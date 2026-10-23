@@ -7,3 +7,4 @@
 Core.lua
 Classes\Rogue.lua
 Classes\Shaman.lua
+Classes\Hunter.lua

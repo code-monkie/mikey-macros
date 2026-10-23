@@ -9,6 +9,21 @@ local _, ns = ...
 ns.classes = {}
 
 local ICON = 134400 -- question mark; #showtooltip supplies the real icon
+
+-- The macro's own icon. While the live macro has no /use, /cast or
+-- /castsequence line at all (none of its spells known yet), it's the picture of
+-- def.icon (a spell ID). Otherwise "?", so #showtooltip decides.
+local function IconFor(def, body)
+    if not def.icon then return ICON end
+    for line in (body .. "\n"):gmatch("(.-)\n") do
+        local cmd = line:match("^(/%a+)")
+        cmd = cmd and cmd:lower()
+        if cmd == "/use" or cmd == "/cast" or cmd == "/castsequence" then return ICON end
+    end
+    local get = (C_Spell and C_Spell.GetSpellTexture) or GetSpellTexture
+    local ok, tex = pcall(get, def.icon)
+    return (ok and tex) or ICON
+end
 local MAX_BODY = 255
 
 local function Print(...)
@@ -93,25 +108,53 @@ local function Context(known)
 end
 
 -- Strip indentation and surrounding blank space so data files stay readable.
--- Drop every clause (or whole /use or /cast line) naming one of the macro's
--- spells that isn't known yet. "Spell(Rank 1)" counts as Spell. Anything not
--- in def.spells is left alone.
+-- A spell name as the macro writes it, ready for lookup: no leading !, no
+-- trailing (Rank n). "Earth Shock(Rank 1)" counts as Earth Shock.
+local function BaseName(text)
+    local name = text:match("^%s*!?%s*(.-)%s*$")
+    return (name:gsub("%s*%(%s*[Rr]ank%s*%d+%s*%)$", ""))
+end
+
+-- Drop every clause (or whole /use, /cast or /castsequence line) naming one of
+-- the macro's spells that isn't known yet. In a /castsequence, unknown spells
+-- are dropped from the sequence. Anything not in def.spells is left alone.
 local function KnownOnly(body, def, ctx)
     local tracked = {}
     for _, spell in ipairs(def.spells) do tracked[spell:lower()] = true end
+    local function keep(text)
+        local name = BaseName(text)
+        return not tracked[name:lower()] or ctx.knows(name)
+    end
     local out = {}
     for line in (body .. "\n"):gmatch("(.-)\n") do
         local cmd, rest = line:match("^(/%a+)%s+(.*)$")
         local lower = cmd and cmd:lower()
-        if lower == "/use" or lower == "/cast" then
+        if lower == "/use" or lower == "/cast" or lower == "/castsequence" then
             local kept = {}
             for clause in (rest .. ";"):gmatch("([^;]*);") do
                 clause = clause:match("^%s*(.-)%s*$")
-                -- the clause's spell, without a leading ! or a trailing (Rank n)
-                local name = clause:match("([^%]]*)$"):match("^%s*!?%s*(.-)%s*$")
-                name = name:gsub("%s*%(%s*[Rr]ank%s*%d+%s*%)$", "")
-                if clause ~= "" and (not tracked[name:lower()] or ctx.knows(name)) then
-                    kept[#kept + 1] = clause
+                if clause ~= "" then
+                    -- split "[conditions] reset=x " from the action
+                    local conds, action = clause:match("^(.*%])%s*(.-)$")
+                    if not conds then conds, action = "", clause end
+                    if lower == "/castsequence" then
+                        local reset, list = action:match("^(reset=%S+)%s+(.*)$")
+                        list = list or action
+                        local spells = {}
+                        for item in (list .. ","):gmatch("([^,]*),") do
+                            item = item:match("^%s*(.-)%s*$")
+                            if item ~= "" and keep(item) then spells[#spells + 1] = item end
+                        end
+                        if #spells > 0 then
+                            local parts = {}
+                            if conds ~= "" then parts[#parts + 1] = conds end
+                            if reset then parts[#parts + 1] = reset end
+                            parts[#parts + 1] = table.concat(spells, ", ")
+                            kept[#kept + 1] = table.concat(parts, " ")
+                        end
+                    elseif keep(action) then
+                        kept[#kept + 1] = clause
+                    end
                 end
             end
             if #kept > 0 then out[#out + 1] = cmd .. " " .. table.concat(kept, "; ") end
@@ -161,7 +204,7 @@ local function Sync(onlyKnown)
             elseif count >= CharacterMax() then
                 full[#full + 1] = def.name
             else
-                CreateMacro(def.name, ICON, body, true)
+                CreateMacro(def.name, IconFor(def, body), body, true)
                 count = count + 1
                 created[#created + 1] = def.name
             end
@@ -181,8 +224,9 @@ local function Sync(onlyKnown)
 end
 
 -- Rewrite existing macros to match the data file and the spells you know
--- (keeps their action bar spots).
-local function Refresh()
+-- (keeps their action bar spots). Normally only changed bodies are rewritten;
+-- force rewrites every macro (also resetting its icon).
+local function Refresh(force)
     local _, class = UnitClass("player")
     local list = ns.classes[class]
     if not list or InCombatLockdown() then return {} end
@@ -195,8 +239,8 @@ local function Refresh()
             local body = Clean(def, ctx)
             if #body <= MAX_BODY then
                 local _, _, current = GetMacroInfo(index)
-                if current ~= body then
-                    EditMacro(index, def.name, ICON, body)
+                if force or current ~= body then
+                    EditMacro(index, def.name, IconFor(def, body), body)
                     updated[#updated + 1] = def.name
                 end
             end
@@ -207,7 +251,7 @@ end
 
 local function Update()
     if not ClassList() or not CanEdit() then return end
-    local updated = Refresh()
+    local updated = Refresh(true)
     if #updated > 0 then
         Print("updated " .. #updated .. ": " .. table.concat(updated, ", "))
     else
