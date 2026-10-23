@@ -1,0 +1,9 @@
+## Interface: 120105
+## Title: mikey-macros
+## Notes: Creates your class macros for the spells you know. Type /mm for commands.
+## Author: mikey
+## Version: 0.1.0
+
+Core.lua
+Classes\Rogue.lua
+Classes\Shaman.lua
