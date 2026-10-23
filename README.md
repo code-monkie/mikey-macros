@@ -40,7 +40,7 @@ General (account) macros are never touched.
 | `/mm sync known` | Create only the macros for spells you already know. |
 | `/mm update` | Rewrite existing macros now (normally automatic). |
 | `/mm clear` | Delete **all** of this character's macros, including hand-made ones. General macros are kept. No confirmation, and the macros come off your bars. |
-| `/mm resync` | `/mm clear`, then `/mm sync`: a fresh class set. |
+| `/mm resync` | `/mm sync` plus `/mm update`: create anything missing and rewrite every macro to match the data file. Macros stay on your bars. |
 
 ## Files
 
@@ -56,9 +56,12 @@ Classes/<Class>.lua   one macro list per class (the only files you normally edit
 2. In game, `/reload`. Existing macros update automatically within a second
    (or run `/mm update`).
 
+After adding macros or changing several, `/mm resync` brings a character fully
+up to date without moving anything off your bars.
+
 Renaming a macro (`name`) creates a new one on the next `/mm sync`; the old
-one is left behind for you to delete. `/mm resync` is the quick way to start
-clean.
+one is left behind for you to delete. To start completely clean, `/mm clear`
+then `/mm sync` (everything comes off your bars).
 
 ## Adding a macro
 
@@ -79,7 +82,7 @@ Add an entry to the class list:
   lines at the start and end are stripped. Keep it under 255 characters.
 
 The list's order is the order macros are created in. Then `/reload` and
-`/mm sync` on each character that should get it.
+`/mm resync` on each character that should get it.
 
 ### Combined macros
 

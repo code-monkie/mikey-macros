@@ -282,13 +282,14 @@ SlashCmdList.MIKEYMACROS = function(msg)
     elseif cmd == "clear" then
         Clear()
     elseif cmd == "resync" then
-        if CanEdit() then Clear(); Sync() end
+        Sync()
+        Update()
     else
         Print("/mm list - your class macros and their state")
         Print("/mm sync - create all your class macros (once per character; they then keep themselves current)")
         Print("/mm sync known - create only the ones for spells you know")
         Print("/mm update - force a refresh now (normally automatic)")
         Print("/mm clear - delete ALL of this character's macros (general macros are kept)")
-        Print("/mm resync - clear, then sync: a fresh class set")
+        Print("/mm resync - create anything missing and rewrite the rest (macros stay on your bars)")
     end
 end
