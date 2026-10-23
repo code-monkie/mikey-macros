@@ -94,7 +94,8 @@ end
 
 -- Strip indentation and surrounding blank space so data files stay readable.
 -- Drop every clause (or whole /use or /cast line) naming one of the macro's
--- spells that isn't known yet. Anything not in def.spells is left alone.
+-- spells that isn't known yet. "Spell(Rank 1)" counts as Spell. Anything not
+-- in def.spells is left alone.
 local function KnownOnly(body, def, ctx)
     local tracked = {}
     for _, spell in ipairs(def.spells) do tracked[spell:lower()] = true end
@@ -106,7 +107,9 @@ local function KnownOnly(body, def, ctx)
             local kept = {}
             for clause in (rest .. ";"):gmatch("([^;]*);") do
                 clause = clause:match("^%s*(.-)%s*$")
+                -- the clause's spell, without a leading ! or a trailing (Rank n)
                 local name = clause:match("([^%]]*)$"):match("^%s*!?%s*(.-)%s*$")
+                name = name:gsub("%s*%(%s*[Rr]ank%s*%d+%s*%)$", "")
                 if clause ~= "" and (not tracked[name:lower()] or ctx.knows(name)) then
                     kept[#kept + 1] = clause
                 end

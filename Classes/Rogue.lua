@@ -12,14 +12,17 @@ ns.classes.ROGUE = {
         /use [nostealth] !Stealth; [@mouseover,harm,nodead] [harm,nodead] Pick Pocket
     ]] },
 
-    -- Ambush from stealth; otherwise Backstab, falling through to Sinister
-    -- Strike when Backstab can't be used (no main-hand dagger, or not behind).
-    { name = "Builder", spells = { "Sinister Strike", "Backstab", "Ambush" }, body = [[
+    { name = "SS", spells = { "Sinister Strike" }, body = [[
+        #showtooltip
+        /startattack
+        /use Sinister Strike
+    ]] },
+
+    -- Ambush from stealth, Backstab otherwise.
+    { name = "BS", spells = { "Backstab", "Ambush" }, body = [[
         #showtooltip
         /startattack [nostealth]
-        /use [stealth] Ambush
-        /use [nostealth] Backstab
-        /use [nostealth] Sinister Strike
+        /use [stealth] Ambush; Backstab
     ]] },
 
     { name = "Bleed", spells = { "Garrote", "Rupture" }, body = [[

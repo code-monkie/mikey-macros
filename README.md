@@ -106,7 +106,9 @@ one (Ctrl+Imbue gives Rockbiter until Frostbrand is learned).
 - A line is split into clauses at `;`. A clause's spell is the text after its
   last `]`, ignoring a leading `!`. If that spell is in `spells` and not
   known, the clause is dropped; if no clause is left, the line is dropped.
-- Spells are matched by name, so ranks don't matter.
+- Spells are matched by name, so ranks don't matter. A deliberate low-rank
+  copy such as `Earth Shock(Rank 1)` (a cheap interrupt) counts as Earth Shock:
+  list `"Earth Shock"` in `spells`.
 - Other lines (`#showtooltip`, `/startattack`, `/dismount`, `/target`, ...)
   always stay.
 
@@ -188,3 +190,22 @@ These keep the class lists consistent:
 - **A macro didn't update after training**: `/mm update`. If it still hasn't,
   check the spell's name in `spells` matches the spellbook exactly.
 - **Lua errors**: install BugGrabber and BugSack.
+
+## Ideas (not planned yet)
+
+Kept here for later; each has trade-offs that weren't worth it yet.
+
+- **Dirty macros.** Remember, per character, the body last written to each
+  macro. If the macro in game no longer matches, it was edited by hand: mark
+  it dirty and stop overwriting it. `/mm list` would show it as edited, with
+  `/mm diff <name>`, `/mm revert <name>` and `/mm export <name>` (a
+  ready-to-paste class file entry). Blizzard's macro window becomes the
+  editor. Trade-off: an in-game edit is the trimmed version, so a dirty macro
+  stops gaining spells as you learn them, and it needs SavedVariables.
+- **In-game editor.** A window to edit a class's macro list. Addons can't
+  write files, so edits would be saved as account-wide overrides layered over
+  the class file, with an Export button to fold them back into the file.
+  Trade-off: two places a macro can live, and a much bigger addon.
+- **Create on learn.** Instead of creating every macro up front, create each
+  one the moment its first spell is learned. No "?" keys, but each new macro
+  still has to be dragged onto a bar mid-level.
