@@ -41,6 +41,13 @@
   collection at once, account-wide (for the classes it covers), instead of
   choosing per character. <code>/mm use</code> per character still overrides it.</li>
 </ul>
+<h2 id="known-issues">Known issues</h2>
+<ul>
+<li><strong>Character macro slots.</strong> With auto mode, every class spell you learn gets
+  a macro, and Classic Era has only 18 character slots, so busy classes (hunter,
+  warlock) fill up around their 30s. <code>/mm</code> says when it runs out; growing the
+  exclude lists is the plan for now.</li>
+</ul>
 <h2 id="ideas-not-planned-yet">Ideas (not planned yet)</h2>
 <p>Kept here for later; each has trade-offs that weren't worth it yet.</p>
 <ul>
@@ -69,10 +76,7 @@ ready-to-paste class file entry so it can become the default.</li>
 </ul>
 <p>Trade-off: needs an editor window, two places a macro can live, and a much
 bigger addon. Editing the SavedVariables file by hand isn't easier than the
-class file (and the game overwrites it at logout while running).
-- <strong>Create on learn.</strong> Instead of creating every macro up front, create each
-one the moment its first spell is learned. No "?" keys, but each new macro
-still has to be dragged onto a bar mid-level.</p>
+class file (and the game overwrites it at logout while running).</p>
 </li>
 </ul>
 </main>

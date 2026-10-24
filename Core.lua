@@ -238,6 +238,15 @@ local function DefaultList()
     return out
 end
 
+-- Every collection macro this character gets, followed collection first, then
+-- the Default collection's under it.
+local function Definitions()
+    local out = {}
+    for _, def in ipairs(ActiveList() or {}) do out[#out + 1] = def end
+    for _, def in ipairs(DefaultList()) do out[#out + 1] = def end
+    return out
+end
+
 local function ClassList()
     local list, owner = ActiveList()
     if not list then
@@ -261,43 +270,6 @@ local function CanEdit()
     return true
 end
 
--- Create missing macros (all of them, or with onlyKnown just those for spells
--- you know). Existing ones are left alone.
-local function Sync(onlyKnown)
-    local list = ClassList()
-    if not list or not CanEdit() then return end
-    local known = KnownSpells()
-    local ctx = Context(known)
-    local have, count = CharacterMacros()
-    local created, full, tooLong = {}, {}, {}
-    for _, def in ipairs(list) do
-        if not have[def.name] and (not onlyKnown or IsLearned(def, known)) then
-            local body = Clean(def, ctx)
-            if #body > MAX_BODY then
-                tooLong[#tooLong + 1] = def.name
-            elseif count >= CharacterMax() then
-                full[#full + 1] = def.name
-            else
-                CreateMacro(def.name, ICON, body, true)
-                count = count + 1
-                created[#created + 1] = def.name
-            end
-        end
-    end
-    if #created > 0 then
-        Print("created " .. #created .. ": " .. table.concat(created, ", "))
-    else
-        Print("nothing new to create.")
-    end
-    if #full > 0 then
-        Print("|cffff6060no free character slots|r for: " .. table.concat(full, ", "))
-    end
-    if #tooLong > 0 then
-        Print("|cffff6060over 255 characters, skipped|r: " .. table.concat(tooLong, ", "))
-    end
-    return true
-end
-
 -- Open Blizzard's macro window on the character-specific tab.
 local function ShowCharacterMacros()
     if InCombatLockdown() then return end
@@ -309,23 +281,20 @@ end
 -- (keeps their action bar spots). Normally only changed bodies are rewritten;
 -- force rewrites every macro.
 local function Refresh(force)
-    local list = ActiveList()
-    local extra = DefaultList() -- the Default collection's macros under another collection
-    if (not list and #extra == 0) or InCombatLockdown() then return {} end
+    local defs = Definitions()
+    if #defs == 0 or InCombatLockdown() then return {} end
     local ctx = Context(KnownSpells())
     local have = CharacterMacros()
     local updated = {}
-    for _, defs in ipairs({ list or {}, extra }) do
-        for _, def in ipairs(defs) do
-            local index = have[def.name]
-            if index then
-                local body = Clean(def, ctx)
-                if #body <= MAX_BODY then
-                    local _, _, current = GetMacroInfo(index)
-                    if force or current ~= body then
-                        EditMacro(index, def.name, ICON, body)
-                        updated[#updated + 1] = def.name
-                    end
+    for _, def in ipairs(defs) do
+        local index = have[def.name]
+        if index then
+            local body = Clean(def, ctx)
+            if #body <= MAX_BODY then
+                local _, _, current = GetMacroInfo(index)
+                if force or current ~= body then
+                    EditMacro(index, def.name, ICON, body)
+                    updated[#updated + 1] = def.name
                 end
             end
         end
@@ -345,9 +314,9 @@ end
 
 -- Auto mode ---------------------------------------------------------------------
 -- With /mm auto on, every class spell this character learns from then on gets a
--- generated character macro (see AutoBody), unless the collection it follows
--- already has a macro for that spell. If the Default collection has one (and
--- the followed collection doesn't), Default's macro is made instead. Spells are matched by name, so
+-- macro, by priority: the followed collection's macro for the spell, else the
+-- Default collection's, else a generated one (see AutoBody), unless the spell
+-- is excluded. /mm sync does the same for every spell you already know. Spells are matched by name, so
 -- only a new spell (rank 1 or unranked) counts, never a higher rank. These
 -- macros are yours: the addon never rewrites or clears them.
 
@@ -452,16 +421,6 @@ local function AutoBody(spell)
     return body .. "/use " .. target .. (f.toggle and "!" or "") .. spell
 end
 
--- Spells (lowercase) the character's collection already has a macro for.
-local function CoveredSpells()
-    local covered = {}
-    local list = ActiveList()
-    for _, def in ipairs(list or {}) do
-        for _, spell in ipairs(def.spells) do covered[spell:lower()] = true end
-    end
-    return covered
-end
-
 local function AutoCreate()
     local db = CharDB()
     if db.auto == false or InCombatLockdown() then return end -- on unless switched off
@@ -478,12 +437,12 @@ local function AutoCreate()
         db.autoKnown = {}
     end
     local known = db.autoKnown
-    local covered = CoveredSpells()
-    -- The Default collection's macro for a spell is made when you learn it.
-    local defaults, ctx = {}, nil
-    local list, owner = ActiveList()
-    for _, def in ipairs(owner == DEFAULT and list or DefaultList()) do
-        for _, spell in ipairs(def.spells) do defaults[spell:lower()] = def end
+    -- Collection macros by spell (followed collection first, then Default's).
+    local defs, ctx = {}, nil
+    for _, def in ipairs(Definitions()) do
+        for _, spell in ipairs(def.spells) do
+            defs[spell:lower()] = defs[spell:lower()] or def
+        end
     end
     local _, class = UnitClass("player")
     local excluded = ns.excluded[class] or {}
@@ -504,7 +463,7 @@ local function AutoCreate()
     table.sort(spellsInOrder)
     for _, spell in ipairs(spellsInOrder) do
         known[spell:lower()] = true -- remembered either way, so it's only ever handled once
-        local def = defaults[spell:lower()]
+        local def = defs[spell:lower()]
         if def then
             if have[def.name] then
                 -- already made (for another of its spells); Refresh keeps it current
@@ -517,7 +476,7 @@ local function AutoCreate()
                 count = count + 1
                 created[#created + 1] = def.name
             end
-        elseif not covered[spell:lower()] then
+        else
             local name = AutoName(spell)
             if have[name] then
                 local n = 2 -- name taken (e.g. two spells with the same initials)
@@ -539,6 +498,61 @@ local function AutoCreate()
     if #full > 0 then
         Print("|cffff6060no free character slots|r for new spell macros: " .. table.concat(full, ", "))
     end
+end
+
+-- /mm sync: what auto mode would have made for every spell you already know
+-- (collection macro, else Default's, else generated unless excluded; generated
+-- only while auto mode is on). With all, collection macros for spells not
+-- learned yet are created too, as placeholders. Existing macros are left alone.
+local function Sync(all)
+    if not CanEdit() then return end
+    local known = KnownSpells()
+    local ctx = Context(known)
+    local have, count = CharacterMacros()
+    local created, full, tooLong, covered = {}, {}, {}, {}
+    local function add(name, body, label)
+        if #body > MAX_BODY then
+            tooLong[#tooLong + 1] = name
+        elseif count >= CharacterMax() then
+            full[#full + 1] = name
+        else
+            CreateMacro(name, ICON, body, true)
+            have[name] = true
+            count = count + 1
+            created[#created + 1] = label or name
+        end
+    end
+    for _, def in ipairs(Definitions()) do
+        for _, spell in ipairs(def.spells) do covered[spell:lower()] = true end
+        if not have[def.name] and (all or IsLearned(def, known)) then add(def.name, Clean(def, ctx)) end
+    end
+    if CharDB().auto ~= false then
+        local _, class = UnitClass("player")
+        local excluded = ns.excluded[class] or {}
+        local spells = {}
+        for low, name in pairs(ClassSpells()) do
+            if not covered[low] and not excluded[low] then spells[#spells + 1] = name end
+        end
+        table.sort(spells)
+        for _, spell in ipairs(spells) do
+            local name = AutoName(spell)
+            if not have[name] then
+                add(name, AutoBody(spell), (name == spell) and spell or (name .. " (" .. spell .. ")"))
+            end
+        end
+    end
+    if #created > 0 then
+        Print("created " .. #created .. ": " .. table.concat(created, ", "))
+    else
+        Print("nothing new to create.")
+    end
+    if #full > 0 then
+        Print("|cffff6060no free character slots|r for: " .. table.concat(full, ", "))
+    end
+    if #tooLong > 0 then
+        Print("|cffff6060over 255 characters, skipped|r: " .. table.concat(tooLong, ", "))
+    end
+    return true
 end
 
 -- /mm auto [on|off]
@@ -649,8 +663,32 @@ end)
 -- for its class (Mikey's, Ulako's, ...). Anything else (e.g. a macro called
 -- "test") is kept, as are general (account) macros. A hand-made macro that
 -- happens to share a name with a collection macro is deleted too.
-local function Clear()
+-- /mm clear -a: every character macro, whatever made it, after a Yes/No popup.
+StaticPopupDialogs.MIKEYMACROS_CLEAR_ALL = {
+    text = "Delete all %d of this character's macros, hand-made ones too?",
+    button1 = YES,
+    button2 = NO,
+    OnAccept = function()
+        if not CanEdit() then return end
+        local _, numChar = GetNumMacros()
+        local first = AccountMax() + 1
+        for index = first + numChar - 1, first, -1 do DeleteMacro(index) end
+        Print("deleted all " .. numChar .. " character macros. /mm sync makes yours again.")
+    end,
+    showAlert = true,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3,
+}
+
+local function Clear(all)
     if not CanEdit() then return end
+    if all then
+        local _, numChar = GetNumMacros()
+        StaticPopup_Show("MIKEYMACROS_CLEAR_ALL", numChar)
+        return
+    end
     local _, class = UnitClass("player")
     local names = {}
     for _, c in pairs(ns.collections) do
@@ -715,7 +753,7 @@ local function Use(name)
     if name:lower() == "none" then
         CharDB().collection = nil
         CharDB().adopted = true
-        Print("this character follows no collection now. Its collection macros are kept but no longer updated; /mm clear removes them.")
+        Print("this character follows no collection now. Its collection macros are kept but no longer updated; /mm clear -a, then /mm sync for a clean switch.")
         return
     else
         local owner = FindCollection(name)
@@ -730,7 +768,7 @@ local function Use(name)
         end
     end
     Print("now following |cffffd040" .. ActiveCollection(class) .. "|r's collection. "
-        .. "/mm resync creates its macros; /mm clear first for a clean switch.")
+        .. "For a clean switch: /mm clear -a, then /mm sync.")
 end
 
 -- The documentation's web address, shown ready to copy. Addons can't use the
@@ -806,7 +844,7 @@ SlashCmdList.MIKEYMACROS = function(msg)
     local cmd, arg = (msg or ""):match("^%s*(%S*)%s*(%S*)")
     cmd = cmd:lower()
     if cmd == "sync" then
-        if Sync(arg:lower() == "known") then ShowCharacterMacros() end
+        if Sync(arg:lower() == "all") then ShowCharacterMacros() end
     elseif cmd == "update" then
         Update()
     elseif cmd == "list" then
@@ -820,18 +858,19 @@ SlashCmdList.MIKEYMACROS = function(msg)
     elseif cmd == "use" then
         Use(arg)
     elseif cmd == "clear" then
-        Clear()
+        Clear(arg == "-a")
     elseif cmd == "resync" then
-        if Sync() then
+        if Sync(true) then
             Update()
             ShowCharacterMacros()
         end
     else
         Print("/mm list - your class macros and their state")
-        Print("/mm sync - create all your class macros (once per character; they then keep themselves current)")
-        Print("/mm sync known - create only the ones for spells you know")
+        Print("/mm sync - create the macros for the spells you know (normally automatic as you learn them)")
+        Print("/mm sync all - also create collection macros for spells you haven't learned yet")
         Print("/mm update - force a refresh now (normally automatic)")
         Print("/mm clear - delete this character's macros that come from any collection (others are kept)")
+        Print("/mm clear -a - delete all of this character's macros, whatever made them")
         Print("/mm resync - create anything missing and rewrite the rest (macros stay on your bars)")
         Print("/mm collections - whose macro sets are installed")
         Print("/mm use <name> - follow someone's collection on this character (/mm use none to stop)")
