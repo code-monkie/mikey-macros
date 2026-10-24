@@ -409,6 +409,74 @@ local function Use(name)
         .. "/mm resync creates its macros; /mm clear first for a clean switch.")
 end
 
+-- The documentation's web address, shown ready to copy. Addons can't use the
+-- clipboard themselves, so the box selects the address for Ctrl+C and closes
+-- itself once you've copied.
+local DOCS_URL = "https://code-monkie.github.io/mikey-macros/"
+local docsBox
+
+local function ShowDocs()
+    if not docsBox then
+        local f = CreateFrame("Frame", "MikeyMacrosDocs", UIParent, "BackdropTemplate")
+        f:SetSize(440, 112)
+        f:SetPoint("CENTER", 0, 120)
+        f:SetFrameStrata("DIALOG")
+        f:SetBackdrop({
+            bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+            edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+            tile = true, tileSize = 32, edgeSize = 32,
+            insets = { left = 11, right = 12, top = 12, bottom = 11 },
+        })
+        f:EnableMouse(true)
+        f:SetMovable(true)
+        f:RegisterForDrag("LeftButton")
+        f:SetScript("OnDragStart", f.StartMoving)
+        f:SetScript("OnDragStop", f.StopMovingOrSizing)
+        tinsert(UISpecialFrames, "MikeyMacrosDocs") -- Escape closes it
+
+        local title = f:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+        title:SetPoint("TOP", 0, -20)
+        title:SetText("mikey-macros documentation")
+
+        local hint = f:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+        hint:SetPoint("BOTTOM", 0, 20)
+        hint:SetText("Ctrl+C (or Ctrl+X) to copy, then paste it into your browser.")
+
+        local close = CreateFrame("Button", nil, f, "UIPanelCloseButton")
+        close:SetPoint("TOPRIGHT", -6, -6)
+
+        local box = CreateFrame("EditBox", nil, f, "InputBoxTemplate")
+        box:SetSize(380, 24)
+        box:SetPoint("CENTER", 0, -2)
+        box:SetAutoFocus(false)
+        local function selectAll(self)
+            self:SetText(DOCS_URL)
+            self:SetFocus()
+            self:HighlightText()
+        end
+        box:SetScript("OnTextChanged", function(self, userInput)
+            if userInput then selectAll(self) end -- read-only: typing puts the address back
+        end)
+        box:SetScript("OnMouseUp", selectAll)
+        box:SetScript("OnEscapePressed", function() f:Hide() end)
+        box:SetScript("OnKeyDown", function(_, key)
+            -- Ctrl+X copies too (the text comes straight back, the box is read-only)
+            if (key == "C" or key == "X") and IsControlKeyDown() then
+                C_Timer.After(0.2, function()
+                    f:Hide()
+                    Print("documentation address copied: paste it into your browser.")
+                end)
+            end
+        end)
+        f:SetScript("OnShow", function() selectAll(box) end)
+        f:SetScript("OnHide", function() box:ClearFocus() end)
+        f:Hide() -- new frames start shown; hide so the Show() below fills the box
+        docsBox = f
+    end
+    docsBox:Show()
+    docsBox:Raise()
+end
+
 SLASH_MIKEYMACROS1 = "/mm"
 SlashCmdList.MIKEYMACROS = function(msg)
     local cmd, arg = (msg or ""):match("^%s*(%S*)%s*(%S*)")
@@ -421,6 +489,8 @@ SlashCmdList.MIKEYMACROS = function(msg)
         List()
     elseif cmd == "collections" then
         Collections()
+    elseif cmd == "docs" then
+        ShowDocs()
     elseif cmd == "use" then
         Use(arg)
     elseif cmd == "clear" then
@@ -439,5 +509,6 @@ SlashCmdList.MIKEYMACROS = function(msg)
         Print("/mm resync - create anything missing and rewrite the rest (macros stay on your bars)")
         Print("/mm collections - whose macro sets are installed")
         Print("/mm use <name> - follow someone's set on this character (/mm use default to go back)")
+        Print("/mm docs - the documentation's web address, ready to copy")
     end
 end

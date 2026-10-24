@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>mikey-macros</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site">
+  <div class="site-inner">
+    <a class="brand" href="index.html" aria-current="page">mikey-macros</a>
+    <nav aria-label="Guides">
+      <a href="collections-guide.html">Collections</a>
+      <a href="writing-macros.html">Writing macros</a>
+      <a href="commands.html">Commands</a>
+      <a href="how-it-works.html">How it works</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+  </div>
+</header>
+<main>
+<h1 id="mikey-macros">mikey-macros</h1>
+<p>Per-character class macros that build themselves as you level. Write a class's
+macros once, in full, the way you want them at max level. On each new character
+the addon creates them all, then keeps every macro trimmed to the spells that
+character actually knows. Learn a spell and the macros that use it update on
+their own.</p>
+<p>Built for WoW: Forever; developed and tested on Classic Era (1.15.9) and
+retail (12.1.5).</p>
+
+<h2 id="quick-start">Quick start</h2>
+<ol>
+<li>Put the <code>mikey-macros</code> folder in <code>Interface\AddOns</code> and restart the game.</li>
+<li>On a character, run <code>/mm sync</code>. The macro window opens on the character tab with
+the class's macros; keys you haven't learned yet show a question mark.</li>
+<li>Drag the macros onto your action bars.</li>
+<li>Play. Each macro fills in as you train its spells.</li>
+</ol>
+<p>To follow someone else's set on a character: <code>/mm collections</code>, then
+<code>/mm use &lt;name&gt;</code> and <code>/mm resync</code>. In game, <code>/mm docs</code> gives you this page's
+address to copy.</p>
+
+<h2 id="guides">Guides</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Guide</th><th>For</th></tr></thead>
+<tbody>
+<tr><td><a href="collections-guide.html">Collections guide</a></td><td>Editing an existing collection, starting your own, switching between them, clearing and name collisions, sharing.</td></tr>
+<tr><td><a href="writing-macros.html">Writing macros</a></td><td>The macro entry format, trimming rules, combined macros, conventions and limits.</td></tr>
+<tr><td><a href="commands.html">Commands</a></td><td>Every <code>/mm</code> command in detail.</td></tr>
+<tr><td><a href="how-it-works.html">How it works</a></td><td>Lifecycle, automatic updates, saved data, limits and troubleshooting.</td></tr>
+<tr><td><a href="roadmap.html">Roadmap</a></td><td>Planned work and ideas being kept for later.</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="source">Source</h2>
+<p>The addon, its collections and these pages live at
+<a href="https://github.com/code-monkie/mikey-macros">github.com/code-monkie/mikey-macros</a>.</p>
+</main>
+<footer>mikey-macros documentation. <a href="https://github.com/code-monkie/mikey-macros">Source on GitHub</a> · Licensed <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a></footer>
+</body>
+</html>

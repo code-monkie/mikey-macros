@@ -48,6 +48,7 @@ installed, `/mm use <name>`, then `/mm resync`.
 | `/mm clear` | Delete this character's collection macros (by name) |
 | `/mm collections` | Installed collections and the one this character follows |
 | `/mm use <name>` | Follow a collection on this character (`default` to go back) |
+| `/mm docs` | The documentation's web address, ready to copy |
 
 Details, including how `/mm clear` matches names: [Commands](docs/commands.html).
 
@@ -62,6 +63,9 @@ Classes with no collection aren't supported yet. Adding one is a single file:
 see the [Collections guide](docs/collections-guide.html).
 
 ## Documentation
+
+Online at <https://code-monkie.github.io/mikey-macros/> (in game, `/mm docs`
+gives you the address to copy).
 
 - [Collections guide](docs/collections-guide.html): edit an existing collection,
   start your own, switch between them, clearing and name collisions, sharing.
@@ -93,3 +97,9 @@ Core.lua                          spell detection, trimming, collections, comman
 Collections/<Owner>/<Class>.lua   one person's macro list for one class
 docs/                             guides
 ```
+
+## License
+
+[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/): free to use,
+share and adapt with credit, not for commercial use, and adaptations must use
+the same license. See [LICENSE](LICENSE).
