@@ -80,56 +80,33 @@ ns.Collection(&quot;Mikey&quot;).ROGUE = {
     <code>Core.lua</code>.</li>
 </ul>
 <h2 id="which-collection-a-character-follows">Which collection a character follows</h2>
-<p>Each character follows exactly one collection for its class, picked in this
-order:</p>
-<ol>
-<li>the collection chosen on that character with <code>/mm use &lt;name&gt;</code>, if it has
-    the character's class;</li>
-<li>otherwise Mikey's, if it has the class;</li>
-<li>otherwise the first collection, alphabetically, that has the class;</li>
-<li>otherwise none: the class isn't supported yet, and <code>/mm</code> says so.</li>
-</ol>
-<p>The choice from <code>/mm use</code> is saved per character (<code>MikeyMacrosCharDB</code> in the
-character's SavedVariables). <code>/mm collections</code> lists every collection and
-the classes it covers, and marks the one the current character follows;
-<code>/mm list</code> starts with it too.</p>
+<p>A character follows <strong>no collection</strong> until you opt in. Out of the box,
+<a href="commands.html#mm-auto">auto mode</a> makes its macros: a plain macro for each class
+spell as it's learned.</p>
+<p>To use a collection on a character, pick it with <code>/mm use &lt;name&gt;</code>, then
+<code>/mm sync</code>. The collection must have a list for the character's class.
+<code>/mm use none</code> stops following one. Without a collection, <code>/mm sync</code>,
+<code>/mm resync</code> and <code>/mm list</code> say so and list the installed collections.</p>
+<p>The choice is saved per character (<code>MikeyMacrosCharDB</code> in the character's
+SavedVariables). <code>/mm collections</code> lists every collection and the classes it
+covers, and marks the one the current character follows; <code>/mm list</code> starts with
+it too.</p>
+<p>Collections and auto mode work together: auto mode skips any spell the
+character's collection already has a macro for.</p>
 <p>Examples with the collections above:</p>
 <div class="table-wrap"><table>
-<thead>
-<tr>
-<th>Character</th>
-<th>Follows</th>
-<th>Why</th>
-</tr>
-</thead>
+<thead><tr><th>Character</th><th>Follows</th><th>Why</th></tr></thead>
 <tbody>
-<tr>
-<td>Rogue</td>
-<td>Mikey</td>
-<td>only Mikey has a rogue list</td>
-</tr>
-<tr>
-<td>Mage</td>
-<td>Ulako</td>
-<td>no Mikey mage; Ulako is the only one</td>
-</tr>
-<tr>
-<td>Shaman</td>
-<td>Mikey</td>
-<td>both have one; Mikey is the default</td>
-</tr>
-<tr>
-<td>Shaman after <code>/mm use ulako</code></td>
-<td>Ulako</td>
-<td>chosen on that character</td>
-</tr>
-<tr>
-<td>Priest</td>
-<td>nobody</td>
-<td>no collection has a priest list</td>
-</tr>
+<tr><td>Any character, nothing chosen</td><td>none</td><td>opt-in only; auto mode makes its macros</td></tr>
+<tr><td>Rogue after <code>/mm use mikey</code></td><td>Mikey</td><td>chosen, and Mikey has a rogue list</td></tr>
+<tr><td>Shaman after <code>/mm use ulako</code></td><td>Ulako</td><td>chosen, and Ulako has a shaman list</td></tr>
+<tr><td>Mage after <code>/mm use mikey</code></td><td>none</td><td>Mikey has no mage list, so the choice isn't saved</td></tr>
+<tr><td>Priest</td><td>none</td><td>no collection has a priest list yet</td></tr>
 </tbody>
 </table></div>
+<p><strong>Characters set up earlier,</strong> before collections were opt-in, keep the
+collection whose macros they already have: the first time the addon sees such a
+character, it adopts that collection (Mikey's first) and says so in chat.</p>
 <h2 id="editing-an-existing-collection">Editing an existing collection</h2>
 <p>All edits happen in the collection's class files, in any text editor. The
 addon reads them at load, so after saving:</p>
@@ -200,9 +177,9 @@ shaman prefixes every name with <code>U_</code> (<code>U_LB</code>, <code>U_Shoc
 most 16 characters.</p>
 <h2 id="switching-collections">Switching collections</h2>
 <ul>
-<li><code>/mm use &lt;name&gt;</code> switches the current character; <code>/mm use default</code> goes
-    back to the default rules. Then <code>/mm resync</code> creates the new collection's
-    macros.</li>
+<li><code>/mm use &lt;name&gt;</code> switches the current character; <code>/mm use none</code> stops
+    following a collection. After switching, <code>/mm resync</code> creates the new
+    collection's macros.</li>
 <li>Switching never deletes anything. The previous collection's macros stay on
     the character (and your bars) but are no longer managed.</li>
 <li>

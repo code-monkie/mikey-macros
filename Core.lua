@@ -8,7 +8,10 @@
 local _, ns = ...
 -- Collections: whose macro lists. Each Collections\<Owner>\<Class>.lua file adds a
 -- class to its owner's collection with ns.Collection("<Owner>").<CLASS> = { ... }.
-local DEFAULT = "Mikey"
+-- New characters start on the Default collection (Collections\Default: the
+-- exceptions to auto mode's generated macros); /mm use <name> picks another.
+local DEFAULT = "Default"
+local PREFERRED = "Mikey" -- only used to adopt characters set up before opting in existed
 ns.collections = {}
 function ns.Collection(owner)
     local c = ns.collections[owner]
@@ -17,6 +20,15 @@ function ns.Collection(owner)
         ns.collections[owner] = c
     end
     return c
+end
+
+-- Spells auto mode never makes a macro for, by class (whatever the collection):
+-- ns.Exclude("HUNTER", { "Eyes of the Beast", ... }), in Collections\Default.
+ns.excluded = {}
+function ns.Exclude(class, spells)
+    local set = ns.excluded[class] or {}
+    for _, spell in ipairs(spells) do set[spell:lower()] = true end
+    ns.excluded[class] = set
 end
 
 local ICON = 134400 -- question mark; #showtooltip supplies the real icon
@@ -177,6 +189,8 @@ local function CharDB()
     return MikeyMacrosCharDB
 end
 
+local Collections -- prints the installed collections; defined further down
+
 -- The collection name matching `name` (any case), or nil.
 local function FindCollection(name)
     for owner in pairs(ns.collections) do
@@ -184,18 +198,11 @@ local function FindCollection(name)
     end
 end
 
--- Whose list this character follows for `class`: the one chosen with /mm use (if
--- it has the class), else Mikey's, else the first alphabetically that has it.
+-- Whose list this character follows for `class`: the collection chosen with
+-- /mm use, if it has the class. Nothing is followed until you opt in.
 local function ActiveCollection(class)
     local chosen = CharDB().collection
     if chosen and ns.collections[chosen] and ns.collections[chosen][class] then return chosen end
-    if ns.collections[DEFAULT] and ns.collections[DEFAULT][class] then return DEFAULT end
-    local owners = {}
-    for owner, c in pairs(ns.collections) do
-        if c[class] then owners[#owners + 1] = owner end
-    end
-    table.sort(owners)
-    return owners[1]
 end
 
 -- This character's macro list and its owner (nil if no collection has the class).
@@ -209,7 +216,13 @@ local function ClassList()
     local list, owner = ActiveList()
     if not list then
         local _, class = UnitClass("player")
-        Print("no collection has macros for " .. class .. ".")
+        local chosen = CharDB().collection
+        if chosen and ns.collections[chosen] then
+            Print(chosen .. "'s collection has no " .. class:lower() .. " macros. Pick another with /mm use <name>:")
+        else
+            Print("this character doesn't follow a collection (auto mode makes its macros). To use one, /mm use <name>:")
+        end
+        Collections()
     end
     return list, owner
 end
@@ -301,6 +314,249 @@ local function Update()
     end
 end
 
+-- Auto mode ---------------------------------------------------------------------
+-- With /mm auto on, every class spell this character learns from then on gets a
+-- generated character macro (see AutoBody), unless the collection it follows
+-- already has a macro for that spell. On the Default collection, that
+-- collection's macro is made instead. Spells are matched by name, so
+-- only a new spell (rank 1 or unranked) counts, never a higher rank. These
+-- macros are yours: the addon never rewrites or clears them.
+
+-- Names (lowercase -> as shown) of the usable spells on the class tabs of the
+-- spellbook: no General tab (Attack, racials, professions, mounts), no
+-- passives, no off-spec or future spells.
+local function ClassSpells()
+    local spells = {}
+    if C_SpellBook and C_SpellBook.GetNumSpellBookSkillLines then -- retail
+        local bank = Enum.SpellBookSpellBank.Player
+        for line = 2, C_SpellBook.GetNumSpellBookSkillLines() do -- line 1 is General
+            local info = C_SpellBook.GetSpellBookSkillLineInfo(line)
+            if info and not info.isGuild and not (info.offSpecID and info.offSpecID ~= 0) then
+                for i = info.itemIndexOffset + 1, info.itemIndexOffset + info.numSpellBookItems do
+                    local item = C_SpellBook.GetSpellBookItemInfo(i, bank)
+                    if item and item.name and not item.isPassive and not item.isOffSpec
+                        and item.itemType == Enum.SpellBookItemType.Spell then
+                        spells[item.name:lower()] = item.name
+                    end
+                end
+            end
+        end
+    else -- classic-based clients
+        for tab = 2, GetNumSpellTabs() do -- tab 1 is General
+            local _, _, offset, count = GetSpellTabInfo(tab)
+            for i = offset + 1, offset + count do
+                local kind = GetSpellBookItemInfo(i, BOOKTYPE_SPELL)
+                local name = GetSpellBookItemName(i, BOOKTYPE_SPELL)
+                if kind == "SPELL" and name and not IsPassiveSpell(i, BOOKTYPE_SPELL) then
+                    spells[name:lower()] = name
+                end
+            end
+        end
+    end
+    return spells
+end
+
+-- A macro name for a spell: the name itself, or its initials when it's longer
+-- than 16 characters (Blessing of Might -> BoM).
+local function AutoName(spell)
+    if #spell <= 16 then return spell end
+    local initials = ""
+    for word in spell:gmatch("[^%s%-]+") do initials = initials .. word:sub(1, 1) end
+    return initials:sub(1, 16)
+end
+
+-- What the game says about a spell, on classic-based and retail clients alike.
+local function SpellFacts(spell)
+    local id, maxRange, harmful, helpful, repeating, desc, subtext
+    if C_Spell and C_Spell.GetSpellInfo then -- retail
+        local info = C_Spell.GetSpellInfo(spell)
+        if not info then return {} end
+        id, maxRange = info.spellID, info.maxRange
+        harmful, helpful = C_Spell.IsSpellHarmful(id), C_Spell.IsSpellHelpful(id)
+        repeating = C_Spell.IsAutoRepeatSpell and C_Spell.IsAutoRepeatSpell(id)
+        desc = C_Spell.GetSpellDescription and C_Spell.GetSpellDescription(id)
+        subtext = C_Spell.GetSpellSubtext and C_Spell.GetSpellSubtext(id)
+    else
+        local _
+        _, _, _, _, _, maxRange, id = GetSpellInfo(spell)
+        if not id then return {} end
+        harmful, helpful = IsHarmfulSpell(spell), IsHelpfulSpell(spell)
+        repeating = IsAutoRepeatSpell(spell)
+        desc = GetSpellDescription and GetSpellDescription(id)
+        subtext = GetSpellSubtext and GetSpellSubtext(id)
+    end
+    desc, subtext = (desc or ""):lower(), (subtext or ""):lower()
+    return {
+        harmful = harmful and true or false,
+        helpful = helpful and true or false,
+        ranged = (maxRange or 0) > 6, -- melee reach is 5 yards
+        -- a second press shouldn't switch it off: stances, forms, stealth, aspects,
+        -- seals, auras, auto-repeat shots
+        toggle = repeating and true or subtext:find("shapeshift") ~= nil
+            or desc:find("until cancel") ~= nil
+            or desc:find("only one [%a%s]- can be active") ~= nil
+            or desc:find("only one [%a%s]- at a time") ~= nil
+            or desc:find("only one [%a%s]- at any one time") ~= nil,
+    }
+end
+
+-- The macro auto mode writes for a newly learned spell:
+--   harmful        -> /startattack first
+--   ranged harmful -> [@mouseover,harm,nodead] [] (mouseover, else target)
+--   ranged helpful -> [@mouseover,help,nodead] []
+--   toggles        -> ! so a second press doesn't cancel it
+local function AutoBody(spell)
+    local f = SpellFacts(spell)
+    local body = "#showtooltip\n"
+    if f.harmful then body = body .. "/startattack\n" end
+    local target = ""
+    if f.ranged and f.harmful then
+        target = "[@mouseover,harm,nodead] [] "
+    elseif f.ranged and f.helpful then
+        target = "[@mouseover,help,nodead] [] "
+    end
+    return body .. "/use " .. target .. (f.toggle and "!" or "") .. spell
+end
+
+-- Spells (lowercase) the character's collection already has a macro for.
+local function CoveredSpells()
+    local covered = {}
+    local list = ActiveList()
+    for _, def in ipairs(list or {}) do
+        for _, spell in ipairs(def.spells) do covered[spell:lower()] = true end
+    end
+    return covered
+end
+
+local function AutoCreate()
+    local db = CharDB()
+    if db.auto == false or InCombatLockdown() then return end -- on unless switched off
+    local current = ClassSpells()
+    if not db.autoKnown then
+        -- First time the addon sees this character: a brand-new (level 1) one gets
+        -- macros for its starting spells; an existing one is left as it is.
+        if UnitLevel("player") > 1 then
+            if not next(current) then return end -- spellbook not loaded yet; try again later
+            db.autoKnown = {}
+            for low in pairs(current) do db.autoKnown[low] = true end
+            return
+        end
+        db.autoKnown = {}
+    end
+    local known = db.autoKnown
+    local covered = CoveredSpells()
+    -- On the Default collection, its macro for a spell is made when you learn it.
+    local defaults, ctx = {}, nil
+    local list, owner = ActiveList()
+    if owner == DEFAULT then
+        for _, def in ipairs(list) do
+            for _, spell in ipairs(def.spells) do defaults[spell:lower()] = def end
+        end
+    end
+    local _, class = UnitClass("player")
+    local excluded = ns.excluded[class] or {}
+    local have, count = CharacterMacros()
+    local created, full, skipped = {}, {}, {}
+    local spellsInOrder = {}
+    for low, name in pairs(current) do
+        if not known[low] then
+            if excluded[low] then
+                known[low] = true -- reported once, never made
+                skipped[#skipped + 1] = name
+            else
+                spellsInOrder[#spellsInOrder + 1] = name
+            end
+        end
+    end
+    table.sort(skipped)
+    table.sort(spellsInOrder)
+    for _, spell in ipairs(spellsInOrder) do
+        known[spell:lower()] = true -- remembered either way, so it's only ever handled once
+        local def = defaults[spell:lower()]
+        if def and not have[def.name] then
+            if count >= CharacterMax() then
+                full[#full + 1] = spell
+            else
+                ctx = ctx or Context(KnownSpells())
+                CreateMacro(def.name, ICON, Clean(def, ctx), true)
+                have[def.name] = true
+                count = count + 1
+                created[#created + 1] = def.name
+            end
+        elseif not covered[spell:lower()] then
+            local name = AutoName(spell)
+            if have[name] then
+                local n = 2 -- name taken (e.g. two spells with the same initials)
+                while have[name:sub(1, 15) .. n] do n = n + 1 end
+                name = name:sub(1, 15) .. n
+            end
+            if count >= CharacterMax() then
+                full[#full + 1] = spell
+            else
+                CreateMacro(name, ICON, AutoBody(spell), true)
+                have[name] = true
+                count = count + 1
+                created[#created + 1] = (name == spell) and spell or (name .. " (" .. spell .. ")")
+            end
+        end
+    end
+    if #created > 0 then Print("new spell macro: " .. table.concat(created, ", ")) end
+    if #skipped > 0 then Print("no macro (excluded): " .. table.concat(skipped, ", ")) end
+    if #full > 0 then
+        Print("|cffff6060no free character slots|r for new spell macros: " .. table.concat(full, ", "))
+    end
+end
+
+-- /mm auto [on|off]
+local function Auto(arg)
+    local db = CharDB()
+    arg = (arg or ""):lower()
+    if arg == "on" then
+        db.auto = true
+        db.autoKnown = {}
+        for low in pairs(ClassSpells()) do db.autoKnown[low] = true end -- what you know now is left alone
+        Print("auto mode |cff60ff60on|r: each new class spell you learn gets its own macro (unless your collection has one).")
+    elseif arg == "off" then
+        db.auto = false
+        Print("auto mode |cffff6060off|r. Macros it made are kept.")
+    else
+        Print("auto mode is " .. (db.auto ~= false and "|cff60ff60on|r" or "|cffff6060off|r") .. ". /mm auto on, /mm auto off.")
+    end
+end
+
+-- A brand-new (level 1) character starts on the Default collection.
+-- Characters set up before collections were opt-in followed one by default. If
+-- this character has never chosen, but already has a collection's macros, it
+-- keeps following that collection (Mikey's first).
+local function Adopt()
+    local db = CharDB()
+    if db.collection or db.adopted then return end
+    local have, numChar = CharacterMacros()
+    if numChar == 0 then
+        if UnitLevel("player") == 1 then db.collection, db.adopted = DEFAULT, true end
+        return -- otherwise nothing to go on (or macros not loaded yet); check again later
+    end
+    db.adopted = true
+    local _, class = UnitClass("player")
+    local owners = {}
+    for owner, c in pairs(ns.collections) do
+        if c[class] then owners[#owners + 1] = owner end
+    end
+    table.sort(owners, function(a, b)
+        if a == PREFERRED or b == PREFERRED then return a == PREFERRED end
+        return a < b
+    end)
+    for _, owner in ipairs(owners) do
+        for _, def in ipairs(ns.collections[owner][class]) do
+            if have[def.name] then
+                db.collection = owner
+                Print("this character keeps following |cffffd040" .. owner .. "|r's collection (/mm use none to stop).")
+                return
+            end
+        end
+    end
+end
+
 -- Keep macros current as spells (and the main-hand weapon) change.
 -- Changes wait until combat ends.
 local pending = false
@@ -311,7 +567,9 @@ local function Schedule()
     C_Timer.After(0.5, function()
         if InCombatLockdown() then return end -- PLAYER_REGEN_ENABLED retries
         pending = false
+        Adopt()
         Refresh()
+        AutoCreate()
     end)
 end
 events:RegisterEvent("PLAYER_LOGIN")
@@ -370,7 +628,7 @@ local function List()
 end
 
 -- Every installed collection and the classes it covers.
-local function Collections()
+function Collections()
     local _, class = UnitClass("player")
     local active = ActiveCollection(class)
     local owners = {}
@@ -383,17 +641,22 @@ local function Collections()
         local mark = (owner == active) and " |cff60ff60(this character)|r" or ""
         Print(owner .. mark .. ": " .. table.concat(classes, ", "))
     end
+    if not active then Print("this character follows no collection.") end
 end
 
--- Follow another collection on this character ("default" goes back to the rules).
+-- Follow a collection on this character, or none ("/mm use none").
 local function Use(name)
     if name == "" then
-        Print("/mm use <name>, or /mm use default. /mm collections shows the names.")
+        Print("/mm use <name>, or /mm use none. The collections:")
+        Collections()
         return
     end
     local _, class = UnitClass("player")
-    if name:lower() == "default" then
+    if name:lower() == "none" then
         CharDB().collection = nil
+        CharDB().adopted = true
+        Print("this character follows no collection now. Its collection macros are kept but no longer updated; /mm clear removes them.")
+        return
     else
         local owner = FindCollection(name)
         if not owner then
@@ -402,10 +665,11 @@ local function Use(name)
         end
         CharDB().collection = owner
         if not ns.collections[owner][class] then
-            Print(owner .. " has no macros for " .. class .. "; using the default until it does.")
+            Print(owner .. "'s collection has no " .. class:lower() .. " macros yet; nothing to follow until it does.")
+            return
         end
     end
-    Print("now following |cffffd040" .. (ActiveCollection(class) or "nobody") .. "|r's collection. "
+    Print("now following |cffffd040" .. ActiveCollection(class) .. "|r's collection. "
         .. "/mm resync creates its macros; /mm clear first for a clean switch.")
 end
 
@@ -489,6 +753,8 @@ SlashCmdList.MIKEYMACROS = function(msg)
         List()
     elseif cmd == "collections" then
         Collections()
+    elseif cmd == "auto" then
+        Auto(arg)
     elseif cmd == "docs" then
         ShowDocs()
     elseif cmd == "use" then
@@ -508,7 +774,8 @@ SlashCmdList.MIKEYMACROS = function(msg)
         Print("/mm clear - delete this character's macros that come from any collection (others are kept)")
         Print("/mm resync - create anything missing and rewrite the rest (macros stay on your bars)")
         Print("/mm collections - whose macro sets are installed")
-        Print("/mm use <name> - follow someone's set on this character (/mm use default to go back)")
+        Print("/mm use <name> - follow someone's collection on this character (/mm use none to stop)")
+        Print("/mm auto on or off - make a macro for each new class spell you learn (this character)")
         Print("/mm docs - the documentation's web address, ready to copy")
     end
 end

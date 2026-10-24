@@ -41,9 +41,11 @@
 <h1 id="how-it-works">How it works</h1>
 <h2 id="lifecycle">Lifecycle</h2>
 <ol>
-<li><strong>Setup (once per character):</strong> <code>/mm sync</code> creates every macro in the
-    collection the character follows, as character-specific macros. Drag them
-    onto your bars.</li>
+<li><strong>Out of the box:</strong> auto mode makes a plain macro for each new class
+    spell the character learns. Drag them onto your bars as they appear.</li>
+<li><strong>With a collection (opt-in):</strong> <code>/mm use &lt;name&gt;</code> and then <code>/mm sync</code>
+    create every macro in that collection's class list, as character-specific
+    macros, so you can lay out your bars once.</li>
 <li><strong>Trimming:</strong> each macro is written with only the spells the character
     knows (see <a href="writing-macros.html#trimming-rules">trimming rules</a>). Fall-through
     lines and <code>#showtooltip</code> icons therefore always work, and a macro with
@@ -65,9 +67,10 @@ touched.</p>
 present and the Classic spellbook API otherwise, so the same files work on
 Classic Era, WoW: Forever and retail.</p>
 <h2 id="saved-data">Saved data</h2>
-<p>Only one thing is saved: the collection chosen with <code>/mm use</code>, per character
-(<code>MikeyMacrosCharDB</code>). The macro lists live in the addon's files; the
-trimmed macros live in the game's own macro storage.</p>
+<p>Per character (<code>MikeyMacrosCharDB</code>): the collection chosen with
+<code>/mm use</code>, whether auto mode is on, and the names of the class spells auto mode has
+already seen. The macro lists live in the addon's files; the macros themselves live
+in the game's own macro storage.</p>
 <h2 id="performance">Performance</h2>
 <p>A few kilobytes of data, no <code>OnUpdate</code>, no timers. Work happens only when
 spells or the main-hand weapon change: one spellbook scan and a string

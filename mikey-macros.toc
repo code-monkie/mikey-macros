@@ -6,6 +6,14 @@
 ## SavedVariablesPerCharacter: MikeyMacrosCharDB
 
 Core.lua
+Collections\Default\Druid.lua
+Collections\Default\Hunter.lua
+Collections\Default\Mage.lua
+Collections\Default\Paladin.lua
+Collections\Default\Priest.lua
+Collections\Default\Rogue.lua
+Collections\Default\Shaman.lua
+Collections\Default\Warlock.lua
 Collections\Mikey\Rogue.lua
 Collections\Mikey\Shaman.lua
 Collections\Mikey\Hunter.lua
