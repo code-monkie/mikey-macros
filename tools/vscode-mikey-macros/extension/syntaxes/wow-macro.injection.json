@@ -1,0 +1,164 @@
+{
+  "scopeName": "source.wow-macro.injection",
+  "injectionSelector": "L:source.lua -comment",
+  "patterns": [
+    {
+      "include": "#body"
+    }
+  ],
+  "repository": {
+    "body": {
+      "begin": "\\b(body)\\s*(=)\\s*(\\[(=*)\\[)",
+      "beginCaptures": {
+        "1": {
+          "name": "variable.other.property.lua"
+        },
+        "2": {
+          "name": "keyword.operator.assignment.lua"
+        },
+        "3": {
+          "name": "punctuation.definition.string.begin.lua"
+        }
+      },
+      "end": "\\]\\4\\]",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.lua"
+        }
+      },
+      "contentName": "meta.embedded.block.wow-macro",
+      "patterns": [
+        {
+          "include": "#meta"
+        },
+        {
+          "include": "#command"
+        },
+        {
+          "include": "#conditions"
+        },
+        {
+          "include": "#reset"
+        },
+        {
+          "include": "#rank"
+        },
+        {
+          "match": ";",
+          "name": "keyword.operator.clause.wow-macro"
+        },
+        {
+          "match": "!(?=\\s*\\S)",
+          "name": "keyword.operator.toggle.wow-macro"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.sequence.wow-macro"
+        }
+      ]
+    },
+    "meta": {
+      "patterns": [
+        {
+          "match": "^\\s*(#show(?:tooltip)?)(?=\\s|$)(.*)$",
+          "captures": {
+            "1": {
+              "name": "keyword.control.directive.wow-macro"
+            },
+            "2": {
+              "name": "string.unquoted.spell.wow-macro"
+            }
+          }
+        },
+        {
+          "match": "^\\s*(#\\S*)",
+          "captures": {
+            "1": {
+              "name": "invalid.illegal.directive.wow-macro"
+            }
+          }
+        }
+      ]
+    },
+    "command": {
+      "match": "^\\s*(/[A-Za-z]+)",
+      "captures": {
+        "1": {
+          "name": "keyword.control.command.wow-macro"
+        }
+      }
+    },
+    "conditions": {
+      "begin": "\\[",
+      "end": "\\]",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.brackets.begin.wow-macro"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.brackets.end.wow-macro"
+        }
+      },
+      "name": "meta.conditions.wow-macro",
+      "patterns": [
+        {
+          "match": "@[A-Za-z][A-Za-z0-9]*",
+          "name": "variable.language.unit.wow-macro"
+        },
+        {
+          "match": "\\b(target)(=)([A-Za-z][A-Za-z0-9]*)",
+          "captures": {
+            "1": {
+              "name": "support.type.condition.wow-macro"
+            },
+            "2": {
+              "name": "keyword.operator.wow-macro"
+            },
+            "3": {
+              "name": "variable.language.unit.wow-macro"
+            }
+          }
+        },
+        {
+          "match": "\\b(?:no)?(?:unithasvehicleui|canexitvehicle|overridebar|shapeshift|advflyable|channeling|possessbar|pvptalent|actionbar|vehicleui|petbattle|modifier|swimming|equipped|outdoors|extrabar|bonusbar|channel|resting|mounted|indoors|stealth|flyable|exists|stance|combat|button|talent|cursor|flying|known|group|party|harm|help|worn|spec|form|dead|raid|pet|btn|mod|bar)\\b",
+          "name": "support.type.condition.wow-macro"
+        },
+        {
+          "match": "(:)([^,\\]]*)",
+          "captures": {
+            "1": {
+              "name": "punctuation.separator.key-value.wow-macro"
+            },
+            "2": {
+              "name": "constant.language.value.wow-macro"
+            }
+          }
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.condition.wow-macro"
+        }
+      ]
+    },
+    "reset": {
+      "match": "\\b(reset)(=)(\\S+)",
+      "captures": {
+        "1": {
+          "name": "keyword.other.reset.wow-macro"
+        },
+        "2": {
+          "name": "keyword.operator.wow-macro"
+        },
+        "3": {
+          "name": "constant.numeric.reset.wow-macro"
+        }
+      }
+    },
+    "rank": {
+      "match": "\\(\\s*[Rr]ank\\s*\\d+\\s*\\)",
+      "name": "constant.numeric.rank.wow-macro"
+    }
+  }
+}

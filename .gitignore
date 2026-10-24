@@ -9,3 +9,6 @@ desktop.ini
 *.swp
 *~
 *.bak
+
+# Built VS Code extension packages
+*.vsix

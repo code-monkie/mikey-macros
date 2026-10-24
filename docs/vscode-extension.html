@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>VS Code extension · mikey-macros</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="with-toc">
+<header class="site">
+  <div class="site-inner">
+    <a class="brand" href="index.html">mikey-macros</a>
+    <nav aria-label="Guides">
+      <a href="collections-guide.html">Collections</a>
+      <a href="writing-macros.html">Writing macros</a>
+      <a href="commands.html">Commands</a>
+      <a href="how-it-works.html">How it works</a>
+      <a href="vscode-extension.html" aria-current="page">VS Code</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+  </div>
+</header>
+<div class="layout">
+  <aside class="page-toc" aria-label="On this page">
+    <details open>
+      <summary>On this page</summary>
+      <ul>
+        <li><a href="#what-it-does">What it does</a></li>
+        <li><a href="#installing">Installing</a></li>
+        <li><a href="#using-it">Using it</a>
+          <ul>
+            <li><a href="#problems">Problems</a></li>
+            <li><a href="#autocomplete">Autocomplete</a></li>
+            <li><a href="#hover">Hover</a></li>
+            <li><a href="#colors">Colors</a></li>
+        </ul></li>
+        <li><a href="#updating-and-removing">Updating and removing</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#limits">Limits</a></li>
+      </ul>
+      <a class="to-top" href="#">Back to top ↑</a>
+    </details>
+  </aside>
+<main>
+<h1 id="vs-code-extension">VS Code extension</h1>
+<p><strong>mikey-macros lint</strong> helps you write collection files in VS Code. It works on
+the macro text inside <code>body = [[ ... ]]</code> and leaves the Lua around it alone: it
+checks macros as you type, colors them, autocompletes conditions, units, commands
+and spells, and explains macro syntax when you hover.</p>
+<p>It's built from <code>tools/vscode-mikey-macros/</code> in this repository and installed from
+a local file; it isn't on the VS Code Marketplace.</p>
+
+<h2 id="what-it-does">What it does</h2>
+<p>It switches on for any Lua file containing an <code>ns.Collection("Owner").CLASS = { ... }</code>
+line, so every file under <code>Collections/</code>, and nothing else.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Feature</th><th>In short</th></tr></thead>
+<tbody>
+<tr><td><a href="#problems">Problems</a></td><td>Squiggles and Problems-panel entries for mistakes in macros, the <code>.toc</code>, and names shared between collections.</td></tr>
+<tr><td><a href="#autocomplete">Autocomplete</a></td><td>Conditions, units, condition values, slash commands, <code>#</code> lines and the macro's own spells.</td></tr>
+<tr><td><a href="#hover">Hover</a></td><td>What a condition, unit, command or <code>#showtooltip</code> means.</td></tr>
+<tr><td><a href="#colors">Colors</a></td><td>Commands, conditions, units, values and separators each in their own color, in any theme.</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="installing">Installing</h2>
+<p>You need VS Code and Python 3 (only to build the package; no Node or npm).</p>
+<ol>
+<li>
+<p><strong>Build the package.</strong> In a terminal, from the <code>mikey-macros</code> folder:</p>
+<pre><code>python tools/vscode-mikey-macros/build_vsix.py</code></pre>
+<p>It writes <code>mikey-macros-lint-&lt;version&gt;.vsix</code> next to the script. (Built files
+aren't committed; <code>.gitignore</code> skips <code>*.vsix</code>.)</p>
+</li>
+<li>
+<p><strong>Install it.</strong> In VS Code open the Extensions view (Ctrl+Shift+X), click the
+<strong>⋯</strong> menu at the top of the view, choose <strong>Install from VSIX…</strong> and pick the
+<code>.vsix</code>. Or from a terminal:</p>
+<pre><code>code --install-extension tools/vscode-mikey-macros/mikey-macros-lint-0.3.0.vsix</code></pre>
+</li>
+<li>
+<p><strong>Open the addon folder</strong> (File → Open Folder → <code>mikey-macros</code>) and open any
+collection file, e.g. <code>Collections/Mikey/Druid.lua</code>. Commands such as <code>/use</code> turn
+purple and conditions teal, which means it's working.</p>
+</li>
+</ol>
+<p>Opening the whole <code>mikey-macros</code> folder, rather than a single file, lets the
+extension find <code>mikey-macros.toc</code> and the other collections for the checks that
+span files.</p>
+
+<h2 id="using-it">Using it</h2>
+
+<h3 id="problems">Problems</h3>
+<p>Problems appear as you type: squiggles on the exact text, and entries in the
+Problems panel (Ctrl+Shift+M). Hover a squiggle for the message.</p>
+<p><strong>Errors</strong>, which stop a macro working or the game loading a file:</p>
+<ul>
+<li>a name over 16 characters, a body over 255, or two macros with the same name in a class;</li>
+<li>an unbalanced or nested <code>[</code> <code>]</code>;</li>
+<li>an unknown condition or unit (<code>nocomba</code>, <code>@mosueover</code>);</li>
+<li>conditions after a spell name, meaning a missing <code>;</code> (<code>[stealth] Ambush [nostealth] Backstab</code>);</li>
+<li><code>#showtooltip</code> with no space before the spell (<code>#showtooltipMangle</code>), or an unknown <code>#</code> line (<code>#howtooltip</code>);</li>
+<li>a collection file that isn't listed in <code>mikey-macros.toc</code>; the message gives the exact line to add;</li>
+<li>a <code>.toc</code> line that points at a missing file, shown on the <code>.toc</code> itself.</li>
+</ul>
+<p><strong>Warnings</strong>, worth a look:</p>
+<ul>
+<li>a spell on a <code>/use</code> line that isn't in <code>spells</code>, so it's never trimmed (fine for items, or spells every character of the class knows from level 1);</li>
+<li>a spell in <code>spells</code> that the body never uses;</li>
+<li>an unknown slash command (<code>/startattac</code>);</li>
+<li>the same macro name in another collection for the class; <code>/mm clear</code> and switching collections treat them as one macro (see <a href="collections-guide.html#clearing-macros-and-name-collisions">name collisions</a>).</li>
+</ul>
+<p>Problems in other files (the <code>.toc</code>, shared names) refresh whenever you save.</p>
+
+<h3 id="autocomplete">Autocomplete</h3>
+<p>Suggestions appear inside macro bodies only, each with a short description.
+Press Ctrl+Space to bring them up anywhere in a macro.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Where you are</th><th>Suggestions</th></tr></thead>
+<tbody>
+<tr><td>after <code>[</code> or <code>,</code></td><td>conditions (<code>combat</code>, <code>stealth</code>, <code>harm</code>, ...), their <code>no</code> versions, and <code>@units</code></td></tr>
+<tr><td>after <code>@</code></td><td>units: <code>@mouseover</code>, <code>@player</code>, <code>@target</code>, <code>@focus</code>, <code>@pet</code>, <code>@cursor</code>, ...</td></tr>
+<tr><td>after <code>mod:</code>, <code>form:</code>, <code>equipped:</code>, <code>group:</code>, <code>button:</code>, <code>spec:</code></td><td>their values (<code>shift</code> / <code>ctrl</code> / <code>alt</code>, form numbers, weapon types, ...)</td></tr>
+<tr><td><code>/</code> at the start of a line</td><td>slash commands</td></tr>
+<tr><td><code>#</code> at the start of a line</td><td><code>#showtooltip</code>, <code>#show</code></td></tr>
+<tr><td>where a spell goes on a <code>/use</code> or <code>/castsequence</code> line</td><td>the spells in this macro's own <code>spells</code> list, so names match exactly</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="hover">Hover</h3>
+<p>Hover over a condition (<code>nocombat</code>, <code>mod:shift</code>, <code>form:1</code>), a unit
+(<code>@mouseover</code>, <code>@focustarget</code>), a slash command, <code>reset=</code> or <code>#showtooltip</code> to
+see what it means. Unknown conditions and units are flagged in the hover too.</p>
+
+<h3 id="colors">Colors</h3>
+<p>The extension brings its own colors for macro text, so they look the same in any
+theme:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Color</th><th>Used for</th><th>Scope</th></tr></thead>
+<tbody>
+<tr><td>purple</td><td><code>/use</code>, <code>/cast</code>, <code>#showtooltip</code> and other commands and <code>#</code> lines</td><td><code>keyword.control.command.wow-macro</code>, <code>keyword.control.directive.wow-macro</code></td></tr>
+<tr><td>teal</td><td>conditions: <code>harm</code>, <code>nodead</code>, <code>mod</code>, ...</td><td><code>support.type.condition.wow-macro</code></td></tr>
+<tr><td>light blue</td><td>units: <code>@mouseover</code>, <code>@player</code>, ...</td><td><code>variable.language.unit.wow-macro</code></td></tr>
+<tr><td>green</td><td>values after <code>:</code>, <code>reset=</code> values, <code>(Rank n)</code></td><td><code>constant.language.value.wow-macro</code>, <code>constant.numeric.reset.wow-macro</code>, <code>constant.numeric.rank.wow-macro</code></td></tr>
+<tr><td>gold</td><td><code>;</code> between clauses, <code>!</code> before a toggle, <code>reset</code></td><td><code>keyword.operator.clause.wow-macro</code>, <code>keyword.operator.toggle.wow-macro</code>, <code>keyword.other.reset.wow-macro</code></td></tr>
+<tr><td>normal text</td><td>spell and item names</td><td></td></tr>
+</tbody>
+</table></div>
+<p><strong>Changing a color:</strong> add a rule for its scope to your settings. For example,
+orange conditions:</p>
+<pre><code>"editor.tokenColorCustomizations": {
+    "textMateRules": [
+        { "scope": "support.type.condition.wow-macro", "settings": { "foreground": "#FF8800" } }
+    ]
+}</code></pre>
+<p>A <code>editor.tokenColorCustomizations</code> setting of your own replaces the extension's
+defaults as a whole, so if you already have one, copy all the rules you want into
+it (see <a href="#troubleshooting">Troubleshooting</a>).</p>
+
+<h2 id="updating-and-removing">Updating and removing</h2>
+<ul>
+<li><strong>Updating:</strong> after the extension changes (a <code>git pull</code>, or your own edits in
+<code>tools/vscode-mikey-macros/extension/</code>), bump <code>version</code> in its <code>package.json</code>,
+rebuild with <code>build_vsix.py</code>, and install the new <code>.vsix</code> over the old one. Reload
+the window if VS Code asks.</li>
+<li><strong>Removing:</strong> Extensions view → mikey-macros lint → Uninstall.</li>
+</ul>
+<p>The extension is plain JavaScript (<code>extension/extension.js</code>) plus a coloring
+grammar (<code>extension/syntaxes/wow-macro.injection.json</code>); the reference lists of
+conditions, units and commands are near the top of <code>extension.js</code>.</p>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+<ul>
+<li><strong>Nothing happens in a collection file.</strong> Check the language in the status bar
+says Lua, and that the file has its <code>ns.Collection("Owner").CLASS = {</code> line. Check
+the extension is enabled in the Extensions view.</li>
+<li><strong>No .toc or shared-name problems.</strong> Open the <code>mikey-macros</code> folder itself, not
+just a file, so the extension can find <code>mikey-macros.toc</code>.</li>
+<li><strong>Macro text is all one color.</strong> Your settings probably have their own
+<code>editor.tokenColorCustomizations</code>, which replaces the extension's colors. Add the
+rules from <a href="#colors">Colors</a> to it, one per scope, with the colors above.</li>
+<li><strong>A word looks the wrong color.</strong> Put the cursor on it and run
+"Developer: Inspect Editor Tokens and Scopes" from the command palette
+(Ctrl+Shift+P) to see which scope it got.</li>
+<li><strong><code>python</code> isn't found when building.</strong> Install Python 3 for Windows
+(tick "Add to PATH"), or run the script with <code>py</code> or <code>python3</code>.</li>
+</ul>
+
+<h2 id="limits">Limits</h2>
+<ul>
+<li>Spell names aren't checked against the game, so a misspelled spell shows up as a
+macro that never fills in.</li>
+<li>Macros whose <code>body</code> is a function (<a href="writing-macros.html#built-bodies">built bodies</a>)
+aren't checked or colored.</li>
+<li>Condition, unit and command lists cover Classic and retail macros; a brand-new
+condition would show as unknown until the list is updated.</li>
+</ul>
+</main>
+</div>
+<footer>mikey-macros documentation. <a href="index.html">Home</a> · <a href="https://github.com/code-monkie/mikey-macros">Source on GitHub</a> · Licensed <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a></footer>
+<script src="js/toc.js"></script>
+</body>
+</html>

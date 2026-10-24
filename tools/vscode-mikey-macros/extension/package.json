@@ -1,0 +1,85 @@
+{
+    "name": "mikey-macros-lint",
+    "displayName": "mikey-macros lint",
+    "description": "Checks WoW macros inside mikey-macros collection files as you type, colors them, autocompletes conditions, units, commands and the macro's spells, and explains syntax on hover.",
+    "version": "0.3.0",
+    "publisher": "code-monkie",
+    "license": "SEE LICENSE IN LICENSE",
+    "engines": {
+        "vscode": "^1.75.0"
+    },
+    "categories": [
+        "Linters"
+    ],
+    "keywords": [
+        "wow",
+        "world of warcraft",
+        "macro",
+        "lua"
+    ],
+    "activationEvents": [
+        "onLanguage:lua"
+    ],
+    "main": "./extension.js",
+    "extensionKind": [
+        "workspace"
+    ],
+    "contributes": {
+        "grammars": [
+            {
+                "scopeName": "source.wow-macro.injection",
+                "path": "./syntaxes/wow-macro.injection.json",
+                "injectTo": [
+                    "source.lua"
+                ]
+            }
+        ],
+        "configurationDefaults": {
+            "editor.tokenColorCustomizations": {
+                "textMateRules": [
+                    {
+                        "scope": [
+                            "keyword.control.command.wow-macro",
+                            "keyword.control.directive.wow-macro"
+                        ],
+                        "settings": {
+                            "foreground": "#C586C0"
+                        }
+                    },
+                    {
+                        "scope": "support.type.condition.wow-macro",
+                        "settings": {
+                            "foreground": "#4EC9B0"
+                        }
+                    },
+                    {
+                        "scope": "variable.language.unit.wow-macro",
+                        "settings": {
+                            "foreground": "#9CDCFE"
+                        }
+                    },
+                    {
+                        "scope": [
+                            "constant.language.value.wow-macro",
+                            "constant.numeric.rank.wow-macro",
+                            "constant.numeric.reset.wow-macro"
+                        ],
+                        "settings": {
+                            "foreground": "#B5CEA8"
+                        }
+                    },
+                    {
+                        "scope": [
+                            "keyword.operator.clause.wow-macro",
+                            "keyword.operator.toggle.wow-macro",
+                            "keyword.other.reset.wow-macro"
+                        ],
+                        "settings": {
+                            "foreground": "#D7BA7D"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
