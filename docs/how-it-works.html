@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>How it works · mikey-macros</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site">
+  <div class="site-inner">
+    <a class="brand" href="../README.md">mikey-macros</a>
+    <nav aria-label="Guides">
+      <a href="collections-guide.html">Collections</a>
+      <a href="writing-macros.html">Writing macros</a>
+      <a href="commands.html">Commands</a>
+      <a href="how-it-works.html" aria-current="page">How it works</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+  </div>
+</header>
+<main>
+<h1 id="how-it-works">How it works</h1>
+<h2 id="lifecycle">Lifecycle</h2>
+<ol>
+<li><strong>Setup (once per character):</strong> <code>/mm sync</code> creates every macro in the
+    collection the character follows, as character-specific macros. Drag them
+    onto your bars.</li>
+<li><strong>Trimming:</strong> each macro is written with only the spells the character
+    knows (see <a href="writing-macros.html#trimming-rules">trimming rules</a>). Fall-through
+    lines and <code>#showtooltip</code> icons therefore always work, and a macro with
+    nothing known yet shows a question mark.</li>
+<li><strong>Automatic updates:</strong> when you learn a spell or change your main-hand
+    weapon, the macros are rewritten. Changes are batched (half a second) and
+    wait for combat to end.</li>
+<li>Rewriting edits a macro in place, so it keeps its place on your bars.</li>
+</ol>
+<h2 id="the-addon-owns-its-macros">The addon owns its macros</h2>
+<p>An edit made in the in-game macro window is overwritten the next time the
+macro is rewritten. Make permanent changes in the collection's class file
+(see the <a href="collections-guide.html">Collections guide</a>). Renaming a macro in game
+takes it out of the addon's hands. General (account) macros are never
+touched.</p>
+<h2 id="spell-detection">Spell detection</h2>
+<p>The addon reads the spellbook, by name, for spells that are actually learned
+(not future or off-spec spells). It uses retail's <code>C_SpellBook</code> API where
+present and the Classic spellbook API otherwise, so the same files work on
+Classic Era, WoW: Forever and retail.</p>
+<h2 id="saved-data">Saved data</h2>
+<p>Only one thing is saved: the collection chosen with <code>/mm use</code>, per character
+(<code>MikeyMacrosCharDB</code>). The macro lists live in the addon's files; the
+trimmed macros live in the game's own macro storage.</p>
+<h2 id="performance">Performance</h2>
+<p>A few kilobytes of data, no <code>OnUpdate</code>, no timers. Work happens only when
+spells or the main-hand weapon change: one spellbook scan and a string
+comparison per macro.</p>
+<h2 id="limits">Limits</h2>
+<ul>
+<li>Character macros: 30 per character on Classic Era and retail. WoW: Forever
+    is likely the same but not confirmed yet (<code>/dump MAX_CHARACTER_MACROS</code>).
+    <code>/mm sync</code> reports anything that didn't fit.</li>
+<li>255 characters per macro body, 16 per name.</li>
+<li>Macros can't be created or changed in combat.</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<ul>
+<li><strong>A key shows "?"</strong>: you don't know any of its spells yet. Expected.</li>
+<li><strong>A macro didn't update after training</strong>: <code>/mm update</code>. If it still
+    doesn't, check the spell's name in <code>spells</code> matches the spellbook exactly.</li>
+<li><strong>A new class file isn't picked up</strong>: it must be listed in
+    <code>mikey-macros.toc</code>, and a new file needs a full game restart.</li>
+<li><strong>A hand-made macro disappeared on <code>/mm clear</code></strong>: its name matched a
+    collection macro; see
+    <a href="collections-guide.html#clearing-macros-and-name-collisions">name collisions</a>.</li>
+<li><strong>Lua errors</strong>: install BugGrabber and BugSack and check what they caught.</li>
+</ul>
+</main>
+<footer>mikey-macros documentation. Back to the <a href="../README.md">README</a>.</footer>
+</body>
+</html>

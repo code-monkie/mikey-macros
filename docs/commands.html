@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Commands · mikey-macros</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site">
+  <div class="site-inner">
+    <a class="brand" href="../README.md">mikey-macros</a>
+    <nav aria-label="Guides">
+      <a href="collections-guide.html">Collections</a>
+      <a href="writing-macros.html">Writing macros</a>
+      <a href="commands.html" aria-current="page">Commands</a>
+      <a href="how-it-works.html">How it works</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+  </div>
+</header>
+<main>
+<h1 id="commands">Commands</h1>
+<p>All commands start with <code>/mm</code>. Typing <code>/mm</code> alone lists them.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/mm list</code></td>
+<td>Every macro in the collection this character follows: <strong>have</strong>, <strong>ready</strong> (spell known, macro not created) or <strong>not learned</strong>, plus character slots used.</td>
+</tr>
+<tr>
+<td><code>/mm sync</code></td>
+<td>Create all missing macros, then open the macro window on the character tab. Never touches existing ones.</td>
+</tr>
+<tr>
+<td><code>/mm sync known</code></td>
+<td>The same, but only for macros with a spell you already know.</td>
+</tr>
+<tr>
+<td><code>/mm update</code></td>
+<td>Rewrite every existing macro now. Normally automatic.</td>
+</tr>
+<tr>
+<td><code>/mm resync</code></td>
+<td><code>/mm sync</code> plus <code>/mm update</code>: create anything missing, rewrite the rest, open the macro window. Macros stay on your bars.</td>
+</tr>
+<tr>
+<td><code>/mm clear</code></td>
+<td>Delete this character's macros whose names appear in any collection for its class.</td>
+</tr>
+<tr>
+<td><code>/mm collections</code></td>
+<td>Installed collections, the classes each covers, and the one this character follows.</td>
+</tr>
+<tr>
+<td><code>/mm use &lt;name&gt;</code></td>
+<td>Follow that collection on this character.</td>
+</tr>
+<tr>
+<td><code>/mm use default</code></td>
+<td>Go back to the default choice.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="details">Details</h2>
+<p><strong><code>/mm sync</code></strong> is the once-per-character setup. It creates every macro in the
+list, known or not, so you can lay out your bars once; macros for spells you
+don't know yet show a question mark and fill in as you train. It reports
+anything that didn't fit in your free character slots.</p>
+<p><strong><code>/mm update</code></strong> is rarely needed: macros are rewritten automatically when
+you learn a spell or change your main-hand weapon (after combat, if you're
+in it). Use it after editing a class file if you don't want to wait.</p>
+<p><strong><code>/mm resync</code></strong> is the command to run after editing a class file or
+switching collections: it brings the character fully up to date without
+taking anything off your bars.</p>
+<p><strong><code>/mm clear</code></strong> deletes by name. A character macro is deleted when its name
+appears in any collection's list for the character's class (Mikey's,
+Ulako's, ...). Other character macros, such as one called <code>test</code>, are kept,
+and general (account) macros are never touched. A hand-made macro that
+happens to share a collection macro's name <strong>is</strong> deleted. There's no
+confirmation, and deleted macros come off your bars. See
+<a href="collections-guide.html#clearing-macros-and-name-collisions">name collisions</a>.</p>
+<p><strong><code>/mm use &lt;name&gt;</code></strong> saves the choice for this character only. If the
+collection doesn't have the character's class, the default choice is used
+until it does. Switching deletes nothing; follow it with <code>/mm resync</code>, or
+<code>/mm clear</code> first for a clean switch. See
+<a href="collections-guide.html#switching-collections">Switching collections</a>.</p>
+<p>Nothing that changes macros runs in combat; the addon says so, or waits for
+combat to end.</p>
+</main>
+<footer>mikey-macros documentation. Back to the <a href="../README.md">README</a>.</footer>
+</body>
+</html>

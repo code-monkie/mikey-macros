@@ -1,12 +1,23 @@
 -- mikey-macros: per-character class macros that maintain themselves.
--- Macro definitions live in Classes\<Class>.lua. /mm sync creates them all once;
+-- Macro definitions live in Collections\<Owner>\<Class>.lua. /mm sync creates them all once;
 -- after that each macro is rewritten automatically (out of combat) to contain
 -- only the spells you know, so fall-through lines and icons always work.
 -- The addon owns these macros: change them in the data file, not in game
 -- (renaming one in game takes it out of the addon's hands).
 
 local _, ns = ...
-ns.classes = {}
+-- Collections: whose macro lists. Each Collections\<Owner>\<Class>.lua file adds a
+-- class to its owner's collection with ns.Collection("<Owner>").<CLASS> = { ... }.
+local DEFAULT = "Mikey"
+ns.collections = {}
+function ns.Collection(owner)
+    local c = ns.collections[owner]
+    if not c then
+        c = {}
+        ns.collections[owner] = c
+    end
+    return c
+end
 
 local ICON = 134400 -- question mark; #showtooltip supplies the real icon
 local MAX_BODY = 255
@@ -161,11 +172,46 @@ local function Clean(def, ctx)
     return KnownOnly(body, def, ctx)
 end
 
-local function ClassList()
+local function CharDB()
+    MikeyMacrosCharDB = MikeyMacrosCharDB or {}
+    return MikeyMacrosCharDB
+end
+
+-- The collection name matching `name` (any case), or nil.
+local function FindCollection(name)
+    for owner in pairs(ns.collections) do
+        if owner:lower() == name:lower() then return owner end
+    end
+end
+
+-- Whose list this character follows for `class`: the one chosen with /mm use (if
+-- it has the class), else Mikey's, else the first alphabetically that has it.
+local function ActiveCollection(class)
+    local chosen = CharDB().collection
+    if chosen and ns.collections[chosen] and ns.collections[chosen][class] then return chosen end
+    if ns.collections[DEFAULT] and ns.collections[DEFAULT][class] then return DEFAULT end
+    local owners = {}
+    for owner, c in pairs(ns.collections) do
+        if c[class] then owners[#owners + 1] = owner end
+    end
+    table.sort(owners)
+    return owners[1]
+end
+
+-- This character's macro list and its owner (nil if no collection has the class).
+local function ActiveList()
     local _, class = UnitClass("player")
-    local list = ns.classes[class]
-    if not list then Print("no macros defined for " .. class .. " yet.") end
-    return list
+    local owner = ActiveCollection(class)
+    if owner then return ns.collections[owner][class], owner end
+end
+
+local function ClassList()
+    local list, owner = ActiveList()
+    if not list then
+        local _, class = UnitClass("player")
+        Print("no collection has macros for " .. class .. ".")
+    end
+    return list, owner
 end
 
 local function CanEdit()
@@ -224,8 +270,7 @@ end
 -- (keeps their action bar spots). Normally only changed bodies are rewritten;
 -- force rewrites every macro.
 local function Refresh(force)
-    local _, class = UnitClass("player")
-    local list = ns.classes[class]
+    local list = ActiveList()
     if not list or InCombatLockdown() then return {} end
     local ctx = Context(KnownSpells())
     local have = CharacterMacros()
@@ -282,22 +327,32 @@ events:SetScript("OnEvent", function(_, event, slot)
     Schedule()
 end)
 
--- Delete every character-specific macro on this character (not just the
--- addon's). General (account) macros are never touched.
+-- Delete this character's macros whose names appear in any collection's list
+-- for its class (Mikey's, Ulako's, ...). Anything else (e.g. a macro called
+-- "test") is kept, as are general (account) macros. A hand-made macro that
+-- happens to share a name with a collection macro is deleted too.
 local function Clear()
     if not CanEdit() then return end
-    local _, numChar = GetNumMacros()
-    local first = AccountMax() + 1
-    for index = first + numChar - 1, first, -1 do -- highest first, so indexes stay valid
-        DeleteMacro(index)
+    local _, class = UnitClass("player")
+    local names = {}
+    for _, c in pairs(ns.collections) do
+        for _, def in ipairs(c[class] or {}) do names[def.name] = true end
     end
-    Print("deleted all " .. numChar .. " character macros. /mm sync creates the class set again.")
+    local have = CharacterMacros()
+    local indexes = {}
+    for name, index in pairs(have) do
+        if names[name] then indexes[#indexes + 1] = index end
+    end
+    table.sort(indexes, function(x, y) return x > y end) -- highest first, so indexes stay valid
+    for _, index in ipairs(indexes) do DeleteMacro(index) end
+    Print("deleted " .. #indexes .. " collection macros; other character macros were kept.")
 end
 
 -- Show every macro for this class and its state.
 local function List()
-    local list = ClassList()
+    local list, owner = ClassList()
     if not list then return end
+    Print("following |cffffd040" .. owner .. "|r's collection.")
     local known = KnownSpells()
     local have, count = CharacterMacros()
     for _, def in ipairs(list) do
@@ -314,15 +369,60 @@ local function List()
     Print(count .. " of " .. CharacterMax() .. " character slots used.")
 end
 
+-- Every installed collection and the classes it covers.
+local function Collections()
+    local _, class = UnitClass("player")
+    local active = ActiveCollection(class)
+    local owners = {}
+    for owner in pairs(ns.collections) do owners[#owners + 1] = owner end
+    table.sort(owners)
+    for _, owner in ipairs(owners) do
+        local classes = {}
+        for c in pairs(ns.collections[owner]) do classes[#classes + 1] = c:sub(1, 1) .. c:sub(2):lower() end
+        table.sort(classes)
+        local mark = (owner == active) and " |cff60ff60(this character)|r" or ""
+        Print(owner .. mark .. ": " .. table.concat(classes, ", "))
+    end
+end
+
+-- Follow another collection on this character ("default" goes back to the rules).
+local function Use(name)
+    if name == "" then
+        Print("/mm use <name>, or /mm use default. /mm collections shows the names.")
+        return
+    end
+    local _, class = UnitClass("player")
+    if name:lower() == "default" then
+        CharDB().collection = nil
+    else
+        local owner = FindCollection(name)
+        if not owner then
+            Print("no collection called " .. name .. ". /mm collections shows the names.")
+            return
+        end
+        CharDB().collection = owner
+        if not ns.collections[owner][class] then
+            Print(owner .. " has no macros for " .. class .. "; using the default until it does.")
+        end
+    end
+    Print("now following |cffffd040" .. (ActiveCollection(class) or "nobody") .. "|r's collection. "
+        .. "/mm resync creates its macros; /mm clear first for a clean switch.")
+end
+
 SLASH_MIKEYMACROS1 = "/mm"
 SlashCmdList.MIKEYMACROS = function(msg)
-    local cmd, arg = (msg or ""):lower():match("^%s*(%S*)%s*(%S*)")
+    local cmd, arg = (msg or ""):match("^%s*(%S*)%s*(%S*)")
+    cmd = cmd:lower()
     if cmd == "sync" then
-        if Sync(arg == "known") then ShowCharacterMacros() end
+        if Sync(arg:lower() == "known") then ShowCharacterMacros() end
     elseif cmd == "update" then
         Update()
     elseif cmd == "list" then
         List()
+    elseif cmd == "collections" then
+        Collections()
+    elseif cmd == "use" then
+        Use(arg)
     elseif cmd == "clear" then
         Clear()
     elseif cmd == "resync" then
@@ -335,7 +435,9 @@ SlashCmdList.MIKEYMACROS = function(msg)
         Print("/mm sync - create all your class macros (once per character; they then keep themselves current)")
         Print("/mm sync known - create only the ones for spells you know")
         Print("/mm update - force a refresh now (normally automatic)")
-        Print("/mm clear - delete ALL of this character's macros (general macros are kept)")
+        Print("/mm clear - delete this character's macros that come from any collection (others are kept)")
         Print("/mm resync - create anything missing and rewrite the rest (macros stay on your bars)")
+        Print("/mm collections - whose macro sets are installed")
+        Print("/mm use <name> - follow someone's set on this character (/mm use default to go back)")
     end
 end

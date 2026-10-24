@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Writing macros · mikey-macros</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site">
+  <div class="site-inner">
+    <a class="brand" href="../README.md">mikey-macros</a>
+    <nav aria-label="Guides">
+      <a href="collections-guide.html">Collections</a>
+      <a href="writing-macros.html" aria-current="page">Writing macros</a>
+      <a href="commands.html">Commands</a>
+      <a href="how-it-works.html">How it works</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+  </div>
+</header>
+<main>
+<h1 id="writing-macros">Writing macros</h1>
+<p>The format of a collection's class list, how macros are trimmed to the
+spells a character knows, and the conventions the existing lists follow.</p>
+<p>For where these files live and how they're chosen, see the
+<a href="collections-guide.html">Collections guide</a>.</p>
+<h2 id="a-macro-entry">A macro entry</h2>
+<pre><code class="language-lua">{ name = &quot;Kick&quot;, spells = { &quot;Kick&quot; }, body = [[
+    #showtooltip
+    /use [@mouseover,harm,nodead,nostealth] [nostealth] Kick
+]] },</code></pre>
+<ul>
+<li><strong>name</strong>: at most 16 characters, unique within the class list (and ideally
+    across collections; see
+    <a href="collections-guide.html#clearing-macros-and-name-collisions">name collisions</a>).</li>
+<li><strong>spells</strong>: every spell the body uses that a character has to learn. These
+    are the names trimmed out until known. Anything not listed (items, other
+    commands) is left alone.</li>
+<li><strong>body</strong>: the full macro, written as you'd type it at max level.
+    Indentation and leading/trailing blank lines are stripped. At most 255
+    characters.</li>
+</ul>
+<p>Write the body for a character that knows everything; the addon removes what
+a lower-level character doesn't know yet.</p>
+<h2 id="combined-macros">Combined macros</h2>
+<p>One key can cover several spells. List them all in <code>spells</code>; each clause is
+trimmed on its own:</p>
+<pre><code class="language-lua">{ name = &quot;Bleed&quot;, spells = { &quot;Garrote&quot;, &quot;Rupture&quot; }, body = [[
+    #showtooltip
+    /use [stealth] Garrote; Rupture
+    /startattack [nostealth]
+]] },</code></pre>
+<p>With modifiers, a clause for an unlearned spell falls through to the next
+one: Ctrl+Imbue gives Rockbiter until Frostbrand is learned.</p>
+<h2 id="trimming-rules">Trimming rules</h2>
+<ul>
+<li><code>/use</code>, <code>/cast</code> and <code>/castsequence</code> lines are trimmed. A line is split into
+    clauses at <code>;</code>; a clause's spell is the text after its last <code>]</code>, ignoring a
+    leading <code>!</code>. If that spell is in <code>spells</code> and not known, the clause is
+    dropped; if no clause is left, the line is dropped.</li>
+<li>In a <code>/castsequence</code>, unknown spells drop out of the sequence.</li>
+<li><code>#showtooltip Spell</code> naming an unknown spell becomes a bare <code>#showtooltip</code>.</li>
+<li>Spells are matched by name, so ranks don't matter. A deliberate low-rank
+    copy such as <code>Earth Shock(Rank 1)</code> (a cheap interrupt) counts as Earth
+    Shock: list <code>"Earth Shock"</code> in <code>spells</code>.</li>
+<li>Every other line (<code>/startattack</code>, <code>/dismount</code>, <code>/target</code>, <code>/pet...</code>) stays.</li>
+</ul>
+<p>A macro with nothing known yet keeps only its other lines and shows a
+question mark. Once a spell is learned, its clause comes back and
+<code>#showtooltip</code> shows the live icon.</p>
+<h2 id="built-bodies">Built bodies</h2>
+<p>A <code>body</code> can also be a function returning the macro text, called with a
+context table:</p>
+<ul>
+<li><code>c.knows("Spell Name")</code>: whether the spell is known.</li>
+<li><code>c.dagger</code>: whether a dagger is in the main hand.</li>
+</ul>
+<pre><code class="language-lua">{ name = &quot;Example&quot;, spells = { &quot;Backstab&quot;, &quot;Sinister Strike&quot; }, body = function(c)
+    local strike = c.dagger and &quot;Backstab&quot; or &quot;Sinister Strike&quot;
+    return &quot;#showtooltip\n/use &quot; .. strike
+end },</code></pre>
+<p>The result is trimmed like any other body. Prefer plain text; use a function
+only when the text depends on more than which spells are known.</p>
+<h2 id="conventions">Conventions</h2>
+<p>The existing lists follow these, which keeps classes consistent:</p>
+<ul>
+<li><code>#showtooltip</code> on every macro; the macro's own icon is the question mark,
+    so the live spell icon shows.</li>
+<li><code>/use</code>, never <code>/cast</code> (the same for spells, and <code>/use</code> also takes items and
+    equipment slots). <code>/castsequence</code> is the exception; it has no <code>/use</code> form.</li>
+<li>No spell ranks, except a deliberate low-rank copy (<code>Spell(Rank 1)</code>).</li>
+<li>Mouseover with fallback for things you aim: <code>[@mouseover,harm,nodead] []</code>
+    for harmful spells, <code>[@mouseover,help,nodead] []</code> for friendly ones, and
+    <code>[@player]</code> as the fallback for self-buffs and cures.</li>
+<li>No mouseover on melee abilities you spam; they act on your target.</li>
+<li><code>/startattack</code> on damage, <code>/startattack [nostealth]</code> on stealth openers,
+    <code>/stopattack</code> and/or <code>/stopcasting</code> around crowd control.</li>
+<li><code>!</code> on toggles (<code>!Stealth</code>, <code>!Ghost Wolf</code>) so a second press doesn't cancel.</li>
+<li>Modifiers mean the same thing across a class: Shift = fire, Ctrl = frost,
+    Alt = a fourth option (shaman shocks, imbues and totems; hunter traps).</li>
+<li>Druid: only Bear is reliably <code>[form:1]</code>; other form numbers depend on the
+    order forms are learned, so use other conditions (<code>[swimming]</code> for
+    Aquatic).</li>
+<li>Hunter: attacks carry the pet rider (<code>/petattack [pet]</code>,
+    <code>/petdefensive [pet,group]</code>, <code>/petassist [pet,nogroup]</code>).</li>
+</ul>
+<h2 id="limits">Limits</h2>
+<ul>
+<li>At most 16 characters per name and 255 per body. <code>/mm sync</code> skips and
+    reports a body that's too long.</li>
+<li>Keep a class list within the character macro limit (30 on Classic Era and
+    retail).</li>
+</ul>
+</main>
+<footer>mikey-macros documentation. Back to the <a href="../README.md">README</a>.</footer>
+</body>
+</html>

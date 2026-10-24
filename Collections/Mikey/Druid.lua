@@ -7,7 +7,7 @@
 
 local _, ns = ...
 
-ns.classes.DRUID = {
+ns.Collection("Mikey").DRUID = {
     -- Caster -------------------------------------------------------------------
     -- Wrath; Shift Starfire.
     { name = "Wrath", spells = { "Wrath", "Starfire" }, body = [[
