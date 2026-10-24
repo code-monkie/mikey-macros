@@ -3,10 +3,14 @@
 Per-character class macros that build themselves as you level.
 
 Write a class's macros once, in full, the way you want them at max level. On
-each new character the addon creates them all, then keeps every macro
-trimmed to the spells that character actually knows. Learn a spell and the
-macros that use it update on their own: no rewriting macros every level, no
-ranks, no broken fall-through lines.
+any character that follows them, the addon creates them all, then keeps every
+macro trimmed to the spells that character actually knows. Learn a spell and
+the macros that use it update on their own: no rewriting macros every level,
+no ranks, no broken fall-through lines.
+
+Out of the box, auto mode gives each class spell a macro as you learn it, with
+mouseover targeting, `/startattack` on attacks, and safe versions of crowd
+control, stealth and resurrection.
 
 Part of a small library of KISS addons built for WoW: Forever. Developed and
 tested on Classic Era (1.15.9) and retail (12.1.5).
