@@ -36,11 +36,11 @@ General (account) macros are never touched.
 |---|---|
 | `/mm` | Show the commands. |
 | `/mm list` | Every macro for your class: **have**, **ready** (spell known, macro not created) or **not learned**, plus character slots used. |
-| `/mm sync` | Create all missing macros for your class. Never touches existing ones. |
+| `/mm sync` | Create all missing macros for your class, then open the macro window on the character tab. Never touches existing ones. |
 | `/mm sync known` | Create only the macros for spells you already know. |
 | `/mm update` | Rewrite every existing macro now (normally automatic). |
 | `/mm clear` | Delete **all** of this character's macros, including hand-made ones. General macros are kept. No confirmation, and the macros come off your bars. |
-| `/mm resync` | `/mm sync` plus `/mm update`: create anything missing and rewrite every macro to match the data file. Macros stay on your bars. |
+| `/mm resync` | `/mm sync` plus `/mm update`: create anything missing and rewrite every macro to match the data file, then open the macro window. Macros stay on your bars. |
 
 ## Files
 
@@ -181,9 +181,9 @@ These keep the class lists consistent:
 
 ## Limits
 
-- Character macros: 18 per character on Classic-based clients (WoW: Forever),
-  30 on retail. Keep each class list within 18. `/mm sync` reports anything
-  that didn't fit.
+- Character macros: 30 per character on Classic Era and retail. WoW: Forever
+  is likely the same but not yet confirmed (`/dump MAX_CHARACTER_MACROS`).
+  `/mm sync` reports anything that didn't fit.
 - 255 characters per macro body; `/mm sync` skips and reports longer ones.
 - Macros can't be created or changed in combat; the addon waits for combat to
   end.

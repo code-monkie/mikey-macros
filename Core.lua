@@ -210,6 +210,14 @@ local function Sync(onlyKnown)
     if #tooLong > 0 then
         Print("|cffff6060over 255 characters, skipped|r: " .. table.concat(tooLong, ", "))
     end
+    return true
+end
+
+-- Open Blizzard's macro window on the character-specific tab.
+local function ShowCharacterMacros()
+    if InCombatLockdown() then return end
+    if not (MacroFrame and MacroFrame:IsShown()) and ShowMacroFrame then ShowMacroFrame() end
+    if MacroFrameTab2 then MacroFrameTab2:Click() end
 end
 
 -- Rewrite existing macros to match the data file and the spells you know
@@ -310,7 +318,7 @@ SLASH_MIKEYMACROS1 = "/mm"
 SlashCmdList.MIKEYMACROS = function(msg)
     local cmd, arg = (msg or ""):lower():match("^%s*(%S*)%s*(%S*)")
     if cmd == "sync" then
-        Sync(arg == "known")
+        if Sync(arg == "known") then ShowCharacterMacros() end
     elseif cmd == "update" then
         Update()
     elseif cmd == "list" then
@@ -318,8 +326,10 @@ SlashCmdList.MIKEYMACROS = function(msg)
     elseif cmd == "clear" then
         Clear()
     elseif cmd == "resync" then
-        Sync()
-        Update()
+        if Sync() then
+            Update()
+            ShowCharacterMacros()
+        end
     else
         Print("/mm list - your class macros and their state")
         Print("/mm sync - create all your class macros (once per character; they then keep themselves current)")

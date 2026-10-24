@@ -21,18 +21,28 @@ ns.classes.HUNTER = {
         /startattack
         /use Arcane Shot
         /use !Auto Shot
+        /petattack [pet]
+        /petdefensive [pet,group]
+        /petassist [pet,nogroup]
     ]] },
 
-    -- Serpent; Shift Scorpid; Ctrl Viper. Mouseover, else target; the pet goes with it.
+    -- Serpent; Shift Scorpid; Ctrl Viper. Mouseover, else target; the pet goes for your target.
     { name = "Sting", spells = { "Serpent Sting", "Scorpid Sting", "Viper Sting" }, body = [[
         #showtooltip
-        /petattack [@mouseover,harm,nodead] [pet]
         /use [mod:ctrl,@mouseover,harm,nodead] [mod:ctrl] Viper Sting; [mod:shift,@mouseover,harm,nodead] [mod:shift] Scorpid Sting; [@mouseover,harm,nodead] [] Serpent Sting
+        /petattack [pet]
+        /petdefensive [pet,group]
+        /petassist [pet,nogroup]
     ]] },
 
+    -- The opener: a mouseover becomes your target, marked, and the pet goes in.
     { name = "Mark", spells = { "Hunter's Mark" }, body = [[
         #showtooltip
-        /use [@mouseover,harm,nodead] [] Hunter's Mark
+        /target [@mouseover,harm,nodead]
+        /use Hunter's Mark
+        /petattack [pet]
+        /petdefensive [pet,group]
+        /petassist [pet,nogroup]
     ]] },
 
     { name = "Conc", spells = { "Concussive Shot" }, body = [[
@@ -46,6 +56,9 @@ ns.classes.HUNTER = {
         /startattack
         /use Multi-Shot
         /use !Auto Shot
+        /petattack [pet]
+        /petdefensive [pet,group]
+        /petassist [pet,nogroup]
     ]] },
 
     { name = "Aimed", spells = { "Aimed Shot" }, body = [[
@@ -53,6 +66,9 @@ ns.classes.HUNTER = {
         /startattack
         /use Aimed Shot
         /use !Auto Shot
+        /petattack [pet]
+        /petdefensive [pet,group]
+        /petassist [pet,nogroup]
     ]] },
 
     { name = "Raptor", spells = { "Raptor Strike" }, body = [[
@@ -61,6 +77,7 @@ ns.classes.HUNTER = {
         /use Raptor Strike
         /petattack [pet]
         /petdefensive [pet,group]
+        /petassist [pet,nogroup]
     ]] },
 
     { name = "Mongoose", spells = { "Mongoose Bite" }, body = [[
@@ -69,6 +86,7 @@ ns.classes.HUNTER = {
         /use Mongoose Bite
         /petattack [pet]
         /petdefensive [pet,group]
+        /petassist [pet,nogroup]
     ]] },
 
     { name = "Wing Clip", spells = { "Wing Clip" }, body = [[
@@ -76,10 +94,10 @@ ns.classes.HUNTER = {
         /use Wing Clip
     ]] },
 
-    -- Hawk and Cheetah in turn; Shift Monkey.
-    { name = "Aspect", spells = { "Aspect of the Hawk", "Aspect of the Cheetah", "Aspect of the Monkey" }, body = [[
+    -- Hawk and Cheetah in turn; Shift Monkey; Ctrl Pack.
+    { name = "Aspect", spells = { "Aspect of the Hawk", "Aspect of the Cheetah", "Aspect of the Monkey", "Aspect of the Pack" }, body = [[
         #showtooltip
-        /use [mod:shift] Aspect of the Monkey
+        /use [mod:ctrl] Aspect of the Pack; [mod:shift] Aspect of the Monkey
         /castsequence [nomod] Aspect of the Cheetah, Aspect of the Hawk
     ]] },
 
@@ -89,13 +107,13 @@ ns.classes.HUNTER = {
         /use [mod:alt] Explosive Trap; [mod:ctrl] Frost Trap; [mod:shift] Immolation Trap; Freezing Trap
     ]] },
 
-    -- Calls the pet if it's out, then sends it in.
-    { name = "Pet", spells = { "Call Pet" }, body = [[
+    -- Calls the pet if it's out, then sends it in. Shift dismisses it.
+    { name = "Pet", spells = { "Call Pet", "Dismiss Pet" }, body = [[
         #showtooltip
-        /use [nopet] Call Pet
-        /petattack [pet]
-        /petdefensive [pet,group]
-        /petassist [pet,nogroup]
+        /use [mod:shift,pet] Dismiss Pet; [nopet] Call Pet
+        /petattack [nomod,pet]
+        /petdefensive [nomod,pet,group]
+        /petassist [nomod,pet,nogroup]
     ]] },
 
     { name = "Pet Stop", spells = {}, body = [[
@@ -125,5 +143,21 @@ ns.classes.HUNTER = {
     { name = "Scare", spells = { "Scare Beast" }, body = [[
         #showtooltip
         /use [@mouseover,harm,nodead] [] Scare Beast
+    ]] },
+
+    -- Cooldowns together (Bestial Wrath is a talent).
+    { name = "Burn", spells = { "Rapid Fire", "Bestial Wrath" }, body = [[
+        #showtooltip
+        /use Rapid Fire
+        /use Bestial Wrath
+    ]] },
+
+    -- Talent.
+    { name = "Intimidation", spells = { "Intimidation" }, body = [[
+        #showtooltip
+        /petattack [pet]
+        /petdefensive [pet,group]
+        /petassist [pet,nogroup]
+        /use Intimidation
     ]] },
 }
