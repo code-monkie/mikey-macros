@@ -206,10 +206,23 @@ Kept here for later; each has trade-offs that weren't worth it yet.
   ready-to-paste class file entry). Blizzard's macro window becomes the
   editor. Trade-off: an in-game edit is the trimmed version, so a dirty macro
   stops gaining spells as you learn them, and it needs SavedVariables.
-- **In-game editor.** A window to edit a class's macro list. Addons can't
-  write files, so edits would be saved as account-wide overrides layered over
-  the class file, with an Export button to fold them back into the file.
-  Trade-off: two places a macro can live, and a much bigger addon.
+- **In-game editor (overrides).** A window to edit a class's macros in game.
+  Addons can't write files, so edits are saved in SavedVariables (WTF), which
+  on Forever is in git anyway. Refinements from thinking it through:
+  - Edit the stored **full template**, never the live macro, so structure
+    changes to a macro that isn't fully learned yet are safe; trimming still
+    applies afterwards.
+  - Store **only the macros you change**, keyed by name, not a copy of the
+    whole class. A full copy would freeze the class and miss later fixes to
+    the class file; overrides let everything else keep following the file.
+  - Account-wide per class (the same tweak on every rogue).
+  - `/mm list` marks overridden macros; a revert drops an override and goes
+    back to the file's version; an export prints the override as a
+    ready-to-paste class file entry so it can become the default.
+
+  Trade-off: needs an editor window, two places a macro can live, and a much
+  bigger addon. Editing the SavedVariables file by hand isn't easier than the
+  class file (and the game overwrites it at logout while running).
 - **Create on learn.** Instead of creating every macro up front, create each
   one the moment its first spell is learned. No "?" keys, but each new macro
   still has to be dragged onto a bar mid-level.
