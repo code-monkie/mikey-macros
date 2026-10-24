@@ -62,6 +62,23 @@ Details, including how `/mm clear` matches names: [Commands](docs/commands.html)
 Classes with no collection aren't supported yet. Adding one is a single file:
 see the [Collections guide](docs/collections-guide.html).
 
+## VS Code extension
+
+Editing collections in VS Code? The **mikey-macros lint** extension (in
+`tools/vscode-mikey-macros/`) works on the macro text inside `body = [[ ... ]]`:
+
+- **checks as you type**: bad conditions and units, brackets, missing `;`, name
+  and length limits, files missing from the `.toc`, names shared between
+  collections;
+- **autocomplete** for conditions, units, condition values, slash commands and the
+  macro's own spells;
+- **hover** explanations of conditions, units and commands;
+- **colors** for commands, conditions, units and values, in any theme.
+
+Install: `python tools/vscode-mikey-macros/build_vsix.py`, then in VS Code
+Extensions → ⋯ → **Install from VSIX…** and pick the built `.vsix`. Details in the
+[VS Code extension guide](docs/vscode-extension.html).
+
 ## Documentation
 
 Online at <https://code-monkie.github.io/mikey-macros/> (in game, `/mm docs`
@@ -74,6 +91,8 @@ gives you the address to copy).
 - [Commands](docs/commands.html): every command in detail.
 - [How it works](docs/how-it-works.html): lifecycle, automatic updates, saved
   data, limits and troubleshooting.
+- [VS Code extension](docs/vscode-extension.html): installing and using the
+  editor extension (checks, autocomplete, hover, colors).
 - [Roadmap](docs/roadmap.html): planned work and ideas.
 
 ## Future development
@@ -95,7 +114,8 @@ Ideas being kept for later (trade-offs in the [Roadmap](docs/roadmap.html)):
 mikey-macros.toc                  load order; every collection file is listed here
 Core.lua                          spell detection, trimming, collections, commands
 Collections/<Owner>/<Class>.lua   one person's macro list for one class
-docs/                             guides
+docs/                             guides (also online)
+tools/vscode-mikey-macros/        VS Code extension: checks, colors and autocompletes macros
 ```
 
 ## License
