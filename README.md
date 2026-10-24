@@ -13,41 +13,42 @@ tested on Classic Era (1.15.9) and retail (12.1.5).
 
 ## Features
 
-- **Set up once per character.** One command creates the whole class set, so
-  you can lay out your action bars at level 1.
-- **Always correct for your level.** Unlearned spells are left out of each
-  macro until you train them; macros update automatically (after combat) and
-  keep their places on your bars.
-- **Plain macro text.** Class lists are ordinary macro bodies in Lua files,
-  easy to read and edit, with combined keys, modifiers, stance and form
-  conditions, `/castsequence` and deliberate rank-1 copies all supported.
-- **Collections.** Macro lists belong to a person. Friends can each keep
-  their own set, and every character chooses whose to follow.
+- **Works out of the box.** Auto mode gives every class spell you learn its own
+  macro (`#showtooltip`, `/use Spell`), ready to drag onto a bar and tweak.
+  Great for new players and new classes.
+- **Collections, opt-in.** Follow someone's hand-written set with
+  `/mm use <name>` and `/mm sync`, and the whole class set is created at
+  once, so you can lay out your action bars at level 1.
+- **Always correct for your level.** Collection macros leave out spells you
+  haven't trained and update themselves (after combat) as you learn them,
+  keeping their places on your bars.
+- **Plain macro text.** Collections are ordinary macro bodies in Lua files,
+  with combined keys, modifiers, stance and form conditions, `/castsequence`
+  and deliberate rank-1 copies all supported.
 
 ## Quick start
 
 1. Install: put the `mikey-macros` folder in `Interface\AddOns` and restart
    the game.
-2. On a character, run `/mm sync`. The macro window opens on the character
-   tab with the class's macros; keys you haven't learned yet show a
-   question mark.
-3. Drag the macros onto your action bars.
-4. Play. Each macro fills in as you train its spells.
+2. Play. Each class spell you learn gets its own macro; drag it onto a bar.
 
-To follow someone else's set on a character: `/mm collections` to see what's
-installed, `/mm use <name>`, then `/mm resync`.
+To follow a collection on a character: `/mm collections` to see what's
+installed, `/mm use <name>`, then `/mm sync`. The macro window opens with the
+class's macros (unlearned keys show a question mark); each fills in as you
+train its spells.
 
 ## Commands
 
 | Command | |
 |---|---|
 | `/mm list` | Macros for this character's class and their state |
-| `/mm sync` | Create the class set (once per character) |
+| `/mm sync` | Create the collection's class set (once per character) |
 | `/mm resync` | Create anything missing and rewrite the rest; nothing leaves your bars |
 | `/mm update` | Rewrite now (normally automatic) |
 | `/mm clear` | Delete this character's collection macros (by name) |
 | `/mm collections` | Installed collections and the one this character follows |
-| `/mm use <name>` | Follow a collection on this character (`default` to go back) |
+| `/mm use <name>` | Follow a collection on this character (`none` to stop) |
+| `/mm auto on` / `off` | Auto mode (on by default): a macro for each new class spell, unless the collection covers it |
 | `/mm docs` | The documentation's web address, ready to copy |
 
 Details, including how `/mm clear` matches names: [Commands](docs/commands.html).
@@ -99,8 +100,9 @@ gives you the address to copy).
 
 Planned next:
 
-- **An account-wide default collection**: choose which collection comes first
-  for every class, with `/mm use` still overriding it per character.
+- **An account-wide default collection**: opt every character into a collection
+  at once (for the classes it covers), with `/mm use` still overriding it per
+  character.
 
 Ideas being kept for later (trade-offs in the [Roadmap](docs/roadmap.html)):
 
