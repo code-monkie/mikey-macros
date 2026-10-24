@@ -18,7 +18,7 @@ ns.Collection("Default").PRIEST = {
         /use [@mouseover,harm,nodead] [] Mind Soothe
     ]] },
     -- Dead friend under the mouse, else your dead target.
-    { name = "Resurrection", spells = { "Resurrection" }, body = [[
+    { name = "Res", spells = { "Resurrection" }, body = [[
         #showtooltip
         /use [@mouseover,help,dead] [] Resurrection
     ]] },

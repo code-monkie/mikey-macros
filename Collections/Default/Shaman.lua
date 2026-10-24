@@ -8,7 +8,7 @@ local _, ns = ...
 
 ns.Collection("Default").SHAMAN = {
     -- Dead friend under the mouse, else your dead target.
-    { name = "Ancestral Spirit", spells = { "Ancestral Spirit" }, body = [[
+    { name = "Res", spells = { "Ancestral Spirit" }, body = [[
         #showtooltip
         /use [@mouseover,help,dead] [] Ancestral Spirit
     ]] },
@@ -16,7 +16,6 @@ ns.Collection("Default").SHAMAN = {
 
 ns.Exclude("SHAMAN", {
     "Far Sight",
-    "Water Breathing",
     "Water Walking",
     "Astral Recall",
 })

@@ -23,7 +23,7 @@ ns.Collection("Default").DRUID = {
         /use !Prowl
     ]] },
     -- Out of combat Revive (where the game has it), in combat Rebirth; mouseover first.
-    { name = "Rebirth", spells = { "Rebirth", "Revive" }, body = [[
+    { name = "Res", spells = { "Rebirth", "Revive" }, body = [[
         #showtooltip
         /use [nocombat,@mouseover,help,dead] [nocombat] Revive; [@mouseover,help,dead] [] Rebirth
     ]] },

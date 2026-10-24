@@ -13,7 +13,7 @@ ns.Collection("Default").PALADIN = {
         /use [@mouseover,harm,nodead] [] Turn Undead
     ]] },
     -- Dead friend under the mouse, else your dead target.
-    { name = "Redemption", spells = { "Redemption" }, body = [[
+    { name = "Res", spells = { "Redemption" }, body = [[
         #showtooltip
         /use [@mouseover,help,dead] [] Redemption
     ]] },
