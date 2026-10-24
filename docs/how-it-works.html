@@ -7,7 +7,7 @@
   <title>How it works · mikey-macros</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="with-toc">
 <header class="site">
   <div class="site-inner">
     <a class="brand" href="../README.md">mikey-macros</a>
@@ -20,6 +20,22 @@
     </nav>
   </div>
 </header>
+<div class="layout">
+  <aside class="page-toc" aria-label="On this page">
+    <details open>
+      <summary>On this page</summary>
+      <ul>
+        <li><a href="#lifecycle">Lifecycle</a></li>
+        <li><a href="#the-addon-owns-its-macros">The addon owns its macros</a></li>
+        <li><a href="#spell-detection">Spell detection</a></li>
+        <li><a href="#saved-data">Saved data</a></li>
+        <li><a href="#performance">Performance</a></li>
+        <li><a href="#limits">Limits</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ul>
+      <a class="to-top" href="#">Back to top ↑</a>
+    </details>
+  </aside>
 <main>
 <h1 id="how-it-works">How it works</h1>
 <h2 id="lifecycle">Lifecycle</h2>
@@ -76,6 +92,8 @@ comparison per macro.</p>
 <li><strong>Lua errors</strong>: install BugGrabber and BugSack and check what they caught.</li>
 </ul>
 </main>
+</div>
 <footer>mikey-macros documentation. Back to the <a href="../README.md">README</a>.</footer>
+<script src="js/toc.js"></script>
 </body>
 </html>
