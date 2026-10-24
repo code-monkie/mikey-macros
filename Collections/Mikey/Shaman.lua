@@ -5,7 +5,7 @@
 
 local _, ns = ...
 
-ns.classes.SHAMAN = {
+ns.Collection("Mikey").SHAMAN = {
     -- Your nuke target: a mouseover becomes the target.
     { name = "LB", spells = { "Lightning Bolt" }, body = [[
         #showtooltip

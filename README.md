@@ -2,214 +2,94 @@
 
 Per-character class macros that build themselves as you level.
 
-You write each class's macros once, in full, the way you want them at max
-level. The addon creates them all on a new character, then keeps each one
+Write a class's macros once, in full, the way you want them at max level. On
+each new character the addon creates them all, then keeps every macro
 trimmed to the spells that character actually knows. Learn a spell and the
-macros that use it update on their own. No rewriting macros every level, no
-ranks, no broken icons.
+macros that use it update on their own: no rewriting macros every level, no
+ranks, no broken fall-through lines.
 
-Part of a small library of KISS addons built for WoW: Forever. Currently
-developed and tested on retail (12.1.5); the code also handles Classic-based
-clients.
+Part of a small library of KISS addons built for WoW: Forever. Developed and
+tested on Classic Era (1.15.9) and retail (12.1.5).
 
-## How it works
+## Features
 
-- `/mm sync` creates every macro in your class's list as a character-specific
-  macro. Do this once per character.
-- Each macro is written with only the spells you know. Any spell from the
-  macro's `spells` list that you haven't learned is dropped from its `/use`
-  or `/cast` line (or the whole line goes, if nothing on it is known yet).
-  Fall-through lines and `#showtooltip` icons therefore always work.
-- When you learn a spell (or change your main-hand weapon), the macros are
-  rewritten automatically. Changes made during combat wait until it ends.
-- Macros keep their places on your action bars when they are rewritten.
+- **Set up once per character.** One command creates the whole class set, so
+  you can lay out your action bars at level 1.
+- **Always correct for your level.** Unlearned spells are left out of each
+  macro until you train them; macros update automatically (after combat) and
+  keep their places on your bars.
+- **Plain macro text.** Class lists are ordinary macro bodies in Lua files,
+  easy to read and edit, with combined keys, modifiers, stance and form
+  conditions, `/castsequence` and deliberate rank-1 copies all supported.
+- **Collections.** Macro lists belong to a person. Friends can each keep
+  their own set, and every character chooses whose to follow.
 
-**The addon owns these macros.** An edit made in the in-game macro window is
-overwritten the next time a spell is learned. Make permanent changes in the
-data file instead. Renaming a macro in game takes it out of the addon's hands.
+## Quick start
 
-General (account) macros are never touched.
+1. Install: put the `mikey-macros` folder in `Interface\AddOns` and restart
+   the game.
+2. On a character, run `/mm sync`. The macro window opens on the character
+   tab with the class's macros; keys you haven't learned yet show a
+   question mark.
+3. Drag the macros onto your action bars.
+4. Play. Each macro fills in as you train its spells.
+
+To follow someone else's set on a character: `/mm collections` to see what's
+installed, `/mm use <name>`, then `/mm resync`.
 
 ## Commands
 
-| Command | What it does |
+| Command | |
 |---|---|
-| `/mm` | Show the commands. |
-| `/mm list` | Every macro for your class: **have**, **ready** (spell known, macro not created) or **not learned**, plus character slots used. |
-| `/mm sync` | Create all missing macros for your class, then open the macro window on the character tab. Never touches existing ones. |
-| `/mm sync known` | Create only the macros for spells you already know. |
-| `/mm update` | Rewrite every existing macro now (normally automatic). |
-| `/mm clear` | Delete **all** of this character's macros, including hand-made ones. General macros are kept. No confirmation, and the macros come off your bars. |
-| `/mm resync` | `/mm sync` plus `/mm update`: create anything missing and rewrite every macro to match the data file, then open the macro window. Macros stay on your bars. |
+| `/mm list` | Macros for this character's class and their state |
+| `/mm sync` | Create the class set (once per character) |
+| `/mm resync` | Create anything missing and rewrite the rest; nothing leaves your bars |
+| `/mm update` | Rewrite now (normally automatic) |
+| `/mm clear` | Delete this character's collection macros (by name) |
+| `/mm collections` | Installed collections and the one this character follows |
+| `/mm use <name>` | Follow a collection on this character (`default` to go back) |
 
-## Files
+Details, including how `/mm clear` matches names: [Commands](docs/commands.html).
+
+## Included collections
+
+| Collection | Classes |
+|---|---|
+| Mikey | Rogue, Shaman, Hunter, Druid |
+| Ulako | Shaman, Mage |
+
+Classes with no collection aren't supported yet. Adding one is a single file:
+see the [Collections guide](docs/collections-guide.html).
+
+## Documentation
+
+- [Collections guide](docs/collections-guide.html): edit an existing collection,
+  start your own, switch between them, clearing and name collisions, sharing.
+- [Writing macros](docs/writing-macros.html): the macro entry format, trimming
+  rules, combined macros, conventions and limits.
+- [Commands](docs/commands.html): every command in detail.
+- [How it works](docs/how-it-works.html): lifecycle, automatic updates, saved
+  data, limits and troubleshooting.
+- [Roadmap](docs/roadmap.html): planned work and ideas.
+
+## Future development
+
+Planned next:
+
+- **An account-wide default collection**: choose which collection comes first
+  for every class, with `/mm use` still overriding it per character.
+
+Ideas being kept for later (trade-offs in the [Roadmap](docs/roadmap.html)):
+
+- dirty-macro detection, so hand edits in the macro window are respected;
+- an in-game editor that saves overrides on top of a collection;
+- creating each macro only when its first spell is learned.
+
+## Repository layout
 
 ```
-mikey-macros.toc      load order; add new class files here
-Core.lua              spell detection, trimming, commands, auto-refresh
-Classes/<Class>.lua   one macro list per class (the only files you normally edit)
+mikey-macros.toc                  load order; every collection file is listed here
+Core.lua                          spell detection, trimming, collections, commands
+Collections/<Owner>/<Class>.lua   one person's macro list for one class
+docs/                             guides
 ```
-
-## Changing macros
-
-1. Open `Classes/<Class>.lua` and edit the macro's `body`.
-2. In game, `/reload`. Existing macros update automatically within a second
-   (or run `/mm update`).
-
-After adding macros or changing several, `/mm resync` brings a character fully
-up to date without moving anything off your bars.
-
-Renaming a macro (`name`) creates a new one on the next `/mm sync`; the old
-one is left behind for you to delete. To start completely clean, `/mm clear`
-then `/mm sync` (everything comes off your bars).
-
-## Adding a macro
-
-Add an entry to the class list:
-
-```lua
-{ name = "Kick", spells = { "Kick" }, body = [[
-    #showtooltip
-    /use [@mouseover,harm,nodead,nostealth] [nostealth] Kick
-]] },
-```
-
-- **name**: up to 16 characters, unique within the class.
-- **spells**: every spell the body uses that the character has to learn.
-  These are the names the addon trims out until known. Anything not listed
-  (items, other commands) is left alone.
-- **body**: the full macro, written as you'd type it. Indentation and blank
-  lines at the start and end are stripped. Keep it under 255 characters.
-
-The list's order is the order macros are created in. Then `/reload` and
-`/mm resync` on each character that should get it.
-
-### Combined macros
-
-One key can cover several spells. List them all in `spells`; each clause is
-trimmed on its own:
-
-```lua
-{ name = "Bleed", spells = { "Garrote", "Rupture" }, body = [[
-    #showtooltip
-    /use [stealth] Garrote; Rupture
-    /startattack [nostealth]
-]] },
-```
-
-With modifiers, a clause for an unlearned spell falls through to the next
-one (Ctrl+Imbue gives Rockbiter until Frostbrand is learned).
-
-### Trimming rules
-
-- `/use`, `/cast` and `/castsequence` lines are trimmed (unknown spells drop
-  out of a sequence). `#showtooltip Spell` naming an unknown spell becomes a
-  bare `#showtooltip`.
-- A line is split into clauses at `;`. A clause's spell is the text after its
-  last `]`, ignoring a leading `!`. If that spell is in `spells` and not
-  known, the clause is dropped; if no clause is left, the line is dropped.
-- Spells are matched by name, so ranks don't matter. A deliberate low-rank
-  copy such as `Earth Shock(Rank 1)` (a cheap interrupt) counts as Earth Shock:
-  list `"Earth Shock"` in `spells`.
-- Other lines (`#showtooltip`, `/startattack`, `/dismount`, `/target`, ...)
-  always stay.
-
-### Built bodies
-
-A `body` can also be a function that returns the macro text. It's called with
-a context table:
-
-- `c.knows("Spell Name")`: whether the spell is known.
-- `c.dagger`: whether a dagger is in the main hand.
-
-```lua
-{ name = "Example", spells = { "Backstab", "Sinister Strike" }, body = function(c)
-    local strike = c.dagger and "Backstab" or "Sinister Strike"
-    return "#showtooltip\n/use " .. strike
-end },
-```
-
-The result is still trimmed like any other body. Plain text bodies are
-preferred; use a function only when the text depends on more than known spells.
-
-## Adding a class
-
-1. Create `Classes/<Class>.lua`:
-
-   ```lua
-   local _, ns = ...
-
-   ns.classes.MAGE = {
-       { name = "Fireball", spells = { "Fireball" }, body = [[
-           #showtooltip
-           /use [@mouseover,harm,nodead] [] Fireball
-       ]] },
-   }
-   ```
-
-   The key is the game's class token: `WARRIOR`, `PALADIN`, `HUNTER`,
-   `ROGUE`, `PRIEST`, `SHAMAN`, `MAGE`, `WARLOCK`, `DRUID` (retail also
-   `DEATHKNIGHT`, `MONK`, `DEMONHUNTER`, `EVOKER`).
-
-2. Add the file to `mikey-macros.toc` under the other classes:
-
-   ```
-   Classes\Mage.lua
-   ```
-
-3. `/reload` (a new file needs a full restart of the game the first time),
-   then `/mm list` and `/mm sync` on a character of that class.
-
-## Conventions
-
-These keep the class lists consistent:
-
-- `#showtooltip` and the question-mark icon on every macro, so the live spell
-  icon shows.
-- `/use`, never `/cast` (same for spells, and `/use` also takes items and slots).
-  `/castsequence` is the exception; it has no `/use` form.
-- No spell ranks, except a deliberate low-rank copy (`Spell(Rank 1)`).
-- Mouseover with fallback for things you aim: `[@mouseover,harm,nodead] []`
-  for harmful spells, `[@mouseover,help,nodead] []` for friendly ones
-  (`[@player]` as the fallback for self-buffs and cures).
-- No mouseover on melee abilities you spam; they act on your target.
-- `/startattack` on damage; `/startattack [nostealth]` for stealth openers;
-  `/stopattack` and/or `/stopcasting` for crowd control.
-- `!` on toggles (`!Stealth`, `!Ghost Wolf`) so a second press doesn't cancel.
-- Modifiers mean the same thing across a class (shaman: Shift = fire,
-  Ctrl = frost, Alt = the fourth option).
-
-## Limits
-
-- Character macros: 30 per character on Classic Era and retail. WoW: Forever
-  is likely the same but not yet confirmed (`/dump MAX_CHARACTER_MACROS`).
-  `/mm sync` reports anything that didn't fit.
-- 255 characters per macro body; `/mm sync` skips and reports longer ones.
-- Macros can't be created or changed in combat; the addon waits for combat to
-  end.
-
-## Troubleshooting
-
-- **A key shows "?"**: you don't know any of its spells yet. Expected.
-- **A macro didn't update after training**: `/mm update`. If it still hasn't,
-  check the spell's name in `spells` matches the spellbook exactly.
-- **Lua errors**: install BugGrabber and BugSack.
-
-## Ideas (not planned yet)
-
-Kept here for later; each has trade-offs that weren't worth it yet.
-
-- **Dirty macros.** Remember, per character, the body last written to each
-  macro. If the macro in game no longer matches, it was edited by hand: mark
-  it dirty and stop overwriting it. `/mm list` would show it as edited, with
-  `/mm diff <name>`, `/mm revert <name>` and `/mm export <name>` (a
-  ready-to-paste class file entry). Blizzard's macro window becomes the
-  editor. Trade-off: an in-game edit is the trimmed version, so a dirty macro
-  stops gaining spells as you learn them, and it needs SavedVariables.
-- **In-game editor.** A window to edit a class's macro list. Addons can't
-  write files, so edits would be saved as account-wide overrides layered over
-  the class file, with an Export button to fold them back into the file.
-  Trade-off: two places a macro can live, and a much bigger addon.
-- **Create on learn.** Instead of creating every macro up front, create each
-  one the moment its first spell is learned. No "?" keys, but each new macro
-  still has to be dragged onto a bar mid-level.

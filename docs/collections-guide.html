@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Collections guide · mikey-macros</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="with-toc">
+<header class="site">
+  <div class="site-inner">
+    <a class="brand" href="../README.md">mikey-macros</a>
+    <nav aria-label="Guides">
+      <a href="collections-guide.html" aria-current="page">Collections</a>
+      <a href="writing-macros.html">Writing macros</a>
+      <a href="commands.html">Commands</a>
+      <a href="how-it-works.html">How it works</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+  </div>
+</header>
+<div class="layout">
+  <aside class="page-toc" aria-label="On this page">
+    <details open>
+      <summary>On this page</summary>
+      <ul>
+        <li><a href="#what-a-collection-is">What a collection is</a></li>
+        <li><a href="#which-collection-a-character-follows">Which collection a character follows</a></li>
+        <li><a href="#editing-an-existing-collection">Editing an existing collection</a>
+          <ul>
+            <li><a href="#change-a-macro">Change a macro</a></li>
+            <li><a href="#add-a-macro">Add a macro</a></li>
+            <li><a href="#remove-a-macro">Remove a macro</a></li>
+            <li><a href="#rename-a-macro">Rename a macro</a></li>
+            <li><a href="#add-a-class-to-a-collection">Add a class to a collection</a></li>
+        </ul></li>
+        <li><a href="#starting-a-new-collection">Starting a new collection</a></li>
+        <li><a href="#switching-collections">Switching collections</a></li>
+        <li><a href="#clearing-macros-and-name-collisions">Clearing macros and name collisions</a></li>
+        <li><a href="#sharing-collections">Sharing collections</a></li>
+        <li><a href="#tips">Tips</a></li>
+      </ul>
+      <a class="to-top" href="#">Back to top ↑</a>
+    </details>
+  </aside>
+<main>
+<h1 id="collections-guide">Collections guide</h1>
+<p>How to edit an existing collection, start a new one, and manage which
+collection each character follows.</p>
+<p>For the macro format itself (fields, trimming, conventions), see
+<a href="writing-macros.html">Writing macros</a>.</p>
+<h2 id="what-a-collection-is">What a collection is</h2>
+<p>A collection is one person's macro lists: a folder under <code>Collections/</code> named
+for its owner, with one file per class they cover.</p>
+<pre><code>Collections/
+  Mikey/   Rogue.lua  Shaman.lua  Hunter.lua  Druid.lua
+  Ulako/   Shaman.lua  Mage.lua</code></pre>
+<p>Each file adds one class to its owner's collection:</p>
+<pre><code class="language-lua">local _, ns = ...
+
+ns.Collection(&quot;Mikey&quot;).ROGUE = {
+    { name = &quot;SS&quot;, spells = { &quot;Sinister Strike&quot; }, body = [[
+        #showtooltip
+        /startattack
+        /use Sinister Strike
+    ]] },
+    -- more macros ...
+}</code></pre>
+<ul>
+<li>The string in <code>ns.Collection("...")</code> is the collection's name. It should
+    match the folder name (a Lua file can't see which folder it's in, so the
+    name has to be written out).</li>
+<li>The key after it (<code>ROGUE</code>) is the game's class token: <code>WARRIOR</code>, <code>PALADIN</code>,
+    <code>HUNTER</code>, <code>ROGUE</code>, <code>PRIEST</code>, <code>SHAMAN</code>, <code>MAGE</code>, <code>WARLOCK</code>, <code>DRUID</code> (retail
+    also <code>DEATHKNIGHT</code>, <code>MONK</code>, <code>DEMONHUNTER</code>, <code>EVOKER</code>).</li>
+<li>A collection doesn't need every class, only the ones its owner plays.</li>
+<li>Every collection file must be listed in <code>mikey-macros.toc</code>, after
+    <code>Core.lua</code>.</li>
+</ul>
+<h2 id="which-collection-a-character-follows">Which collection a character follows</h2>
+<p>Each character follows exactly one collection for its class, picked in this
+order:</p>
+<ol>
+<li>the collection chosen on that character with <code>/mm use &lt;name&gt;</code>, if it has
+    the character's class;</li>
+<li>otherwise Mikey's, if it has the class;</li>
+<li>otherwise the first collection, alphabetically, that has the class;</li>
+<li>otherwise none: the class isn't supported yet, and <code>/mm</code> says so.</li>
+</ol>
+<p>The choice from <code>/mm use</code> is saved per character (<code>MikeyMacrosCharDB</code> in the
+character's SavedVariables). <code>/mm collections</code> lists every collection and
+the classes it covers, and marks the one the current character follows;
+<code>/mm list</code> starts with it too.</p>
+<p>Examples with the collections above:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Character</th>
+<th>Follows</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rogue</td>
+<td>Mikey</td>
+<td>only Mikey has a rogue list</td>
+</tr>
+<tr>
+<td>Mage</td>
+<td>Ulako</td>
+<td>no Mikey mage; Ulako is the only one</td>
+</tr>
+<tr>
+<td>Shaman</td>
+<td>Mikey</td>
+<td>both have one; Mikey is the default</td>
+</tr>
+<tr>
+<td>Shaman after <code>/mm use ulako</code></td>
+<td>Ulako</td>
+<td>chosen on that character</td>
+</tr>
+<tr>
+<td>Priest</td>
+<td>nobody</td>
+<td>no collection has a priest list</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="editing-an-existing-collection">Editing an existing collection</h2>
+<p>All edits happen in the collection's class files, in any text editor. The
+addon reads them at load, so after saving:</p>
+<ul>
+<li><strong>changed an existing file:</strong> <code>/reload</code> in game;</li>
+<li><strong>added a new file:</strong> add it to <code>mikey-macros.toc</code> and restart the game (a
+    new file isn't picked up by <code>/reload</code>).</li>
+</ul>
+<h3 id="change-a-macro">Change a macro</h3>
+<ol>
+<li>Edit the macro's <code>body</code> (or <code>spells</code>) in
+    <code>Collections/&lt;Owner&gt;/&lt;Class&gt;.lua</code>.</li>
+<li><code>/reload</code>. Characters following that collection update within a second.
+    <code>/mm update</code> forces it.</li>
+</ol>
+<h3 id="add-a-macro">Add a macro</h3>
+<ol>
+<li>Add an entry to the class list. The list's order is the order macros are
+    created in.</li>
+<li><code>/reload</code>, then <code>/mm resync</code> on each character that should get it
+    (resync creates what's missing and leaves everything else on your bars).</li>
+</ol>
+<h3 id="remove-a-macro">Remove a macro</h3>
+<ol>
+<li>Delete its entry from the list.</li>
+<li><code>/reload</code>. The addon no longer manages it, so the macro stays on
+    characters that have it. Delete it in the macro window. (<code>/mm clear</code> only
+    removes names that are still in a collection, so it won't find it.)</li>
+</ol>
+<h3 id="rename-a-macro">Rename a macro</h3>
+<p>Renaming (<code>name</code>) is a remove plus an add: <code>/mm resync</code> creates the new name,
+and the old macro is left behind for you to delete in the macro window.</p>
+<h3 id="add-a-class-to-a-collection">Add a class to a collection</h3>
+<ol>
+<li>Create <code>Collections/&lt;Owner&gt;/&lt;Class&gt;.lua</code> (copy another class file and
+    replace its list, or start from the example above).</li>
+<li>
+<p>Add it to <code>mikey-macros.toc</code>:</p>
+<pre><code>Collections\Mikey\Mage.lua</code></pre>
+</li>
+<li>
+<p>Restart the game, then <code>/mm list</code> and <code>/mm sync</code> on a character of that
+    class.</p>
+</li>
+</ol>
+<h2 id="starting-a-new-collection">Starting a new collection</h2>
+<p>The quickest way is to copy an existing class file and make it yours.
+Example: Ulako starting from Mikey's druid.</p>
+<ol>
+<li>Copy <code>Collections/Mikey/Druid.lua</code> to <code>Collections/Ulako/Druid.lua</code>.</li>
+<li>
+<p>Change the owner on its <code>ns.Collection(...)</code> line:</p>
+<pre><code class="language-lua">ns.Collection(&quot;Ulako&quot;).DRUID = {</code></pre>
+</li>
+<li>
+<p>Add the file to <code>mikey-macros.toc</code>:</p>
+<pre><code>Collections\Ulako\Druid.lua</code></pre>
+</li>
+<li>
+<p>Restart the game. On your druid: <code>/mm use ulako</code>, then <code>/mm resync</code>.</p>
+</li>
+<li>From now on, edit <code>Collections/Ulako/Druid.lua</code>. Nobody else's changes
+    touch it.</li>
+</ol>
+<p>Rename the copied macros while you're at it (see
+<a href="#clearing-macros-and-name-collisions">name collisions</a>): Ulako's starter
+shaman prefixes every name with <code>U_</code> (<code>U_LB</code>, <code>U_Shock</code>, ...). Names are at
+most 16 characters.</p>
+<h2 id="switching-collections">Switching collections</h2>
+<ul>
+<li><code>/mm use &lt;name&gt;</code> switches the current character; <code>/mm use default</code> goes
+    back to the default rules. Then <code>/mm resync</code> creates the new collection's
+    macros.</li>
+<li>Switching never deletes anything. The previous collection's macros stay on
+    the character (and your bars) but are no longer managed.</li>
+<li>
+<p>For a clean switch:</p>
+<pre><code>/mm clear
+/mm use ulako
+/mm resync</code></pre>
+<p><code>/mm clear</code> removes macros from <strong>every</strong> collection for the class, so the
+previous collection's macros go too.</p>
+</li>
+</ul>
+<h2 id="clearing-macros-and-name-collisions">Clearing macros and name collisions</h2>
+<p><code>/mm clear</code> deletes this character's macros <strong>by name</strong>: any character macro
+whose name appears in any collection's list for the character's class.</p>
+<ul>
+<li>Shaman example: everything named like Mikey's (<code>LB</code>, <code>Shock</code>, <code>Earth</code>, ...)
+    and Ulako's (<code>U_LB</code>, <code>U_Shock</code>, ...) is deleted; a macro called <code>test</code> is
+    kept.</li>
+<li>General (account) macros are never touched.</li>
+<li>There's no confirmation, and deleted macros come off your action bars.</li>
+</ul>
+<p><strong>Collisions.</strong> Because macros are matched by name:</p>
+<ul>
+<li>a macro you made by hand with the same name as any collection macro for the
+    class is deleted by <code>/mm clear</code> (and adopted by <code>/mm sync</code>/<code>/mm update</code> if
+    it matches the collection you follow);</li>
+<li>two collections using the same name for different macros can't be told
+    apart: switching between them rewrites the macro in place.</li>
+</ul>
+<p>Keep hand-made character macros on names no collection uses, and give each
+collection its own names (a prefix is the easy way).</p>
+<h2 id="sharing-collections">Sharing collections</h2>
+<ul>
+<li>A collection is just its folder, so sharing is copying the folder (plus
+    the <code>.toc</code> lines) or a pull request to the repo.</li>
+<li><strong>Only add collections from people you trust.</strong> A collection file is Lua
+    code and runs in the game like any addon, so read one from a stranger
+    before installing it.</li>
+<li>Updating someone else's collection (a newer copy from its owner, or a
+    <code>git pull</code>) can't conflict with yours as long as you only edit your own
+    folder.</li>
+</ul>
+<h2 id="tips">Tips</h2>
+<ul>
+<li><strong>Customize by starting your own collection</strong>, not by editing someone
+    else's: your changes stay yours, and theirs can be updated freely.</li>
+<li>Keep each class list within the character macro limit (30 on Classic Era
+    and retail; see <a href="how-it-works.html#limits">How it works</a>).</li>
+<li>Use <a href="writing-macros.html">Writing macros</a> for the format, the trimming rules
+    and the shared conventions (mouseover, <code>/startattack</code>, modifiers).</li>
+</ul>
+</main>
+</div>
+<footer>mikey-macros documentation. Back to the <a href="../README.md">README</a>.</footer>
+<script src="js/toc.js"></script>
+</body>
+</html>

@@ -6,7 +6,7 @@
 
 local _, ns = ...
 
-ns.classes.HUNTER = {
+ns.Collection("Mikey").HUNTER = {
     { name = "AS", spells = { "Auto Shot" }, body = [[
         #showtooltip
         /startattack

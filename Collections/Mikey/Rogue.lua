@@ -4,7 +4,7 @@
 
 local _, ns = ...
 
-ns.classes.ROGUE = {
+ns.Collection("Mikey").ROGUE = {
     { name = "Stealth", spells = { "Stealth", "Pick Pocket" }, body = [[
         #showtooltip
         /dismount [mounted]
