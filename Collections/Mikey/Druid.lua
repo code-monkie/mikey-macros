@@ -29,16 +29,6 @@ ns.Collection("Mikey").DRUID = {
         /use [mod:shift,@mouseover,help,nodead] [mod:shift] Healing Touch(Rank 2); [@mouseover,help,nodead] [] Healing Touch
     ]] },
 
-    { name = "Rejuv", spells = { "Rejuvenation" }, body = [[
-        #showtooltip
-        /use [@mouseover,help,nodead] [] Rejuvenation
-    ]] },
-
-    { name = "Regrowth", spells = { "Regrowth" }, body = [[
-        #showtooltip
-        /use [@mouseover,help,nodead] [] Regrowth
-    ]] },
-
     -- Mark of the Wild; Shift Thorns. Mouseover friend, else target.
     { name = "Buff", spells = { "Mark of the Wild", "Thorns" }, body = [[
         #showtooltip
@@ -49,27 +39,6 @@ ns.Collection("Mikey").DRUID = {
     { name = "Roots", spells = { "Entangling Roots", "Hibernate" }, body = [[
         #showtooltip
         /use [mod:shift,@mouseover,harm,nodead] [mod:shift] Hibernate; [@mouseover,harm,nodead] [] Entangling Roots
-    ]] },
-
-    { name = "FF", spells = { "Faerie Fire" }, body = [[
-        #showtooltip
-        /use [@mouseover,harm,nodead] [] Faerie Fire
-    ]] },
-
-    { name = "Grasp", spells = { "Nature's Grasp" }, body = [[
-        #showtooltip
-        /use Nature's Grasp
-    ]] },
-
-    { name = "Cure", spells = { "Cure Poison" }, body = [[
-        #showtooltip
-        /use [@mouseover,help,nodead] [@player] Cure Poison
-    ]] },
-
-    -- Rebirth in combat, Revive out of combat. Dead mouseover, else target.
-    { name = "Rez", spells = { "Rebirth", "Revive" }, body = [[
-        #showtooltip
-        /use [combat,@mouseover,help,dead] [combat] Rebirth; [@mouseover,help,dead] [] Revive
     ]] },
 
     -- Bear ---------------------------------------------------------------------

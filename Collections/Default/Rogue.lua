@@ -22,11 +22,12 @@ ns.Collection("Default").ROGUE = {
         /stopattack
         /use [@mouseover,harm,nodead] [] Blind
     ]] },
-    -- Stealth; Pick Pocket once you're in stealth.
+    -- Off the mount and into Stealth; Pick Pocket (mouseover, else target) once you're in stealth.
     { name = "Stealth", spells = { "Stealth", "Pick Pocket" }, body = [[
         #showtooltip
+        /dismount [mounted]
         /stopattack
-        /use [stealth] Pick Pocket; !Stealth
+        /use [stealth,@mouseover,harm,nodead] [stealth] Pick Pocket; !Stealth
     ]] },
     { name = "Vanish", spells = { "Vanish" }, body = [[
         #showtooltip

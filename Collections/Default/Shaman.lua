@@ -7,6 +7,11 @@
 local _, ns = ...
 
 ns.Collection("Default").SHAMAN = {
+    -- Not while mounted.
+    { name = "Ghost Wolf", spells = { "Ghost Wolf" }, body = [[
+        #showtooltip
+        /use [nomounted] !Ghost Wolf
+    ]] },
     -- Dead friend under the mouse, else your dead target.
     { name = "Res", spells = { "Ancestral Spirit" }, body = [[
         #showtooltip

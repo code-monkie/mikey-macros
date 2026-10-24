@@ -8,8 +8,10 @@
 local _, ns = ...
 -- Collections: whose macro lists. Each Collections\<Owner>\<Class>.lua file adds a
 -- class to its owner's collection with ns.Collection("<Owner>").<CLASS> = { ... }.
--- New characters start on the Default collection (Collections\Default: the
--- exceptions to auto mode's generated macros); /mm use <name> picks another.
+-- The Default collection (Collections\Default) holds the exceptions to auto
+-- mode's generated macros and applies under every collection: the followed
+-- collection wins where it has a macro for the spell. New characters start on
+-- Default; /mm use <name> picks another.
 local DEFAULT = "Default"
 local PREFERRED = "Mikey" -- only used to adopt characters set up before opting in existed
 ns.collections = {}
@@ -212,6 +214,30 @@ local function ActiveList()
     if owner then return ns.collections[owner][class], owner end
 end
 
+-- The Default collection's macros this character gets on top of the collection
+-- it follows (on Default, ActiveList already has them): each one whose spells
+-- and name the followed collection doesn't already have.
+local function DefaultList()
+    local _, class = UnitClass("player")
+    local defaults = ns.collections[DEFAULT] and ns.collections[DEFAULT][class]
+    local list, owner = ActiveList()
+    if not defaults or owner == DEFAULT then return {} end
+    local taken = {}
+    for _, def in ipairs(list or {}) do
+        taken[def.name] = true
+        for _, spell in ipairs(def.spells) do taken[spell:lower()] = true end
+    end
+    local out = {}
+    for _, def in ipairs(defaults) do
+        local free = not taken[def.name]
+        for _, spell in ipairs(def.spells) do
+            if taken[spell:lower()] then free = false end
+        end
+        if free then out[#out + 1] = def end
+    end
+    return out
+end
+
 local function ClassList()
     local list, owner = ActiveList()
     if not list then
@@ -284,19 +310,22 @@ end
 -- force rewrites every macro.
 local function Refresh(force)
     local list = ActiveList()
-    if not list or InCombatLockdown() then return {} end
+    local extra = DefaultList() -- the Default collection's macros under another collection
+    if (not list and #extra == 0) or InCombatLockdown() then return {} end
     local ctx = Context(KnownSpells())
     local have = CharacterMacros()
     local updated = {}
-    for _, def in ipairs(list) do
-        local index = have[def.name]
-        if index then
-            local body = Clean(def, ctx)
-            if #body <= MAX_BODY then
-                local _, _, current = GetMacroInfo(index)
-                if force or current ~= body then
-                    EditMacro(index, def.name, ICON, body)
-                    updated[#updated + 1] = def.name
+    for _, defs in ipairs({ list or {}, extra }) do
+        for _, def in ipairs(defs) do
+            local index = have[def.name]
+            if index then
+                local body = Clean(def, ctx)
+                if #body <= MAX_BODY then
+                    local _, _, current = GetMacroInfo(index)
+                    if force or current ~= body then
+                        EditMacro(index, def.name, ICON, body)
+                        updated[#updated + 1] = def.name
+                    end
                 end
             end
         end
@@ -317,8 +346,8 @@ end
 -- Auto mode ---------------------------------------------------------------------
 -- With /mm auto on, every class spell this character learns from then on gets a
 -- generated character macro (see AutoBody), unless the collection it follows
--- already has a macro for that spell. On the Default collection, that
--- collection's macro is made instead. Spells are matched by name, so
+-- already has a macro for that spell. If the Default collection has one (and
+-- the followed collection doesn't), Default's macro is made instead. Spells are matched by name, so
 -- only a new spell (rank 1 or unranked) counts, never a higher rank. These
 -- macros are yours: the addon never rewrites or clears them.
 
@@ -390,6 +419,9 @@ local function SpellFacts(spell)
         harmful = harmful and true or false,
         helpful = helpful and true or false,
         ranged = (maxRange or 0) > 6, -- melee reach is 5 yards
+        -- only ever lands on your pet or demon (Mend Pet, Health Funnel, Dark Pact)
+        petOnly = desc:find("your pet") ~= nil or desc:find("caster's pet") ~= nil
+            or desc:find("summoned demon") ~= nil,
         -- a second press shouldn't switch it off: stances, forms, stealth, aspects,
         -- seals, auras, auto-repeat shots
         toggle = repeating and true or subtext:find("shapeshift") ~= nil
@@ -404,15 +436,17 @@ end
 --   harmful        -> /startattack first
 --   ranged harmful -> [@mouseover,harm,nodead] [] (mouseover, else target)
 --   ranged helpful -> [@mouseover,help,nodead] []
+--   pet-only       -> no mouseover (the spell picks your pet itself)
 --   toggles        -> ! so a second press doesn't cancel it
 local function AutoBody(spell)
     local f = SpellFacts(spell)
     local body = "#showtooltip\n"
     if f.harmful then body = body .. "/startattack\n" end
     local target = ""
-    if f.ranged and f.harmful then
+    local ranged = f.ranged and not f.petOnly
+    if ranged and f.harmful then
         target = "[@mouseover,harm,nodead] [] "
-    elseif f.ranged and f.helpful then
+    elseif ranged and f.helpful then
         target = "[@mouseover,help,nodead] [] "
     end
     return body .. "/use " .. target .. (f.toggle and "!" or "") .. spell
@@ -445,13 +479,11 @@ local function AutoCreate()
     end
     local known = db.autoKnown
     local covered = CoveredSpells()
-    -- On the Default collection, its macro for a spell is made when you learn it.
+    -- The Default collection's macro for a spell is made when you learn it.
     local defaults, ctx = {}, nil
     local list, owner = ActiveList()
-    if owner == DEFAULT then
-        for _, def in ipairs(list) do
-            for _, spell in ipairs(def.spells) do defaults[spell:lower()] = def end
-        end
+    for _, def in ipairs(owner == DEFAULT and list or DefaultList()) do
+        for _, spell in ipairs(def.spells) do defaults[spell:lower()] = def end
     end
     local _, class = UnitClass("player")
     local excluded = ns.excluded[class] or {}
@@ -473,8 +505,10 @@ local function AutoCreate()
     for _, spell in ipairs(spellsInOrder) do
         known[spell:lower()] = true -- remembered either way, so it's only ever handled once
         local def = defaults[spell:lower()]
-        if def and not have[def.name] then
-            if count >= CharacterMax() then
+        if def then
+            if have[def.name] then
+                -- already made (for another of its spells); Refresh keeps it current
+            elseif count >= CharacterMax() then
                 full[#full + 1] = spell
             else
                 ctx = ctx or Context(KnownSpells())
@@ -557,6 +591,31 @@ local function Adopt()
     end
 end
 
+-- A spell shouldn't be both excluded and part of a macro this character
+-- follows (its collection's, or Default's under it). Said once per session in
+-- chat, so the data files can be fixed.
+local conflictsChecked = false
+local function CheckConflicts()
+    if conflictsChecked then return end
+    conflictsChecked = true
+    local _, class = UnitClass("player")
+    local excluded = ns.excluded[class]
+    if not excluded then return end
+    local function check(defs, owner)
+        for _, def in ipairs(defs) do
+            for _, spell in ipairs(def.spells) do
+                if excluded[spell:lower()] then
+                    Print("|cffff6060conflict|r: " .. spell .. " is excluded but is in "
+                        .. owner .. "'s " .. def.name .. " macro.")
+                end
+            end
+        end
+    end
+    local list, owner = ActiveList()
+    if list then check(list, owner) end
+    check(DefaultList(), DEFAULT)
+end
+
 -- Keep macros current as spells (and the main-hand weapon) change.
 -- Changes wait until combat ends.
 local pending = false
@@ -568,6 +627,7 @@ local function Schedule()
         if InCombatLockdown() then return end -- PLAYER_REGEN_ENABLED retries
         pending = false
         Adopt()
+        CheckConflicts()
         Refresh()
         AutoCreate()
     end)

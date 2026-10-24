@@ -45,12 +45,6 @@ ns.Collection("Mikey").HUNTER = {
         /petassist [pet,nogroup]
     ]] },
 
-    { name = "Conc", spells = { "Concussive Shot" }, body = [[
-        #showtooltip
-        /startattack
-        /use [@mouseover,harm,nodead] [] Concussive Shot
-    ]] },
-
     { name = "Multi", spells = { "Multi-Shot" }, body = [[
         #showtooltip
         /startattack
@@ -89,11 +83,6 @@ ns.Collection("Mikey").HUNTER = {
         /petassist [pet,nogroup]
     ]] },
 
-    { name = "Wing Clip", spells = { "Wing Clip" }, body = [[
-        #showtooltip
-        /use Wing Clip
-    ]] },
-
     -- Hawk and Cheetah in turn; Shift Monkey; Ctrl Pack.
     { name = "Aspect", spells = { "Aspect of the Hawk", "Aspect of the Cheetah", "Aspect of the Monkey", "Aspect of the Pack" }, body = [[
         #showtooltip
@@ -107,42 +96,11 @@ ns.Collection("Mikey").HUNTER = {
         /use [mod:alt] Explosive Trap; [mod:ctrl] Frost Trap; [mod:shift] Immolation Trap; Freezing Trap
     ]] },
 
-    -- Calls the pet if it's out, then sends it in. Shift dismisses it.
-    { name = "Pet", spells = { "Call Pet", "Dismiss Pet" }, body = [[
-        #showtooltip
-        /use [mod:shift,pet] Dismiss Pet; [nopet] Call Pet
-        /petattack [nomod,pet]
-        /petdefensive [nomod,pet,group]
-        /petassist [nomod,pet,nogroup]
-    ]] },
-
     { name = "Pet Stop", spells = {}, body = [[
         #showtooltip Pet Passive
         /petpassive
         /petfollow
         /petstopattack
-    ]] },
-
-    -- Revive a missing or dead pet, otherwise Mend Pet.
-    { name = "Mend", spells = { "Revive Pet", "Mend Pet" }, body = [[
-        #showtooltip
-        /use [nopet] [@pet,dead] Revive Pet
-        /use Mend Pet
-    ]] },
-
-    { name = "Tame", spells = { "Beast Training", "Tame Beast" }, body = [[
-        #showtooltip
-        /use [pet] Beast Training; Tame Beast
-    ]] },
-
-    { name = "DS", spells = { "Distracting Shot" }, body = [[
-        #showtooltip
-        /use [@mouseover,harm,nodead] [] Distracting Shot
-    ]] },
-
-    { name = "Scare", spells = { "Scare Beast" }, body = [[
-        #showtooltip
-        /use [@mouseover,harm,nodead] [] Scare Beast
     ]] },
 
     -- Cooldowns together (Bestial Wrath is a talent).

@@ -21,30 +21,10 @@ ns.Collection("Mikey").SHAMAN = {
         /use [mod:ctrl,@mouseover,harm,nodead] [mod:ctrl] Frost Shock; [mod:shift,@mouseover,harm,nodead] [mod:shift] Flame Shock; [@mouseover,harm,nodead] [] Earth Shock
     ]] },
 
-    { name = "Purge", spells = { "Purge" }, body = [[
-        #showtooltip
-        /use [@mouseover,harm,nodead] [] Purge
-    ]] },
-
-    { name = "HW", spells = { "Healing Wave" }, body = [[
-        #showtooltip
-        /use [@mouseover,help,nodead] [] Healing Wave
-    ]] },
-
-    { name = "LHW", spells = { "Lesser Healing Wave" }, body = [[
-        #showtooltip
-        /use [@mouseover,help,nodead] [] Lesser Healing Wave
-    ]] },
-
     -- Poison; Shift Disease. Mouseover friend, else you.
     { name = "Cure", spells = { "Cure Poison", "Cure Disease" }, body = [[
         #showtooltip
         /use [mod:shift,@mouseover,help,nodead] [mod:shift,@player] Cure Disease; [@mouseover,help,nodead] [@player] Cure Poison
-    ]] },
-
-    { name = "LS", spells = { "Lightning Shield" }, body = [[
-        #showtooltip
-        /use Lightning Shield
     ]] },
 
     -- Rockbiter; Shift Flametongue; Ctrl Frostbrand; Alt Windfury.
@@ -75,17 +55,5 @@ ns.Collection("Mikey").SHAMAN = {
     { name = "Call", spells = { "Call of the Elements", "Totemic Recall", "Call of the Ancestors", "Call of the Spirits" }, body = [[
         #showtooltip
         /use [mod:alt] Call of the Spirits; [mod:ctrl] Call of the Ancestors; [mod:shift] Totemic Recall; Call of the Elements
-    ]] },
-
-    { name = "Wolf", spells = { "Ghost Wolf" }, body = [[
-        #showtooltip
-        /dismount [mounted]
-        /use !Ghost Wolf
-    ]] },
-
-    -- Mouseover a dead friend, else your target.
-    { name = "Rez", spells = { "Ancestral Spirit" }, body = [[
-        #showtooltip
-        /use [@mouseover,help,dead] [] Ancestral Spirit
     ]] },
 }

@@ -5,19 +5,6 @@
 local _, ns = ...
 
 ns.Collection("Mikey").ROGUE = {
-    { name = "Stealth", spells = { "Stealth", "Pick Pocket" }, body = [[
-        #showtooltip
-        /dismount [mounted]
-        /stopattack
-        /use [nostealth] !Stealth; [@mouseover,harm,nodead] [harm,nodead] Pick Pocket
-    ]] },
-
-    { name = "SS", spells = { "Sinister Strike" }, body = [[
-        #showtooltip
-        /startattack
-        /use Sinister Strike
-    ]] },
-
     -- Ambush from stealth, Backstab otherwise.
     { name = "BS", spells = { "Backstab", "Ambush" }, body = [[
         #showtooltip
@@ -29,16 +16,6 @@ ns.Collection("Mikey").ROGUE = {
         #showtooltip
         /use [stealth] Garrote; Rupture
         /startattack [nostealth]
-    ]] },
-
-    { name = "Eviscerate", spells = { "Eviscerate" }, body = [[
-        #showtooltip
-        /use Eviscerate
-    ]] },
-
-    { name = "SnD", spells = { "Slice and Dice" }, body = [[
-        #showtooltip
-        /use Slice and Dice
     ]] },
 
     -- Sap from stealth, Gouge in combat.
@@ -54,26 +31,10 @@ ns.Collection("Mikey").ROGUE = {
         /use [@mouseover,harm,nodead,nostealth] [nostealth] Kick
     ]] },
 
-    { name = "Evasion", spells = { "Evasion" }, body = [[
-        #showtooltip
-        /use Evasion
-    ]] },
-
-    { name = "Sprint", spells = { "Sprint" }, body = [[
-        #showtooltip
-        /use Sprint
-    ]] },
-
     -- Later levels.
     { name = "Vanish", spells = { "Vanish" }, body = [[
         #showtooltip Vanish
         /use [nostealth,combat] Vanish; [nostealth,nocombat] Stealth
-    ]] },
-
-    { name = "Blind", spells = { "Blind" }, body = [[
-        #showtooltip
-        /stopattack
-        /use [@mouseover,harm,nodead] [] Blind
     ]] },
 
     { name = "CS", spells = { "Cheap Shot" }, body = [[
