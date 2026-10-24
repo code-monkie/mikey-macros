@@ -38,7 +38,7 @@ General (account) macros are never touched.
 | `/mm list` | Every macro for your class: **have**, **ready** (spell known, macro not created) or **not learned**, plus character slots used. |
 | `/mm sync` | Create all missing macros for your class. Never touches existing ones. |
 | `/mm sync known` | Create only the macros for spells you already know. |
-| `/mm update` | Rewrite every existing macro now, icons included (normally automatic). |
+| `/mm update` | Rewrite every existing macro now (normally automatic). |
 | `/mm clear` | Delete **all** of this character's macros, including hand-made ones. General macros are kept. No confirmation, and the macros come off your bars. |
 | `/mm resync` | `/mm sync` plus `/mm update`: create anything missing and rewrite every macro to match the data file. Macros stay on your bars. |
 
@@ -78,11 +78,6 @@ Add an entry to the class list:
 - **spells**: every spell the body uses that the character has to learn.
   These are the names the addon trims out until known. Anything not listed
   (items, other commands) is left alone.
-- **icon** (optional): a spell ID. While the live macro has no `/use`,
-  `/cast` or `/castsequence` line at all (you don't know any of its spells
-  yet), its icon is this spell's picture. Once a spell line is in, the icon is
-  the question mark and `#showtooltip` shows the live spell. Rank 1's ID is
-  fine.
 - **body**: the full macro, written as you'd type it. Indentation and blank
   lines at the start and end are stripped. Keep it under 255 characters.
 
@@ -195,8 +190,7 @@ These keep the class lists consistent:
 
 ## Troubleshooting
 
-- **A key shows "?"**: you don't know any of its spells yet and it has no
-  `icon`, or the icon's spell ID wasn't found on this client.
+- **A key shows "?"**: you don't know any of its spells yet. Expected.
 - **A macro didn't update after training**: `/mm update`. If it still hasn't,
   check the spell's name in `spells` matches the spellbook exactly.
 - **Lua errors**: install BugGrabber and BugSack.

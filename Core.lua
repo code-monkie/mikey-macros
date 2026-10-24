@@ -9,21 +9,6 @@ local _, ns = ...
 ns.classes = {}
 
 local ICON = 134400 -- question mark; #showtooltip supplies the real icon
-
--- The macro's own icon. While the live macro has no /use, /cast or
--- /castsequence line at all (none of its spells known yet), it's the picture of
--- def.icon (a spell ID). Otherwise "?", so #showtooltip decides.
-local function IconFor(def, body)
-    if not def.icon then return ICON end
-    for line in (body .. "\n"):gmatch("(.-)\n") do
-        local cmd = line:match("^(/%a+)")
-        cmd = cmd and cmd:lower()
-        if cmd == "/use" or cmd == "/cast" or cmd == "/castsequence" then return ICON end
-    end
-    local get = (C_Spell and C_Spell.GetSpellTexture) or GetSpellTexture
-    local ok, tex = pcall(get, def.icon)
-    return (ok and tex) or ICON
-end
 local MAX_BODY = 255
 
 local function Print(...)
@@ -208,7 +193,7 @@ local function Sync(onlyKnown)
             elseif count >= CharacterMax() then
                 full[#full + 1] = def.name
             else
-                CreateMacro(def.name, IconFor(def, body), body, true)
+                CreateMacro(def.name, ICON, body, true)
                 count = count + 1
                 created[#created + 1] = def.name
             end
@@ -229,7 +214,7 @@ end
 
 -- Rewrite existing macros to match the data file and the spells you know
 -- (keeps their action bar spots). Normally only changed bodies are rewritten;
--- force rewrites every macro (also resetting its icon).
+-- force rewrites every macro.
 local function Refresh(force)
     local _, class = UnitClass("player")
     local list = ns.classes[class]
@@ -244,7 +229,7 @@ local function Refresh(force)
             if #body <= MAX_BODY then
                 local _, _, current = GetMacroInfo(index)
                 if force or current ~= body then
-                    EditMacro(index, def.name, IconFor(def, body), body)
+                    EditMacro(index, def.name, ICON, body)
                     updated[#updated + 1] = def.name
                 end
             end
