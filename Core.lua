@@ -117,7 +117,8 @@ end
 
 -- Drop every clause (or whole /use, /cast or /castsequence line) naming one of
 -- the macro's spells that isn't known yet. In a /castsequence, unknown spells
--- are dropped from the sequence. Anything not in def.spells is left alone.
+-- are dropped from the sequence; a "#showtooltip Spell" for an unknown spell
+-- becomes a bare #showtooltip. Anything not in def.spells is left alone.
 local function KnownOnly(body, def, ctx)
     local tracked = {}
     for _, spell in ipairs(def.spells) do tracked[spell:lower()] = true end
@@ -127,6 +128,9 @@ local function KnownOnly(body, def, ctx)
     end
     local out = {}
     for line in (body .. "\n"):gmatch("(.-)\n") do
+        -- "#showtooltip Spell" naming a spell you don't know yet: bare #showtooltip
+        local tip, arg = line:match("^(#[Ss][Hh][Oo][Ww][Tt][Oo][Oo][Ll][Tt][Ii][Pp])%s+(.-)%s*$")
+        if tip and arg ~= "" and not keep(arg) then line = tip end
         local cmd, rest = line:match("^(/%a+)%s+(.*)$")
         local lower = cmd and cmd:lower()
         if lower == "/use" or lower == "/cast" or lower == "/castsequence" then

@@ -107,7 +107,9 @@ one (Ctrl+Imbue gives Rockbiter until Frostbrand is learned).
 
 ### Trimming rules
 
-- Only `/use` and `/cast` lines are trimmed.
+- `/use`, `/cast` and `/castsequence` lines are trimmed (unknown spells drop
+  out of a sequence). `#showtooltip Spell` naming an unknown spell becomes a
+  bare `#showtooltip`.
 - A line is split into clauses at `;`. A clause's spell is the text after its
   last `]`, ignoring a leading `!`. If that spell is in `spells` and not
   known, the clause is dropped; if no clause is left, the line is dropped.
