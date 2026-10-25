@@ -29,10 +29,12 @@ ns.Collection("Default").ROGUE = {
         /stopattack
         /use [stealth,@mouseover,harm,nodead] [stealth] Pick Pocket; !Stealth
     ]] },
+    -- Vanish in combat; out of combat it's Stealth, so a Vanish is never wasted.
+    -- The icon and cooldown always show Vanish.
     { name = "Vanish", spells = { "Vanish" }, body = [[
-        #showtooltip
+        #showtooltip Vanish
         /stopattack
-        /use Vanish
+        /use [nostealth,combat] Vanish; [nostealth,nocombat] Stealth
     ]] },
     -- Lands where the mouse points.
     { name = "Distract", spells = { "Distract" }, body = [[

@@ -1,6 +1,7 @@
 -- Rogue macros. Write each body in full; spells listed in `spells` are left
 -- out of the live macro until you know them. Names must be unique and at most
 -- 16 characters; bodies at most 255.
+-- Stealth, Vanish, Blind and Distract come from the Default collection.
 
 local _, ns = ...
 
@@ -32,11 +33,6 @@ ns.Collection("Mikey").ROGUE = {
     ]] },
 
     -- Later levels.
-    { name = "Vanish", spells = { "Vanish" }, body = [[
-        #showtooltip Vanish
-        /use [nostealth,combat] Vanish; [nostealth,nocombat] Stealth
-    ]] },
-
     { name = "CS", spells = { "Cheap Shot" }, body = [[
         #showtooltip
         /use [@mouseover,harm,nodead] [] Cheap Shot
