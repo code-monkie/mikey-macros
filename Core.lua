@@ -366,7 +366,8 @@ end
 -- What the game says about a spell, on classic-based and retail clients alike.
 local function SpellFacts(spell)
     local id, maxRange, harmful, helpful, repeating, desc, subtext
-    if C_Spell and C_Spell.GetSpellInfo then -- retail
+    -- Classic clients first: their C_Spell.GetSpellInfo swaps minRange and maxRange.
+    if not GetSpellInfo and C_Spell and C_Spell.GetSpellInfo then -- retail
         local info = C_Spell.GetSpellInfo(spell)
         if not info then return {} end
         id, maxRange = info.spellID, info.maxRange
@@ -421,6 +422,33 @@ local function AutoBody(spell)
     return body .. "/use " .. target .. (f.toggle and "!" or "") .. spell
 end
 
+-- Put each new macro on the action buttons holding the spell it was made for
+-- (the starting spells at level 1; on retail, spells the game places as you
+-- learn them). Empty buttons are never filled. Out of combat, empty cursor only.
+-- Returns the names of the macros it placed.
+local function SwapIntoBars(made)
+    local placed = {}
+    if #made == 0 or InCombatLockdown() or GetCursorInfo() then return placed end
+    local bySpell = {}
+    for _, m in ipairs(made) do bySpell[m.spell:lower()] = m.name end
+    for slot = 1, 180 do
+        local kind, id = GetActionInfo(slot)
+        if kind == "spell" and id then
+            local spell = (C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id))
+                or (GetSpellInfo and GetSpellInfo(id))
+            local macro = spell and bySpell[spell:lower()]
+            local index = macro and GetMacroIndexByName(macro)
+            if index and index > 0 then
+                PickupMacro(index)
+                PlaceAction(slot) -- the spell comes back on the cursor
+                ClearCursor()
+                placed[macro] = true
+            end
+        end
+    end
+    return placed
+end
+
 local function AutoCreate()
     local db = CharDB()
     if db.auto == false or InCombatLockdown() then return end -- on unless switched off
@@ -448,6 +476,7 @@ local function AutoCreate()
     local excluded = ns.excluded[class] or {}
     local have, count = CharacterMacros()
     local created, full, skipped = {}, {}, {}
+    local made = {} -- { name = macro, spell = the spell just learned }, for SwapIntoBars
     local spellsInOrder = {}
     for low, name in pairs(current) do
         if not known[low] then
@@ -475,6 +504,7 @@ local function AutoCreate()
                 have[def.name] = true
                 count = count + 1
                 created[#created + 1] = def.name
+                made[#made + 1] = { name = def.name, spell = spell }
             end
         else
             local name = AutoName(spell)
@@ -489,8 +519,17 @@ local function AutoCreate()
                 CreateMacro(name, ICON, AutoBody(spell), true)
                 have[name] = true
                 count = count + 1
+                made[#made + 1] = { name = name, spell = spell }
                 created[#created + 1] = (name == spell) and spell or (name .. " (" .. spell .. ")")
             end
+        end
+    end
+    -- Anything that didn't land on a bar: open the macro window to drag it there.
+    local placed = SwapIntoBars(made)
+    for _, m in ipairs(made) do
+        if not placed[m.name] then
+            ShowCharacterMacros()
+            break
         end
     end
     if #created > 0 then Print("new spell macro: " .. table.concat(created, ", ")) end
