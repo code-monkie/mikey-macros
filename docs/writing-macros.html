@@ -55,6 +55,13 @@ spells a character knows, and the conventions the existing lists follow.</p>
 <li><strong>spells</strong>: every spell the body uses that a character has to learn. These
     are the names trimmed out until known. Anything not listed (items, other
     commands) is left alone.</li>
+<li><strong>learn</strong> (optional): the spell, or list of spells, that makes the macro
+    when learned. Without it, learning any spell in <code>spells</code> makes it. Use it
+    when a macro names several spells but belongs to one of them, such as a
+    finishers key: <code>learn = "Eviscerate"</code> with Rupture and Expose Armor
+    on modifiers makes one macro at level 1 instead of one per spell. Spells
+    a macro you have names (but isn't made for) get no generated macro of
+    their own.</li>
 <li><strong>body</strong>: the full macro, written as you'd type it at max level.
     Indentation and leading/trailing blank lines are stripped. At most 255
     characters.</li>
@@ -78,7 +85,10 @@ one: Ctrl+Imbue gives Rockbiter until Frostbrand is learned.</p>
     leading <code>!</code>. If that spell is in <code>spells</code> and not known, the clause is
     dropped; if no clause is left, the line is dropped.</li>
 <li>In a <code>/castsequence</code>, unknown spells drop out of the sequence.</li>
-<li><code>#showtooltip Spell</code> naming an unknown spell becomes a bare <code>#showtooltip</code>.</li>
+<li><code>#showtooltip</code> is trimmed the same way, clause by clause:
+    <code>#showtooltip [mod:shift] Rupture; Eviscerate</code> before Rupture is learned is
+    <code>#showtooltip Eviscerate</code>. With nothing left it becomes a bare
+    <code>#showtooltip</code>.</li>
 <li>Spells are matched by name, so ranks don't matter. A deliberate low-rank
     copy such as <code>Earth Shock(Rank 1)</code> (a cheap interrupt) counts as Earth
     Shock: list <code>"Earth Shock"</code> in <code>spells</code>.</li>

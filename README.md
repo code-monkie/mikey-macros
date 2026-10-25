@@ -75,6 +75,7 @@ Details, including how `/mm clear` matches names: [Commands](docs/commands.html)
 | Default | Druid, Hunter, Mage, Paladin, Priest, Rogue, Shaman, Warlock (exceptions and exclude lists) |
 | Mikey | Rogue, Shaman, Hunter, Druid |
 | Ulako | Shaman, Mage |
+| ClassicWowForever | Rogue (snapshot of [classicwowforever.com/macros](https://classicwowforever.com/macros/), CC BY 4.0) |
 
 Every class works with auto mode; a collection is for hand-written macros on
 top. Adding one is a single file: see the

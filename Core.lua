@@ -101,8 +101,19 @@ local function CharacterMacros()
     return byName, numChar
 end
 
+-- The spells that create a macro when learned: def.learn (one name or a list)
+-- if given, else every spell in def.spells. def.spells is always the trimming
+-- list; learn only narrows which of them make the macro appear. Lets a macro
+-- that names several spells (finishers on modifiers) be made once, for its
+-- main spell, instead of for each spell in it.
+local function LearnSpells(def)
+    if def.learn == nil then return def.spells end
+    if type(def.learn) == "table" then return def.learn end
+    return { def.learn }
+end
+
 local function IsLearned(def, known)
-    for _, spell in ipairs(def.spells) do
+    for _, spell in ipairs(LearnSpells(def)) do
         if known[spell:lower()] then return true end
     end
     return false
@@ -135,8 +146,10 @@ end
 
 -- Drop every clause (or whole /use, /cast or /castsequence line) naming one of
 -- the macro's spells that isn't known yet. In a /castsequence, unknown spells
--- are dropped from the sequence; a "#showtooltip Spell" for an unknown spell
--- becomes a bare #showtooltip. Anything not in def.spells is left alone.
+-- are dropped from the sequence; #showtooltip loses its clauses for unknown
+-- spells the same way ("#showtooltip [mod:shift] Rupture; Eviscerate" before
+-- Rupture is "#showtooltip Eviscerate"), and becomes a bare #showtooltip when
+-- none are left. Anything not in def.spells is left alone.
 local function KnownOnly(body, def, ctx)
     local tracked = {}
     for _, spell in ipairs(def.spells) do tracked[spell:lower()] = true end
@@ -146,9 +159,19 @@ local function KnownOnly(body, def, ctx)
     end
     local out = {}
     for line in (body .. "\n"):gmatch("(.-)\n") do
-        -- "#showtooltip Spell" naming a spell you don't know yet: bare #showtooltip
+        -- #showtooltip: drop clauses for spells you don't know yet
         local tip, arg = line:match("^(#[Ss][Hh][Oo][Ww][Tt][Oo][Oo][Ll][Tt][Ii][Pp])%s+(.-)%s*$")
-        if tip and arg ~= "" and not keep(arg) then line = tip end
+        if tip and arg ~= "" then
+            local kept = {}
+            for clause in (arg .. ";"):gmatch("([^;]*);") do
+                clause = clause:match("^%s*(.-)%s*$")
+                if clause ~= "" then
+                    local action = clause:match("^.*%]%s*(.-)$") or clause
+                    if keep(action) then kept[#kept + 1] = clause end
+                end
+            end
+            line = #kept > 0 and (tip .. " " .. table.concat(kept, "; ")) or tip
+        end
         local cmd, rest = line:match("^(/%a+)%s+(.*)$")
         local lower = cmd and cmd:lower()
         if lower == "/use" or lower == "/cast" or lower == "/castsequence" then
@@ -246,7 +269,7 @@ local function DefaultList()
     local taken = {}
     for _, def in ipairs(list or {}) do
         taken[def.name] = true
-        for _, spell in ipairs(def.spells) do taken[spell:lower()] = true end
+        for _, spell in ipairs(LearnSpells(def)) do taken[spell:lower()] = true end
     end
     local own = owner and ns.excludedBy[owner] and ns.excludedBy[owner][class]
     for low in pairs(own or {}) do taken[low] = true end
@@ -490,12 +513,18 @@ local function AutoCreate()
         db.autoKnown = {}
     end
     local known = db.autoKnown
-    -- Collection macros by spell (followed collection first, then Default's).
-    -- A spell can belong to several macros (e.g. Summon Voidwalker gates both
-    -- pet-spell macros); learning it makes all of them.
-    local defs, ctx = {}, nil
+    -- Collection macros by the spells that make them (followed collection first,
+    -- then Default's). A spell can make several macros (e.g. Summon Voidwalker
+    -- gates both pet-spell macros); learning it makes all of them. A spell on a
+    -- collection macro you have (as a modifier or sequence step, not the spell
+    -- it's made for) is covered: no generated macro of its own. Until that
+    -- macro exists, the spell gets one as usual.
+    local defs, covered, ctx = {}, {}, nil
     for _, def in ipairs(Definitions()) do
-        for _, spell in ipairs(def.spells) do
+        if IsLearned(def, current) then
+            for _, spell in ipairs(def.spells) do covered[spell:lower()] = true end
+        end
+        for _, spell in ipairs(LearnSpells(def)) do
             local low = spell:lower()
             defs[low] = defs[low] or {}
             table.insert(defs[low], def)
@@ -541,6 +570,8 @@ local function AutoCreate()
                     made[#made + 1] = { name = def.name, spell = spell, swap = swap }
                 end
             end
+        elseif covered[spell:lower()] then
+            -- on another collection macro (a modifier or sequence step): no macro of its own
         else
             local name = AutoName(spell)
             if have[name] then
@@ -597,8 +628,10 @@ local function Sync(all)
         end
     end
     for _, def in ipairs(Definitions()) do
-        for _, spell in ipairs(def.spells) do covered[spell:lower()] = true end
-        if not have[def.name] and (all or IsLearned(def, known)) then add(def.name, Clean(def, ctx)) end
+        if all or IsLearned(def, known) then
+            for _, spell in ipairs(def.spells) do covered[spell:lower()] = true end
+            if not have[def.name] then add(def.name, Clean(def, ctx)) end
+        end
     end
     if CharDB().auto ~= false then
         local _, class = UnitClass("player")

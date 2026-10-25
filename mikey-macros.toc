@@ -21,3 +21,4 @@ Collections\Mikey\Druid.lua
 Collections\Mikey\Warlock.lua
 Collections\Ulako\Shaman.lua
 Collections\Ulako\Mage.lua
+Collections\ClassicWowForever\Rogue.lua
