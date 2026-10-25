@@ -136,6 +136,9 @@ ns.Exclude(&quot;SHAMAN&quot;, {
     &quot;Rockbiter Weapon&quot;,
     -- ...
 }, &quot;Mikey&quot;)</code></pre>
+<p>A collection's own exclude list is the final word for its followers: a spell on it gets no
+managed macro at all, not even the Default collection's. (A Default macro holding that spell is
+dropped whole; its other spells then get generated macros, unless excluded too.)</p>
 <h2 id="editing-an-existing-collection">Editing an existing collection</h2>
 <p>All edits happen in the collection's class files, in any text editor. The
 addon reads them at load, so after saving:</p>

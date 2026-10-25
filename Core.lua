@@ -235,7 +235,9 @@ end
 
 -- The Default collection's macros this character gets on top of the collection
 -- it follows (on Default, ActiveList already has them): each one whose spells
--- and name the followed collection doesn't already have.
+-- and name the followed collection doesn't already have. A spell on the
+-- followed collection's own exclude list counts as taken too: that collection
+-- doesn't want a managed macro for it, so Default's is dropped as well.
 local function DefaultList()
     local _, class = UnitClass("player")
     local defaults = ns.collections[DEFAULT] and ns.collections[DEFAULT][class]
@@ -246,6 +248,8 @@ local function DefaultList()
         taken[def.name] = true
         for _, spell in ipairs(def.spells) do taken[spell:lower()] = true end
     end
+    local own = owner and ns.excludedBy[owner] and ns.excludedBy[owner][class]
+    for low in pairs(own or {}) do taken[low] = true end
     local out = {}
     for _, def in ipairs(defaults) do
         local free = not taken[def.name]
@@ -449,7 +453,9 @@ local function SwapIntoBars(made)
     local placed = {}
     if #made == 0 or InCombatLockdown() or GetCursorInfo() then return placed end
     local bySpell = {}
-    for _, m in ipairs(made) do bySpell[m.spell:lower()] = m.name end
+    for _, m in ipairs(made) do
+        if m.swap ~= false then bySpell[m.spell:lower()] = m.name end
+    end
     for slot = 1, 180 do
         local kind, id = GetActionInfo(slot)
         if kind == "spell" and id then
@@ -485,10 +491,14 @@ local function AutoCreate()
     end
     local known = db.autoKnown
     -- Collection macros by spell (followed collection first, then Default's).
+    -- A spell can belong to several macros (e.g. Summon Voidwalker gates both
+    -- pet-spell macros); learning it makes all of them.
     local defs, ctx = {}, nil
     for _, def in ipairs(Definitions()) do
         for _, spell in ipairs(def.spells) do
-            defs[spell:lower()] = defs[spell:lower()] or def
+            local low = spell:lower()
+            defs[low] = defs[low] or {}
+            table.insert(defs[low], def)
         end
     end
     local _, class = UnitClass("player")
@@ -511,19 +521,25 @@ local function AutoCreate()
     table.sort(spellsInOrder)
     for _, spell in ipairs(spellsInOrder) do
         known[spell:lower()] = true -- remembered either way, so it's only ever handled once
-        local def = defs[spell:lower()]
-        if def then
-            if have[def.name] then
-                -- already made (for another of its spells); Refresh keeps it current
-            elseif count >= CharacterMax() then
-                full[#full + 1] = spell
-            else
-                ctx = ctx or Context(KnownSpells())
-                CreateMacro(def.name, ICON, Clean(def, ctx), true)
-                have[def.name] = true
-                count = count + 1
-                created[#created + 1] = def.name
-                made[#made + 1] = { name = def.name, spell = spell }
+        local list = defs[spell:lower()]
+        if list then
+            for _, def in ipairs(list) do
+                if have[def.name] then
+                    -- already made (for another of its spells); Refresh keeps it current
+                elseif count >= CharacterMax() then
+                    full[#full + 1] = spell
+                else
+                    ctx = ctx or Context(KnownSpells())
+                    local body = Clean(def, ctx)
+                    CreateMacro(def.name, ICON, body, true)
+                    have[def.name] = true
+                    count = count + 1
+                    created[#created + 1] = def.name
+                    -- swap onto the spell's buttons only if the macro casts it
+                    -- (not a pet-spell macro gated on Summon Voidwalker)
+                    local swap = body:lower():find(spell:lower(), 1, true) ~= nil
+                    made[#made + 1] = { name = def.name, spell = spell, swap = swap }
+                end
             end
         else
             local name = AutoName(spell)

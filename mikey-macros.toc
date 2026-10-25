@@ -18,5 +18,6 @@ Collections\Mikey\Rogue.lua
 Collections\Mikey\Shaman.lua
 Collections\Mikey\Hunter.lua
 Collections\Mikey\Druid.lua
+Collections\Mikey\Warlock.lua
 Collections\Ulako\Shaman.lua
 Collections\Ulako\Mage.lua
