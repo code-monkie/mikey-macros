@@ -128,6 +128,14 @@ macro, whatever collection the character follows.</p>
 })</code></pre>
 <p>Learning an excluded spell says <code>no macro (excluded): ...</code> in chat, once. Add to
 either list as you find spells that need it; most players never need to.</p>
+<p>A collection can also keep its <strong>own exclude list</strong>, on top of Default's, for the
+characters following it. Pass the owner as a third argument in that collection's class file:</p>
+<pre><code class="language-lua">-- Collections\Mikey\Shaman.lua: totems and imbues come from a ring addon
+ns.Exclude(&quot;SHAMAN&quot;, {
+    &quot;Searing Totem&quot;,
+    &quot;Rockbiter Weapon&quot;,
+    -- ...
+}, &quot;Mikey&quot;)</code></pre>
 <h2 id="editing-an-existing-collection">Editing an existing collection</h2>
 <p>All edits happen in the collection's class files, in any text editor. The
 addon reads them at load, so after saving:</p>

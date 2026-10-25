@@ -24,13 +24,21 @@ function ns.Collection(owner)
     return c
 end
 
--- Spells auto mode never makes a macro for, by class (whatever the collection):
--- ns.Exclude("HUNTER", { "Eyes of the Beast", ... }), in Collections\Default.
-ns.excluded = {}
-function ns.Exclude(class, spells)
-    local set = ns.excluded[class] or {}
+-- Spells auto mode never makes a macro for, by class.
+-- ns.Exclude("HUNTER", { "Eyes of the Beast", ... }) in Collections\Default
+-- applies whatever the collection. A collection can add its own on top, for
+-- characters following it: ns.Exclude("SHAMAN", { ... }, "Mikey").
+ns.excluded = {}      -- [class] = set, every collection
+ns.excludedBy = {}    -- [owner][class] = set, only that collection's followers
+function ns.Exclude(class, spells, owner)
+    local root = ns.excluded
+    if owner then
+        ns.excludedBy[owner] = ns.excludedBy[owner] or {}
+        root = ns.excludedBy[owner]
+    end
+    local set = root[class] or {}
     for _, spell in ipairs(spells) do set[spell:lower()] = true end
-    ns.excluded[class] = set
+    root[class] = set
 end
 
 local ICON = 134400 -- question mark; #showtooltip supplies the real icon
@@ -205,6 +213,17 @@ end
 local function ActiveCollection(class)
     local chosen = CharDB().collection
     if chosen and ns.collections[chosen] and ns.collections[chosen][class] then return chosen end
+end
+
+-- The spells auto mode skips for this character: every collection's list plus
+-- the followed collection's own.
+local function Excluded(class)
+    local set = {}
+    for low in pairs(ns.excluded[class] or {}) do set[low] = true end
+    local owner = ActiveCollection(class)
+    local own = owner and ns.excludedBy[owner] and ns.excludedBy[owner][class]
+    for low in pairs(own or {}) do set[low] = true end
+    return set
 end
 
 -- This character's macro list and its owner (nil if no collection has the class).
@@ -473,7 +492,7 @@ local function AutoCreate()
         end
     end
     local _, class = UnitClass("player")
-    local excluded = ns.excluded[class] or {}
+    local excluded = Excluded(class)
     local have, count = CharacterMacros()
     local created, full, skipped = {}, {}, {}
     local made = {} -- { name = macro, spell = the spell just learned }, for SwapIntoBars
@@ -567,7 +586,7 @@ local function Sync(all)
     end
     if CharDB().auto ~= false then
         local _, class = UnitClass("player")
-        local excluded = ns.excluded[class] or {}
+        local excluded = Excluded(class)
         local spells = {}
         for low, name in pairs(ClassSpells()) do
             if not covered[low] and not excluded[low] then spells[#spells + 1] = name end
@@ -652,8 +671,8 @@ local function CheckConflicts()
     if conflictsChecked then return end
     conflictsChecked = true
     local _, class = UnitClass("player")
-    local excluded = ns.excluded[class]
-    if not excluded then return end
+    local excluded = Excluded(class)
+    if not next(excluded) then return end
     local function check(defs, owner)
         for _, def in ipairs(defs) do
             for _, spell in ipairs(def.spells) do
