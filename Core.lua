@@ -128,11 +128,27 @@ local function MainHandDagger()
     return classID == 2 and subclassID == 15 -- Weapon, Dagger
 end
 
+-- The number of a shapeshift form or stance as [form:N] sees it, or nil if you
+-- don't have it. Form numbers follow the stance bar, so they shift as forms are
+-- learned (Cat Form is 2 before Aquatic Form, 3 after); a macro built with this
+-- is rewritten when they change.
+local function FormIndex(name)
+    local low = name:lower()
+    for i = 1, (GetNumShapeshiftForms and GetNumShapeshiftForms() or 0) do
+        local _, _, _, spellID = GetShapeshiftFormInfo(i)
+        local formName = spellID and (
+            (C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(spellID))
+            or (GetSpellInfo and GetSpellInfo(spellID)))
+        if formName and formName:lower() == low then return i end
+    end
+end
+
 -- What a dynamic macro body can ask about the character.
 local function Context(known)
     return {
         knows = function(spell) return known[spell:lower()] == true end,
         dagger = MainHandDagger(),
+        form = FormIndex,
     }
 end
 
@@ -276,7 +292,7 @@ local function DefaultList()
     local out = {}
     for _, def in ipairs(defaults) do
         local free = not taken[def.name]
-        for _, spell in ipairs(def.spells) do
+        for _, spell in ipairs(LearnSpells(def)) do
             if taken[spell:lower()] then free = false end
         end
         if free then out[#out + 1] = def end
@@ -742,7 +758,7 @@ local function CheckConflicts()
     check(DefaultList(), DEFAULT, ns.excluded[class])
 end
 
--- Keep macros current as spells (and the main-hand weapon) change.
+-- Keep macros current as spells, forms (form numbers) and the main-hand weapon change.
 -- Changes wait until combat ends.
 local pending = false
 local events = CreateFrame("Frame")
@@ -761,6 +777,7 @@ end
 events:RegisterEvent("PLAYER_LOGIN")
 events:RegisterEvent("SPELLS_CHANGED")
 events:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+events:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
 events:RegisterEvent("PLAYER_REGEN_ENABLED")
 events:SetScript("OnEvent", function(_, event, slot)
     if event == "PLAYER_EQUIPMENT_CHANGED" and slot ~= (INVSLOT_MAINHAND or 16) then return end

@@ -103,10 +103,22 @@ context table:</p>
 <ul>
 <li><code>c.knows("Spell Name")</code>: whether the spell is known.</li>
 <li><code>c.dagger</code>: whether a dagger is in the main hand.</li>
+<li><code>c.form("Form Name")</code>: the form's number as <code>[form:N]</code> sees it, or nil
+    if you don't have it. Form numbers follow the stance bar, so they change as
+    forms are learned (Cat Form is 2 until Aquatic Form, then 3); the macro is
+    rewritten when they do.</li>
 </ul>
 <pre><code class="language-lua">{ name = &quot;Example&quot;, spells = { &quot;Backstab&quot;, &quot;Sinister Strike&quot; }, body = function(c)
     local strike = c.dagger and &quot;Backstab&quot; or &quot;Sinister Strike&quot;
     return &quot;#showtooltip\n/use &quot; .. strike
+end },</code></pre>
+<pre><code class="language-lua">{ name = &quot;Prowl&quot;, learn = &quot;Prowl&quot;, spells = { &quot;Prowl&quot;, &quot;Cat Form&quot; }, body = function(c)
+    local cat = c.form(&quot;Cat Form&quot;) or 3
+    return ([[
+    #showtooltip Prowl
+    /cast [noform:%d] Cat Form
+    /cast [form:%d,nostealth,nocombat] Prowl
+    ]]):format(cat, cat)
 end },</code></pre>
 <p>The result is trimmed like any other body. Prefer plain text; use a function
 only when the text depends on more than which spells are known.</p>

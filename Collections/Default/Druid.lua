@@ -17,11 +17,17 @@ ns.Collection("Default").DRUID = {
         /stopattack
         /use [@mouseover,harm,nodead] [] Soothe Animal
     ]] },
-    { name = "Prowl", spells = { "Prowl" }, body = [[
-        #showtooltip
-        /stopattack
-        /use !Prowl
-    ]] },
+    -- Into Cat Form first, then Prowl (out of combat); more presses don't drop it.
+    -- Cat Form's number depends on which forms you have, so it's filled in.
+    { name = "Prowl", learn = "Prowl", spells = { "Prowl", "Cat Form" }, body = function(c)
+        local cat = c.form("Cat Form") or 3
+        return ([[
+        #showtooltip Prowl
+        /dismount
+        /cast [noform:%d] Cat Form
+        /cast [form:%d,nostealth,nocombat] Prowl
+        ]]):format(cat, cat)
+    end },
     -- Out of combat Revive (where the game has it), in combat Rebirth; mouseover first.
     { name = "Res", spells = { "Rebirth", "Revive" }, body = [[
         #showtooltip
