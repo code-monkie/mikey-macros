@@ -136,6 +136,9 @@ Collections/Default/<Class>.lua   the exceptions to generated macros, and the ex
 Collections/<Owner>/<Class>.lua   one person's macro list for one class
 docs/                             guides (also online)
 tools/vscode-mikey-macros/        VS Code extension: checks, colors and autocompletes macros
+tools/classicwowforever/          browser script that builds the ClassicWowForever collection files
+tools/trimtest.py                 shows how a collection's macros trim at given known spells
+CLAUDE.md                         working notes for Claude sessions on this repo
 ```
 
 ## License

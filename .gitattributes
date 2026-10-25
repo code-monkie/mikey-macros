@@ -1,0 +1,3 @@
+# Check out every text file with CRLF on every machine (the repo itself stores LF),
+# so Windows and Linux tools agree and no file shows as changed for line endings.
+* text=auto eol=crlf
