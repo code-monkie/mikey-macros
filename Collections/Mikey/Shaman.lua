@@ -1,7 +1,9 @@
 -- Shaman macros. Write each body in full; spells listed in `spells` are left
 -- out of the live macro until you know them. Names must be unique and at most
 -- 16 characters; bodies at most 255.
--- Modifiers mean the same thing everywhere: Shift = fire, Ctrl = frost.
+-- One spell per macro, no modifier branches: Shift and Ctrl are their own
+-- bars (Shift+1-7, Ctrl+1-7). Totems and weapon imbues come from mikey-ring,
+-- so auto mode makes no macros for them (exclude list at the bottom).
 
 local _, ns = ...
 
@@ -14,46 +16,74 @@ ns.Collection("Mikey").SHAMAN = {
         /use Lightning Bolt
     ]] },
 
-    -- Earth (interrupt, usually an off target), Shift Flame, Ctrl Frost. One shared cooldown.
-    { name = "Shock", spells = { "Earth Shock", "Flame Shock", "Frost Shock" }, body = [[
+    -- Shocks: mouseover, else target. They share one cooldown.
+    { name = "Earth Shock", spells = { "Earth Shock" }, body = [[
         #showtooltip
         /startattack
-        /use [mod:ctrl,@mouseover,harm,nodead] [mod:ctrl] Frost Shock; [mod:shift,@mouseover,harm,nodead] [mod:shift] Flame Shock; [@mouseover,harm,nodead] [] Earth Shock
+        /use [@mouseover,harm,nodead] [] Earth Shock
     ]] },
 
-    -- Poison; Shift Disease. Mouseover friend, else you.
-    { name = "Cure", spells = { "Cure Poison", "Cure Disease" }, body = [[
+    { name = "Flame Shock", spells = { "Flame Shock" }, body = [[
         #showtooltip
-        /use [mod:shift,@mouseover,help,nodead] [mod:shift,@player] Cure Disease; [@mouseover,help,nodead] [@player] Cure Poison
+        /startattack
+        /use [@mouseover,harm,nodead] [] Flame Shock
     ]] },
 
-    -- Rockbiter; Shift Flametongue; Ctrl Frostbrand; Alt Windfury.
-    { name = "Imbue", spells = { "Rockbiter Weapon", "Flametongue Weapon", "Frostbrand Weapon", "Windfury Weapon" }, body = [[
+    { name = "Frost Shock", spells = { "Frost Shock" }, body = [[
         #showtooltip
-        /use [mod:alt] Windfury Weapon; [mod:ctrl] Frostbrand Weapon; [mod:shift] Flametongue Weapon; Rockbiter Weapon
+        /startattack
+        /use [@mouseover,harm,nodead] [] Frost Shock
     ]] },
 
-    -- Stoneskin; Shift Strength of Earth; Ctrl Earthbind; Ctrl+Shift Tremor; Alt Stoneclaw.
-    { name = "Earth", spells = { "Stoneskin Totem", "Strength of Earth Totem", "Earthbind Totem", "Tremor Totem", "Stoneclaw Totem" }, body = [[
+    -- Cures: mouseover friend, else you.
+    { name = "Cure Poison", spells = { "Cure Poison" }, body = [[
         #showtooltip
-        /use [mod:alt] Stoneclaw Totem; [mod:ctrl,mod:shift] Tremor Totem; [mod:ctrl] Earthbind Totem; [mod:shift] Strength of Earth Totem; Stoneskin Totem
+        /use [@mouseover,help,nodead] [@player] Cure Poison
     ]] },
 
-    -- Searing; Shift Fire Nova; Ctrl Magma; Alt Flametongue.
-    { name = "Fire", spells = { "Searing Totem", "Fire Nova Totem", "Magma Totem", "Flametongue Totem" }, body = [[
+    { name = "Cure Disease", spells = { "Cure Disease" }, body = [[
         #showtooltip
-        /use [mod:alt] Flametongue Totem; [mod:ctrl] Magma Totem; [mod:shift] Fire Nova Totem; Searing Totem
-    ]] },
-
-    -- Healing Stream; Shift Mana Spring; Ctrl Poison Cleansing; Alt Disease Cleansing.
-    { name = "Water", spells = { "Healing Stream Totem", "Mana Spring Totem", "Poison Cleansing Totem", "Disease Cleansing Totem" }, body = [[
-        #showtooltip
-        /use [mod:alt] Disease Cleansing Totem; [mod:ctrl] Poison Cleansing Totem; [mod:shift] Mana Spring Totem; Healing Stream Totem
-    ]] },
-
-    -- Call of the Elements; Shift Totemic Recall; Ctrl Call of the Ancestors; Alt Call of the Spirits.
-    { name = "Call", spells = { "Call of the Elements", "Totemic Recall", "Call of the Ancestors", "Call of the Spirits" }, body = [[
-        #showtooltip
-        /use [mod:alt] Call of the Spirits; [mod:ctrl] Call of the Ancestors; [mod:shift] Totemic Recall; Call of the Elements
+        /use [@mouseover,help,nodead] [@player] Cure Disease
     ]] },
 }
+
+-- Mikey's characters only (on top of Default's list): mikey-ring drops these.
+ns.Exclude("SHAMAN", {
+    -- Weapon imbues
+    "Rockbiter Weapon",
+    "Flametongue Weapon",
+    "Frostbrand Weapon",
+    "Windfury Weapon",
+    -- Earth totems
+    "Stoneskin Totem",
+    "Earthbind Totem",
+    "Stoneclaw Totem",
+    "Strength of Earth Totem",
+    "Tremor Totem",
+    -- Fire totems
+    "Searing Totem",
+    "Fire Nova Totem",
+    "Frost Resistance Totem",
+    "Magma Totem",
+    "Flametongue Totem",
+    -- Water totems
+    "Healing Stream Totem",
+    "Mana Spring Totem",
+    "Poison Cleansing Totem",
+    "Disease Cleansing Totem",
+    "Fire Resistance Totem",
+    "Mana Tide Totem",
+    -- Air totems
+    "Grounding Totem",
+    "Nature Resistance Totem",
+    "Windfury Totem",
+    "Sentry Totem",
+    "Windwall Totem",
+    "Grace of Air Totem",
+    "Tranquil Air Totem",
+    -- Totem calls
+    "Call of the Elements",
+    "Call of the Ancestors",
+    "Call of the Spirits",
+    "Totemic Recall",
+}, "Mikey")

@@ -23,4 +23,8 @@ ns.Exclude("SHAMAN", {
     "Far Sight",
     "Water Walking",
     "Astral Recall",
+    "Call of the Elements",
+    "Call of the Ancestors",
+    "Call of the Spirits",
+    "Totemic Recall",
 })

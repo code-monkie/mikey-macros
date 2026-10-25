@@ -1,15 +1,17 @@
 -- Rogue macros. Write each body in full; spells listed in `spells` are left
 -- out of the live macro until you know them. Names must be unique and at most
 -- 16 characters; bodies at most 255.
+-- Stealth, Vanish, Blind and Distract come from the Default collection.
 
 local _, ns = ...
 
 ns.Collection("Mikey").ROGUE = {
-    -- Ambush from stealth, Backstab otherwise.
-    { name = "BS", spells = { "Backstab", "Ambush" }, body = [[
+    -- Ambush from stealth; out of it, Backstab, else Sinister Strike.
+    { name = "Attack", spells = { "Sinister Strike", "Backstab", "Ambush" }, body = [[
         #showtooltip
         /startattack [nostealth]
         /use [stealth] Ambush; Backstab
+        /use [nostealth] Sinister Strike
     ]] },
 
     { name = "Bleed", spells = { "Garrote", "Rupture" }, body = [[
@@ -32,18 +34,8 @@ ns.Collection("Mikey").ROGUE = {
     ]] },
 
     -- Later levels.
-    { name = "Vanish", spells = { "Vanish" }, body = [[
-        #showtooltip Vanish
-        /use [nostealth,combat] Vanish; [nostealth,nocombat] Stealth
-    ]] },
-
-    { name = "CS", spells = { "Cheap Shot" }, body = [[
+    { name = "Stun", spells = { "Cheap Shot", "Kidney Shot" }, body = [[
         #showtooltip
-        /use [@mouseover,harm,nodead] [] Cheap Shot
-    ]] },
-
-    { name = "KS", spells = { "Kidney Shot" }, body = [[
-        #showtooltip
-        /use [@mouseover,harm,nodead] [] Kidney Shot
+        /use [stealth] Cheap Shot; Kidney Shot
     ]] },
 }

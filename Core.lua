@@ -24,13 +24,21 @@ function ns.Collection(owner)
     return c
 end
 
--- Spells auto mode never makes a macro for, by class (whatever the collection):
--- ns.Exclude("HUNTER", { "Eyes of the Beast", ... }), in Collections\Default.
-ns.excluded = {}
-function ns.Exclude(class, spells)
-    local set = ns.excluded[class] or {}
+-- Spells auto mode never makes a macro for, by class.
+-- ns.Exclude("HUNTER", { "Eyes of the Beast", ... }) in Collections\Default
+-- applies whatever the collection. A collection can add its own on top, for
+-- characters following it: ns.Exclude("SHAMAN", { ... }, "Mikey").
+ns.excluded = {}      -- [class] = set, every collection
+ns.excludedBy = {}    -- [owner][class] = set, only that collection's followers
+function ns.Exclude(class, spells, owner)
+    local root = ns.excluded
+    if owner then
+        ns.excludedBy[owner] = ns.excludedBy[owner] or {}
+        root = ns.excludedBy[owner]
+    end
+    local set = root[class] or {}
     for _, spell in ipairs(spells) do set[spell:lower()] = true end
-    ns.excluded[class] = set
+    root[class] = set
 end
 
 local ICON = 134400 -- question mark; #showtooltip supplies the real icon
@@ -93,8 +101,19 @@ local function CharacterMacros()
     return byName, numChar
 end
 
+-- The spells that create a macro when learned: def.learn (one name or a list)
+-- if given, else every spell in def.spells. def.spells is always the trimming
+-- list; learn only narrows which of them make the macro appear. Lets a macro
+-- that names several spells (finishers on modifiers) be made once, for its
+-- main spell, instead of for each spell in it.
+local function LearnSpells(def)
+    if def.learn == nil then return def.spells end
+    if type(def.learn) == "table" then return def.learn end
+    return { def.learn }
+end
+
 local function IsLearned(def, known)
-    for _, spell in ipairs(def.spells) do
+    for _, spell in ipairs(LearnSpells(def)) do
         if known[spell:lower()] then return true end
     end
     return false
@@ -109,11 +128,27 @@ local function MainHandDagger()
     return classID == 2 and subclassID == 15 -- Weapon, Dagger
 end
 
+-- The number of a shapeshift form or stance as [form:N] sees it, or nil if you
+-- don't have it. Form numbers follow the stance bar, so they shift as forms are
+-- learned (Cat Form is 2 before Aquatic Form, 3 after); a macro built with this
+-- is rewritten when they change.
+local function FormIndex(name)
+    local low = name:lower()
+    for i = 1, (GetNumShapeshiftForms and GetNumShapeshiftForms() or 0) do
+        local _, _, _, spellID = GetShapeshiftFormInfo(i)
+        local formName = spellID and (
+            (C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(spellID))
+            or (GetSpellInfo and GetSpellInfo(spellID)))
+        if formName and formName:lower() == low then return i end
+    end
+end
+
 -- What a dynamic macro body can ask about the character.
 local function Context(known)
     return {
         knows = function(spell) return known[spell:lower()] == true end,
         dagger = MainHandDagger(),
+        form = FormIndex,
     }
 end
 
@@ -127,8 +162,10 @@ end
 
 -- Drop every clause (or whole /use, /cast or /castsequence line) naming one of
 -- the macro's spells that isn't known yet. In a /castsequence, unknown spells
--- are dropped from the sequence; a "#showtooltip Spell" for an unknown spell
--- becomes a bare #showtooltip. Anything not in def.spells is left alone.
+-- are dropped from the sequence; #showtooltip loses its clauses for unknown
+-- spells the same way ("#showtooltip [mod:shift] Rupture; Eviscerate" before
+-- Rupture is "#showtooltip Eviscerate"), and becomes a bare #showtooltip when
+-- none are left. Anything not in def.spells is left alone.
 local function KnownOnly(body, def, ctx)
     local tracked = {}
     for _, spell in ipairs(def.spells) do tracked[spell:lower()] = true end
@@ -138,9 +175,19 @@ local function KnownOnly(body, def, ctx)
     end
     local out = {}
     for line in (body .. "\n"):gmatch("(.-)\n") do
-        -- "#showtooltip Spell" naming a spell you don't know yet: bare #showtooltip
+        -- #showtooltip: drop clauses for spells you don't know yet
         local tip, arg = line:match("^(#[Ss][Hh][Oo][Ww][Tt][Oo][Oo][Ll][Tt][Ii][Pp])%s+(.-)%s*$")
-        if tip and arg ~= "" and not keep(arg) then line = tip end
+        if tip and arg ~= "" then
+            local kept = {}
+            for clause in (arg .. ";"):gmatch("([^;]*);") do
+                clause = clause:match("^%s*(.-)%s*$")
+                if clause ~= "" then
+                    local action = clause:match("^.*%]%s*(.-)$") or clause
+                    if keep(action) then kept[#kept + 1] = clause end
+                end
+            end
+            line = #kept > 0 and (tip .. " " .. table.concat(kept, "; ")) or tip
+        end
         local cmd, rest = line:match("^(/%a+)%s+(.*)$")
         local lower = cmd and cmd:lower()
         if lower == "/use" or lower == "/cast" or lower == "/castsequence" then
@@ -207,6 +254,17 @@ local function ActiveCollection(class)
     if chosen and ns.collections[chosen] and ns.collections[chosen][class] then return chosen end
 end
 
+-- The spells auto mode skips for this character: every collection's list plus
+-- the followed collection's own.
+local function Excluded(class)
+    local set = {}
+    for low in pairs(ns.excluded[class] or {}) do set[low] = true end
+    local owner = ActiveCollection(class)
+    local own = owner and ns.excludedBy[owner] and ns.excludedBy[owner][class]
+    for low in pairs(own or {}) do set[low] = true end
+    return set
+end
+
 -- This character's macro list and its owner (nil if no collection has the class).
 local function ActiveList()
     local _, class = UnitClass("player")
@@ -216,7 +274,9 @@ end
 
 -- The Default collection's macros this character gets on top of the collection
 -- it follows (on Default, ActiveList already has them): each one whose spells
--- and name the followed collection doesn't already have.
+-- and name the followed collection doesn't already have. A spell on the
+-- followed collection's own exclude list counts as taken too: that collection
+-- doesn't want a managed macro for it, so Default's is dropped as well.
 local function DefaultList()
     local _, class = UnitClass("player")
     local defaults = ns.collections[DEFAULT] and ns.collections[DEFAULT][class]
@@ -225,12 +285,14 @@ local function DefaultList()
     local taken = {}
     for _, def in ipairs(list or {}) do
         taken[def.name] = true
-        for _, spell in ipairs(def.spells) do taken[spell:lower()] = true end
+        for _, spell in ipairs(LearnSpells(def)) do taken[spell:lower()] = true end
     end
+    local own = owner and ns.excludedBy[owner] and ns.excludedBy[owner][class]
+    for low in pairs(own or {}) do taken[low] = true end
     local out = {}
     for _, def in ipairs(defaults) do
         local free = not taken[def.name]
-        for _, spell in ipairs(def.spells) do
+        for _, spell in ipairs(LearnSpells(def)) do
             if taken[spell:lower()] then free = false end
         end
         if free then out[#out + 1] = def end
@@ -430,7 +492,9 @@ local function SwapIntoBars(made)
     local placed = {}
     if #made == 0 or InCombatLockdown() or GetCursorInfo() then return placed end
     local bySpell = {}
-    for _, m in ipairs(made) do bySpell[m.spell:lower()] = m.name end
+    for _, m in ipairs(made) do
+        if m.swap ~= false then bySpell[m.spell:lower()] = m.name end
+    end
     for slot = 1, 180 do
         local kind, id = GetActionInfo(slot)
         if kind == "spell" and id then
@@ -465,15 +529,25 @@ local function AutoCreate()
         db.autoKnown = {}
     end
     local known = db.autoKnown
-    -- Collection macros by spell (followed collection first, then Default's).
-    local defs, ctx = {}, nil
+    -- Collection macros by the spells that make them (followed collection first,
+    -- then Default's). A spell can make several macros (e.g. Summon Voidwalker
+    -- gates both pet-spell macros); learning it makes all of them. A spell on a
+    -- collection macro you have (as a modifier or sequence step, not the spell
+    -- it's made for) is covered: no generated macro of its own. Until that
+    -- macro exists, the spell gets one as usual.
+    local defs, covered, ctx = {}, {}, nil
     for _, def in ipairs(Definitions()) do
-        for _, spell in ipairs(def.spells) do
-            defs[spell:lower()] = defs[spell:lower()] or def
+        if IsLearned(def, current) then
+            for _, spell in ipairs(def.spells) do covered[spell:lower()] = true end
+        end
+        for _, spell in ipairs(LearnSpells(def)) do
+            local low = spell:lower()
+            defs[low] = defs[low] or {}
+            table.insert(defs[low], def)
         end
     end
     local _, class = UnitClass("player")
-    local excluded = ns.excluded[class] or {}
+    local excluded = Excluded(class)
     local have, count = CharacterMacros()
     local created, full, skipped = {}, {}, {}
     local made = {} -- { name = macro, spell = the spell just learned }, for SwapIntoBars
@@ -492,20 +566,28 @@ local function AutoCreate()
     table.sort(spellsInOrder)
     for _, spell in ipairs(spellsInOrder) do
         known[spell:lower()] = true -- remembered either way, so it's only ever handled once
-        local def = defs[spell:lower()]
-        if def then
-            if have[def.name] then
-                -- already made (for another of its spells); Refresh keeps it current
-            elseif count >= CharacterMax() then
-                full[#full + 1] = spell
-            else
-                ctx = ctx or Context(KnownSpells())
-                CreateMacro(def.name, ICON, Clean(def, ctx), true)
-                have[def.name] = true
-                count = count + 1
-                created[#created + 1] = def.name
-                made[#made + 1] = { name = def.name, spell = spell }
+        local list = defs[spell:lower()]
+        if list then
+            for _, def in ipairs(list) do
+                if have[def.name] then
+                    -- already made (for another of its spells); Refresh keeps it current
+                elseif count >= CharacterMax() then
+                    full[#full + 1] = spell
+                else
+                    ctx = ctx or Context(KnownSpells())
+                    local body = Clean(def, ctx)
+                    CreateMacro(def.name, ICON, body, true)
+                    have[def.name] = true
+                    count = count + 1
+                    created[#created + 1] = def.name
+                    -- swap onto the spell's buttons only if the macro casts it
+                    -- (not a pet-spell macro gated on Summon Voidwalker)
+                    local swap = body:lower():find(spell:lower(), 1, true) ~= nil
+                    made[#made + 1] = { name = def.name, spell = spell, swap = swap }
+                end
             end
+        elseif covered[spell:lower()] then
+            -- on another collection macro (a modifier or sequence step): no macro of its own
         else
             local name = AutoName(spell)
             if have[name] then
@@ -562,12 +644,14 @@ local function Sync(all)
         end
     end
     for _, def in ipairs(Definitions()) do
-        for _, spell in ipairs(def.spells) do covered[spell:lower()] = true end
-        if not have[def.name] and (all or IsLearned(def, known)) then add(def.name, Clean(def, ctx)) end
+        if all or IsLearned(def, known) then
+            for _, spell in ipairs(def.spells) do covered[spell:lower()] = true end
+            if not have[def.name] then add(def.name, Clean(def, ctx)) end
+        end
     end
     if CharDB().auto ~= false then
         local _, class = UnitClass("player")
-        local excluded = ns.excluded[class] or {}
+        local excluded = Excluded(class)
         local spells = {}
         for low, name in pairs(ClassSpells()) do
             if not covered[low] and not excluded[low] then spells[#spells + 1] = name end
@@ -644,17 +728,18 @@ local function Adopt()
     end
 end
 
--- A spell shouldn't be both excluded and part of a macro this character
--- follows (its collection's, or Default's under it). Said once per session in
--- chat, so the data files can be fixed.
+-- A spell shouldn't be both excluded and part of a macro in the same
+-- collection's file (the followed collection's macros against its own exclude
+-- list; Default's against Default's). A followed collection's macro for a
+-- spell Default excludes is a deliberate override, not a conflict. Said once
+-- per session in chat, so the data files can be fixed.
 local conflictsChecked = false
 local function CheckConflicts()
     if conflictsChecked then return end
     conflictsChecked = true
     local _, class = UnitClass("player")
-    local excluded = ns.excluded[class]
-    if not excluded then return end
-    local function check(defs, owner)
+    local function check(defs, owner, excluded)
+        if not excluded then return end
         for _, def in ipairs(defs) do
             for _, spell in ipairs(def.spells) do
                 if excluded[spell:lower()] then
@@ -665,11 +750,15 @@ local function CheckConflicts()
         end
     end
     local list, owner = ActiveList()
-    if list then check(list, owner) end
-    check(DefaultList(), DEFAULT)
+    if list then
+        local own = ns.excludedBy[owner] and ns.excludedBy[owner][class]
+        if owner == DEFAULT then own = ns.excluded[class] end
+        check(list, owner, own)
+    end
+    check(DefaultList(), DEFAULT, ns.excluded[class])
 end
 
--- Keep macros current as spells (and the main-hand weapon) change.
+-- Keep macros current as spells, forms (form numbers) and the main-hand weapon change.
 -- Changes wait until combat ends.
 local pending = false
 local events = CreateFrame("Frame")
@@ -688,6 +777,7 @@ end
 events:RegisterEvent("PLAYER_LOGIN")
 events:RegisterEvent("SPELLS_CHANGED")
 events:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+events:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
 events:RegisterEvent("PLAYER_REGEN_ENABLED")
 events:SetScript("OnEvent", function(_, event, slot)
     if event == "PLAYER_EQUIPMENT_CHANGED" and slot ~= (INVSLOT_MAINHAND or 16) then return end
