@@ -58,23 +58,27 @@
 </tr>
 <tr>
 <td><code>/mm sync</code></td>
-<td>Create all missing macros from this character's collection, then open the macro window on the character tab. Never touches existing ones. Without a collection, lists the collections instead.</td>
+<td>Create the missing macros for the spells you know, by the <a href="#which-macro">usual rule</a>, then open the macro window on the character tab. Never touches existing ones.</td>
 </tr>
 <tr>
-<td><code>/mm sync known</code></td>
-<td>The same, but only for macros with a spell you already know.</td>
+<td><code>/mm sync all</code></td>
+<td>The same, plus collection macros for spells you haven't learned yet (placeholders).</td>
 </tr>
 <tr>
 <td><code>/mm update</code></td>
-<td>Rewrite every existing macro now. Normally automatic.</td>
+<td>Rewrite every existing collection macro now. Normally automatic.</td>
 </tr>
 <tr>
 <td><code>/mm resync</code></td>
-<td><code>/mm sync</code> plus <code>/mm update</code>: create anything missing, rewrite the rest, open the macro window. Macros stay on your bars.</td>
+<td><code>/mm sync all</code> plus <code>/mm update</code>: create anything missing, rewrite the rest, open the macro window. Macros stay on your bars.</td>
 </tr>
 <tr>
 <td><code>/mm clear</code></td>
 <td>Delete this character's macros whose names appear in any collection for its class.</td>
+</tr>
+<tr>
+<td><code>/mm clear -a</code></td>
+<td>Delete <strong>all</strong> of this character's macros, whatever made them, after a Yes/No popup.</td>
 </tr>
 <tr>
 <td><code>/mm collections</code></td>
@@ -82,15 +86,15 @@
 </tr>
 <tr>
 <td><code>/mm use &lt;name&gt;</code></td>
-<td>Follow that collection on this character.</td>
+<td>Follow that collection on this character (<code>default</code> for the Default collection).</td>
 </tr>
 <tr>
 <td><code>/mm use none</code></td>
-<td>Stop following a collection on this character (auto mode only).</td>
+<td>Follow no collection on this character (Default's macros and generated ones still apply).</td>
 </tr>
 <tr>
 <td><code>/mm auto on</code> / <code>off</code></td>
-<td>Auto mode, <strong>on by default</strong>: a plain macro for each new class spell this character learns, unless its collection already covers the spell.</td>
+<td>Auto mode, <strong>on by default</strong>: a macro for each new class spell this character learns.</td>
 </tr>
 <tr>
 <td><code>/mm docs</code></td>
@@ -98,58 +102,98 @@
 </tr>
 </tbody>
 </table></div>
+<h2 id="which-macro">Which macro a spell gets</h2>
+<p>Auto mode (when you learn a spell) and <code>/mm sync</code> (for the spells you
+already know) use the same rule. For each spell, the first that applies:</p>
+<ol>
+<li><strong>The collection you follow</strong> has a macro for it: that macro.</li>
+<li><strong>The Default collection</strong> has one: Default's. Default applies under every
+    collection, wherever the collection you follow has nothing for the spell (or
+    the same macro name).</li>
+<li><strong>The spell is excluded</strong> for the class (tracking, Eyes of the Beast, Far
+    Sight, mounts, ...): no macro.</li>
+<li>Otherwise <strong>a generated macro</strong> (see <a href="#mm-auto">auto mode</a>).</li>
+</ol>
+<p>A collection macro with several spells is created when the first of them is
+learned; the others only update it. A spell shouldn't be both excluded and in a
+macro you follow: if one is, a red <code>conflict:</code> line in chat says so at login.</p>
 <h2 id="details">Details</h2>
-<h3 id="mm-sync"><code>/mm sync</code></h3>
-<p><code>/mm sync</code> is the once-per-character setup. It creates every macro in the
-list, known or not, so you can lay out your bars once; macros for spells you
-don't know yet show a question mark and fill in as you train. It reports
-anything that didn't fit in your free character slots.</p>
+<h3 id="mm-sync"><code>/mm sync</code> and <code>/mm sync all</code></h3>
+<p><code>/mm sync</code> catches a character up: a leveled character the addon sees for
+the first time, or one that just switched collections. It creates what auto
+mode would have made for every spell the character knows (generated macros only
+while auto mode is on) and never touches macros that already exist.</p>
+<p><code>/mm sync all</code> also creates the collection's macros for spells you don't know
+yet, so you can lay out your bars once; they show a question mark and fill in as
+you train. Both report anything that didn't fit in your free character slots.</p>
 <h3 id="mm-update"><code>/mm update</code></h3>
-<p><code>/mm update</code> is rarely needed: macros are rewritten automatically when
-you learn a spell or change your main-hand weapon (after combat, if you're
-in it). Use it after editing a class file if you don't want to wait.</p>
+<p><code>/mm update</code> is rarely needed: collection macros are rewritten
+automatically when you learn a spell or change your main-hand weapon (after
+combat, if you're in it). Use it after editing a class file if you don't want to
+wait.</p>
 <h3 id="mm-resync"><code>/mm resync</code></h3>
-<p><code>/mm resync</code> is the command to run after editing a class file or
-switching collections: it brings the character fully up to date without
-taking anything off your bars.</p>
-<h3 id="mm-clear"><code>/mm clear</code></h3>
+<p><code>/mm resync</code> is the command to run after editing a class file: it brings
+the character fully up to date, placeholders included, without taking anything
+off your bars.</p>
+<h3 id="mm-clear"><code>/mm clear</code> and <code>/mm clear -a</code></h3>
 <p><code>/mm clear</code> deletes by name. A character macro is deleted when its name
-appears in any collection's list for the character's class (Mikey's,
-Ulako's, ...). Other character macros, such as one called <code>test</code>, are kept,
-and general (account) macros are never touched. A hand-made macro that
-happens to share a collection macro's name <strong>is</strong> deleted. There's no
-confirmation, and deleted macros come off your bars. See
+appears in any collection's list for the character's class (Default's, Mikey's,
+Ulako's, ...). Other character macros, such as one called <code>test</code> or a
+generated macro, are kept, and general (account) macros are never touched. A
+hand-made macro that happens to share a collection macro's name <strong>is</strong>
+deleted. There's no confirmation, and deleted macros come off your bars. See
 <a href="collections-guide.html#clearing-macros-and-name-collisions">name collisions</a>.</p>
+<p><code>/mm clear -a</code> deletes <strong>every</strong> character macro, hand-made ones too, after a
+Yes/No popup. General (account) macros are still kept. With <code>/mm sync</code> after it,
+it's the clean way to switch collections or start over.</p>
 <h3 id="mm-auto"><code>/mm auto on</code> / <code>off</code></h3>
 <p>Auto mode, per character, <strong>on by default</strong>. Every new class spell the
-character learns gets its own character macro:</p>
+character learns gets a macro, by the <a href="#which-macro">usual rule</a>. A generated
+macro is shaped by what the game says about the spell:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Spell</th><th>Macro</th></tr></thead>
+<tbody>
+<tr><td>harmful</td><td><code>/startattack</code> first</td></tr>
+<tr><td>harmful, ranged</td><td><code>/use [@mouseover,harm,nodead] [] Spell</code></td></tr>
+<tr><td>helpful, ranged</td><td><code>/use [@mouseover,help,nodead] [] Spell</code></td></tr>
+<tr><td>toggle (stance, form, aura, auto-repeat, "until cancelled")</td><td><code>/use !Spell</code>, so a second press doesn't cancel it</td></tr>
+<tr><td>pet-only (Mend Pet, Health Funnel)</td><td>no targeting</td></tr>
+</tbody>
+</table></div>
+<p>For example, Frostbolt becomes:</p>
 <pre><code>#showtooltip
-/use Judgement</code></pre>
+/startattack
+/use [@mouseover,harm,nodead] [] Frostbolt</code></pre>
 <ul>
 <li><strong>Only new spells:</strong> a spell counts once, when its first rank (or the unranked
 spell) is learned; higher ranks don't make another macro. A spell is only ever handled
 once, even after a talent reset or deleting its macro.</li>
 <li><strong>Where it starts:</strong> a brand-new (level 1) character gets macros for its
 starting spells. A character that's already leveled when the addon first sees it
-is left as it is, and so is everything a character knows when you turn auto mode
-back on with <code>/mm auto on</code>; only spells learned after that get macros.</li>
+is left as it is (<code>/mm sync</code> catches it up), and so is everything a character
+knows when you turn auto mode back on with <code>/mm auto on</code>.</li>
 <li><strong>Class spells only:</strong> the class tabs of the spellbook. The General tab (Attack,
-racials, professions, mounts) and passive spells are skipped.</li>
-<li><strong>Collections first:</strong> no macro is made for a spell the character's collection
-already has a macro for.</li>
+racials, professions, mounts), passive spells and pet abilities are skipped.</li>
+<li><strong>On your bars:</strong> if the spell is already on an action button (your starting
+spells at level 1; on retail, spells the game places for you), the new macro takes
+its place. Empty buttons are never filled. If a new macro didn't land on a bar,
+the macro window opens on the character tab so you can drag it on.</li>
+<li><strong>In chat:</strong> <code>new spell macro: ...</code> for each one made, and
+<code>no macro (excluded): ...</code> once for each excluded spell.</li>
 <li><strong>Names:</strong> the spell's name, or its initials when longer than 16 characters
 (Blessing of Might becomes <code>BoM</code>); a number is added if the name is taken.</li>
-<li><strong>They're yours:</strong> the addon never rewrites these macros, and <code>/mm clear</code>
-doesn't delete them, so tweak them freely.</li>
+<li><strong>Generated macros are yours:</strong> the addon never rewrites them, and <code>/mm clear</code>
+doesn't delete them (<code>/mm clear -a</code> does), so tweak them freely.</li>
 </ul>
 <p><code>/mm auto</code> alone shows whether it's on. Turning it off keeps the macros it made.</p>
 <h3 id="mm-use"><code>/mm use &lt;name&gt;</code></h3>
-<p>Characters follow no collection until you opt in. <code>/mm use &lt;name&gt;</code> picks one
-for this character only (it must have a list for the character's class), and
-<code>/mm use none</code> stops following it; the collection's macros are kept but no longer
-updated, and <code>/mm clear</code> removes them. <code>/mm use</code> alone lists the collections.
-Switching deletes nothing; follow it with <code>/mm resync</code>, or <code>/mm clear</code> first for a
-clean switch. See <a href="collections-guide.html#switching-collections">Switching collections</a>.</p>
+<p>New level-1 characters start on the Default collection. <code>/mm use &lt;name&gt;</code> picks
+another for this character only (it must have a list for the character's class),
+<code>/mm use default</code> goes back to Default, and <code>/mm use none</code> follows nothing
+(Default's macros and generated ones still apply). <code>/mm use</code> alone lists the
+collections. Switching deletes nothing: the old collection's macros are kept but
+no longer updated. For a clean switch, <code>/mm clear -a</code>, then <code>/mm sync</code>. See
+<a href="collections-guide.html#switching-collections">Switching collections</a>.</p>
 <p>Nothing that changes macros runs in combat; the addon says so, or waits for
 combat to end.</p>
 </main>

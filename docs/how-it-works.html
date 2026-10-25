@@ -41,31 +41,42 @@
 <h1 id="how-it-works">How it works</h1>
 <h2 id="lifecycle">Lifecycle</h2>
 <ol>
-<li><strong>Out of the box:</strong> auto mode makes a plain macro for each new class
-    spell the character learns. Drag them onto your bars as they appear.</li>
-<li><strong>With a collection (opt-in):</strong> <code>/mm use &lt;name&gt;</code> and then <code>/mm sync</code>
-    create every macro in that collection's class list, as character-specific
-    macros, so you can lay out your bars once.</li>
+<li><strong>Out of the box:</strong> a new character starts on the Default collection
+    with auto mode on. Each class spell it learns gets a macro: the collection's
+    if it has one, otherwise Default's, otherwise a generated one (see
+    <a href="commands.html#which-macro">Which macro a spell gets</a>). At level 1 the
+    starting spells on the bar become their macros in place; later, the macro
+    window opens so you can drag new ones on.</li>
+<li><strong>With a collection (opt-in):</strong> <code>/mm use &lt;name&gt;</code>; its macros appear as
+    you learn their spells. <code>/mm sync</code> creates them for spells you already
+    know, and <code>/mm sync all</code> creates the whole class list at once, so you can
+    lay out your bars once.</li>
 <li><strong>Trimming:</strong> each macro is written with only the spells the character
     knows (see <a href="writing-macros.html#trimming-rules">trimming rules</a>). Fall-through
     lines and <code>#showtooltip</code> icons therefore always work, and a macro with
     nothing known yet shows a question mark.</li>
 <li><strong>Automatic updates:</strong> when you learn a spell or change your main-hand
-    weapon, the macros are rewritten. Changes are batched (half a second) and
+    weapon, the collection macros (Default's included) are rewritten. Changes are batched (half a second) and
     wait for combat to end.</li>
 <li>Rewriting edits a macro in place, so it keeps its place on your bars.</li>
 </ol>
 <h2 id="the-addon-owns-its-macros">The addon owns its macros</h2>
-<p>An edit made in the in-game macro window is overwritten the next time the
-macro is rewritten. Make permanent changes in the collection's class file
-(see the <a href="collections-guide.html">Collections guide</a>). Renaming a macro in game
-takes it out of the addon's hands. General (account) macros are never
-touched.</p>
+<p>Collection macros, Default's included, belong to the addon: an edit made in
+the in-game macro window is overwritten the next time the macro is rewritten.
+Make permanent changes in the collection's class file (see the
+<a href="collections-guide.html">Collections guide</a>). Renaming a macro in game takes it
+out of the addon's hands. Generated macros are the other way round: they're
+written once and never touched again, so edit them freely. General (account)
+macros are never touched.</p>
 <h2 id="spell-detection">Spell detection</h2>
 <p>The addon reads the spellbook, by name, for spells that are actually learned
 (not future or off-spec spells). It uses retail's <code>C_SpellBook</code> API where
 present and the Classic spellbook API otherwise, so the same files work on
-Classic Era, WoW: Forever and retail.</p>
+Classic Era, WoW: Forever and retail. A generated macro's shape comes from the
+spell's own data: harmful or helpful, its range, and its description (toggles,
+pet-only spells). On Classic clients the range is read with <code>GetSpellInfo</code>,
+because their <code>C_Spell.GetSpellInfo</code> reports the minimum and maximum range the
+wrong way round.</p>
 <h2 id="saved-data">Saved data</h2>
 <p>Per character (<code>MikeyMacrosCharDB</code>): the collection chosen with
 <code>/mm use</code>, whether auto mode is on, and the names of the class spells auto mode has
@@ -86,6 +97,15 @@ comparison per macro.</p>
 <h2 id="troubleshooting">Troubleshooting</h2>
 <ul>
 <li><strong>A key shows "?"</strong>: you don't know any of its spells yet. Expected.</li>
+<li><strong>A spell got no macro</strong>: check chat. <code>no macro (excluded)</code> means it's on the
+    class's exclude list; <code>no free character slots</code> means you're full. A leveled
+    character the addon saw for the first time gets nothing until <code>/mm sync</code>.</li>
+<li><strong>A character follows a collection you didn't pick</strong>: it already had that
+    collection's macros (they're stored on Blizzard's servers, so they survive a
+    cleared WTF folder), and the addon kept it following them. <code>/mm use default</code>
+    changes that.</li>
+<li><strong>A <code>conflict:</code> line at login</strong>: a spell is both excluded and in a macro
+    this character follows. Take it off the exclude list or out of the macro.</li>
 <li><strong>A macro didn't update after training</strong>: <code>/mm update</code>. If it still
     doesn't, check the spell's name in <code>spells</code> matches the spellbook exactly.</li>
 <li><strong>A new class file isn't picked up</strong>: it must be listed in
