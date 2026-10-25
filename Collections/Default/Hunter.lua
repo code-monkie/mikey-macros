@@ -30,4 +30,6 @@ ns.Exclude("HUNTER", {
     "Dismiss Pet",
     "Revive Pet",
     "Feed Pet",
+    "Flare",
+    "Feign Death",
 })

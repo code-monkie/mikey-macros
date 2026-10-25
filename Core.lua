@@ -679,17 +679,18 @@ local function Adopt()
     end
 end
 
--- A spell shouldn't be both excluded and part of a macro this character
--- follows (its collection's, or Default's under it). Said once per session in
--- chat, so the data files can be fixed.
+-- A spell shouldn't be both excluded and part of a macro in the same
+-- collection's file (the followed collection's macros against its own exclude
+-- list; Default's against Default's). A followed collection's macro for a
+-- spell Default excludes is a deliberate override, not a conflict. Said once
+-- per session in chat, so the data files can be fixed.
 local conflictsChecked = false
 local function CheckConflicts()
     if conflictsChecked then return end
     conflictsChecked = true
     local _, class = UnitClass("player")
-    local excluded = Excluded(class)
-    if not next(excluded) then return end
-    local function check(defs, owner)
+    local function check(defs, owner, excluded)
+        if not excluded then return end
         for _, def in ipairs(defs) do
             for _, spell in ipairs(def.spells) do
                 if excluded[spell:lower()] then
@@ -700,8 +701,12 @@ local function CheckConflicts()
         end
     end
     local list, owner = ActiveList()
-    if list then check(list, owner) end
-    check(DefaultList(), DEFAULT)
+    if list then
+        local own = ns.excludedBy[owner] and ns.excludedBy[owner][class]
+        if owner == DEFAULT then own = ns.excluded[class] end
+        check(list, owner, own)
+    end
+    check(DefaultList(), DEFAULT, ns.excluded[class])
 end
 
 -- Keep macros current as spells (and the main-hand weapon) change.
