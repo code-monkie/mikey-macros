@@ -4,41 +4,45 @@
 -- Bear is always [form:1] (the first form learned). Other form numbers depend
 -- on the order you learn forms, so they're avoided: Aquatic uses [swimming].
 -- Bear abilities shift you into Bear Form first if you aren't in it.
+-- One spell per macro, no modifier branches: Shift and Ctrl are their own
+-- bars (Shift+1-7, Ctrl+1-7).
 
 local _, ns = ...
 
 ns.Collection("Mikey").DRUID = {
     -- Caster -------------------------------------------------------------------
-    -- Wrath; Shift Starfire.
-    { name = "Wrath", spells = { "Wrath", "Starfire" }, body = [[
-        #showtooltip
-        /startattack
-        /use [mod:shift,@mouseover,harm,nodead] [mod:shift] Starfire; [@mouseover,harm,nodead] [] Wrath
-    ]] },
-
-    -- Moonfire; Shift rank 1 (a cheap tag or pull).
+    -- Wrath, Starfire, Mark of the Wild and Thorns: auto mode's generated macros
+    -- (/startattack + mouseover for damage, mouseover friend for buffs).
+    -- Moonfire and Healing Touch are spelled out because their low-rank macros
+    -- below cover the spells (auto mode would otherwise skip them).
     { name = "Moonfire", spells = { "Moonfire" }, body = [[
         #showtooltip
         /startattack
-        /use [mod:shift,@mouseover,harm,nodead] [mod:shift] Moonfire(Rank 1); [@mouseover,harm,nodead] [] Moonfire
+        /use [@mouseover,harm,nodead] [] Moonfire
     ]] },
 
-    -- Healing Touch; Shift rank 2 (a cheap heal).
+    -- Rank 1: a cheap tag or pull.
+    { name = "MF1", spells = { "Moonfire" }, body = [[
+        #showtooltip
+        /startattack
+        /use [@mouseover,harm,nodead] [] Moonfire(Rank 1)
+    ]] },
+
     { name = "HT", spells = { "Healing Touch" }, body = [[
         #showtooltip
-        /use [mod:shift,@mouseover,help,nodead] [mod:shift] Healing Touch(Rank 2); [@mouseover,help,nodead] [] Healing Touch
+        /use [@mouseover,help,nodead] [] Healing Touch
     ]] },
 
-    -- Mark of the Wild; Shift Thorns. Mouseover friend, else target.
-    { name = "Buff", spells = { "Mark of the Wild", "Thorns" }, body = [[
+    -- Rank 2: a cheap heal.
+    { name = "HT2", spells = { "Healing Touch" }, body = [[
         #showtooltip
-        /use [mod:shift,@mouseover,help,nodead] [mod:shift] Thorns; [@mouseover,help,nodead] [] Mark of the Wild
+        /use [@mouseover,help,nodead] [] Healing Touch(Rank 2)
     ]] },
 
-    -- Entangling Roots; Shift Hibernate.
-    { name = "Roots", spells = { "Entangling Roots", "Hibernate" }, body = [[
+    -- Hibernate comes from the Default collection (/stopattack, mouseover).
+    { name = "Roots", spells = { "Entangling Roots" }, body = [[
         #showtooltip
-        /use [mod:shift,@mouseover,harm,nodead] [mod:shift] Hibernate; [@mouseover,harm,nodead] [] Entangling Roots
+        /use [@mouseover,harm,nodead] [] Entangling Roots
     ]] },
 
     -- Bear ---------------------------------------------------------------------
