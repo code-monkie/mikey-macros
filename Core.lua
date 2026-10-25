@@ -480,7 +480,7 @@ local function AutoCreate()
     local spellsInOrder = {}
     for low, name in pairs(current) do
         if not known[low] then
-            if excluded[low] then
+            if excluded[low] and not defs[low] then -- a macro you follow still wins
                 known[low] = true -- reported once, never made
                 skipped[#skipped + 1] = name
             else

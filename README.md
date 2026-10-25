@@ -17,12 +17,18 @@ tested on Classic Era (1.15.9) and retail (12.1.5).
 
 ## Features
 
-- **Works out of the box.** Auto mode gives every class spell you learn its own
-  macro (`#showtooltip`, `/use Spell`), ready to drag onto a bar and tweak.
-  Great for new players and new classes.
+- **Works out of the box.** Auto mode gives every class spell you learn a
+  macro, shaped for the spell: mouseover targeting on ranged spells,
+  `/startattack` on attacks, `!` on toggles. At level 1 the starting spells on
+  your bar become their macros in place; later, the macro window opens so you
+  can drag new ones on.
+- **One rule for every macro.** For each spell: the macro from the collection
+  you follow, else the **Default** collection's (hand-picked exceptions such as
+  crowd control, stealth and resurrection), else a generated one, unless the
+  spell is on the class's exclude list (Eyes of the Beast, tracking, ...).
 - **Collections, opt-in.** Follow someone's hand-written set with
-  `/mm use <name>` and `/mm sync`, and the whole class set is created at
-  once, so you can lay out your action bars at level 1.
+  `/mm use <name>`. Its macros appear as you learn their spells, or all at
+  once with `/mm sync all` so you can lay out your action bars at level 1.
 - **Always correct for your level.** Collection macros leave out spells you
   haven't trained and update themselves (after combat) as you learn them,
   keeping their places on your bars.
@@ -36,23 +42,28 @@ tested on Classic Era (1.15.9) and retail (12.1.5).
    the game.
 2. Play. Each class spell you learn gets its own macro; drag it onto a bar.
 
+A character that's already leveled when the addon first sees it is left as it
+is: `/mm sync` gives it macros for everything it knows.
+
 To follow a collection on a character: `/mm collections` to see what's
-installed, `/mm use <name>`, then `/mm sync`. The macro window opens with the
-class's macros (unlearned keys show a question mark); each fills in as you
-train its spells.
+installed, `/mm use <name>`, then `/mm sync` (or `/mm clear -a` first, for a
+clean switch). `/mm sync all` also creates the macros for spells you haven't
+learned yet (they show a question mark and fill in as you train).
 
 ## Commands
 
 | Command | |
 |---|---|
 | `/mm list` | Macros for this character's class and their state |
-| `/mm sync` | Create the collection's class set (once per character) |
-| `/mm resync` | Create anything missing and rewrite the rest; nothing leaves your bars |
+| `/mm sync` | Create the missing macros for the spells you know (normally automatic as you learn them) |
+| `/mm sync all` | The same, plus collection macros for spells you haven't learned yet |
+| `/mm resync` | `/mm sync all`, then rewrite the rest; nothing leaves your bars |
 | `/mm update` | Rewrite now (normally automatic) |
 | `/mm clear` | Delete this character's collection macros (by name) |
+| `/mm clear -a` | Delete all of this character's macros, after a confirmation |
 | `/mm collections` | Installed collections and the one this character follows |
-| `/mm use <name>` | Follow a collection on this character (`none` to stop) |
-| `/mm auto on` / `off` | Auto mode (on by default): a macro for each new class spell, unless the collection covers it |
+| `/mm use <name>` | Follow a collection on this character (`default`, or `none` to stop) |
+| `/mm auto on` / `off` | Auto mode (on by default): a macro for each new class spell |
 | `/mm docs` | The documentation's web address, ready to copy |
 
 Details, including how `/mm clear` matches names: [Commands](docs/commands.html).
@@ -61,11 +72,13 @@ Details, including how `/mm clear` matches names: [Commands](docs/commands.html)
 
 | Collection | Classes |
 |---|---|
+| Default | Druid, Hunter, Mage, Paladin, Priest, Rogue, Shaman, Warlock (exceptions and exclude lists) |
 | Mikey | Rogue, Shaman, Hunter, Druid |
 | Ulako | Shaman, Mage |
 
-Classes with no collection aren't supported yet. Adding one is a single file:
-see the [Collections guide](docs/collections-guide.html).
+Every class works with auto mode; a collection is for hand-written macros on
+top. Adding one is a single file: see the
+[Collections guide](docs/collections-guide.html).
 
 ## VS Code extension
 
@@ -111,14 +124,14 @@ Planned next:
 Ideas being kept for later (trade-offs in the [Roadmap](docs/roadmap.html)):
 
 - dirty-macro detection, so hand edits in the macro window are respected;
-- an in-game editor that saves overrides on top of a collection;
-- creating each macro only when its first spell is learned.
+- an in-game editor that saves overrides on top of a collection.
 
 ## Repository layout
 
 ```
 mikey-macros.toc                  load order; every collection file is listed here
-Core.lua                          spell detection, trimming, collections, commands
+Core.lua                          spell detection, trimming, collections, auto mode, commands
+Collections/Default/<Class>.lua   the exceptions to generated macros, and the exclude list
 Collections/<Owner>/<Class>.lua   one person's macro list for one class
 docs/                             guides (also online)
 tools/vscode-mikey-macros/        VS Code extension: checks, colors and autocompletes macros

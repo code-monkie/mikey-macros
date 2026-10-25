@@ -55,6 +55,7 @@ collection each character follows.</p>
 <p>A collection is one person's macro lists: a folder under <code>Collections/</code> named
 for its owner, with one file per class they cover.</p>
 <pre><code>Collections/
+  Default/ Druid.lua  Hunter.lua  Mage.lua  Paladin.lua  Priest.lua ...
   Mikey/   Rogue.lua  Shaman.lua  Hunter.lua  Druid.lua
   Ulako/   Shaman.lua  Mage.lua</code></pre>
 <p>Each file adds one class to its owner's collection:</p>
@@ -80,33 +81,53 @@ ns.Collection(&quot;Mikey&quot;).ROGUE = {
     <code>Core.lua</code>.</li>
 </ul>
 <h2 id="which-collection-a-character-follows">Which collection a character follows</h2>
-<p>A character follows <strong>no collection</strong> until you opt in. Out of the box,
-<a href="commands.html#mm-auto">auto mode</a> makes its macros: a plain macro for each class
-spell as it's learned.</p>
-<p>To use a collection on a character, pick it with <code>/mm use &lt;name&gt;</code>, then
-<code>/mm sync</code>. The collection must have a list for the character's class.
-<code>/mm use none</code> stops following one. Without a collection, <code>/mm sync</code>,
-<code>/mm resync</code> and <code>/mm list</code> say so and list the installed collections.</p>
+<p>A new (level 1) character starts on the <strong>Default</strong> collection. To use another,
+pick it with <code>/mm use &lt;name&gt;</code>; it must have a list for the character's class.
+<code>/mm use default</code> goes back, and <code>/mm use none</code> follows nothing.</p>
+<p>Whatever a character follows, every spell it learns gets a macro by one rule
+(see <a href="commands.html#which-macro">Which macro a spell gets</a>): the followed
+collection's, else Default's, else a generated one, unless the spell is excluded.
+So a collection only needs the macros its owner wants to write by hand; auto mode
+and Default cover the rest.</p>
 <p>The choice is saved per character (<code>MikeyMacrosCharDB</code> in the character's
 SavedVariables). <code>/mm collections</code> lists every collection and the classes it
 covers, and marks the one the current character follows; <code>/mm list</code> starts with
 it too.</p>
-<p>Collections and auto mode work together: auto mode skips any spell the
-character's collection already has a macro for.</p>
 <p>Examples with the collections above:</p>
 <div class="table-wrap"><table>
 <thead><tr><th>Character</th><th>Follows</th><th>Why</th></tr></thead>
 <tbody>
-<tr><td>Any character, nothing chosen</td><td>none</td><td>opt-in only; auto mode makes its macros</td></tr>
-<tr><td>Rogue after <code>/mm use mikey</code></td><td>Mikey</td><td>chosen, and Mikey has a rogue list</td></tr>
+<tr><td>New level-1 character</td><td>Default</td><td>where every new character starts</td></tr>
+<tr><td>Rogue after <code>/mm use mikey</code></td><td>Mikey</td><td>chosen, and Mikey has a rogue list; Default fills the gaps</td></tr>
 <tr><td>Shaman after <code>/mm use ulako</code></td><td>Ulako</td><td>chosen, and Ulako has a shaman list</td></tr>
-<tr><td>Mage after <code>/mm use mikey</code></td><td>none</td><td>Mikey has no mage list, so the choice isn't saved</td></tr>
-<tr><td>Priest</td><td>none</td><td>no collection has a priest list yet</td></tr>
+<tr><td>Mage after <code>/mm use mikey</code></td><td>unchanged</td><td>Mikey has no mage list, so the choice isn't saved</td></tr>
+<tr><td>Warrior</td><td>Default</td><td>no collection has a warrior list; every macro is generated</td></tr>
 </tbody>
 </table></div>
 <p><strong>Characters set up earlier,</strong> before collections were opt-in, keep the
 collection whose macros they already have: the first time the addon sees such a
 character, it adopts that collection (Mikey's first) and says so in chat.</p>
+<h2 id="the-default-collection">The Default collection</h2>
+<p><code>Collections/Default/</code> holds the exceptions to generated macros, the spells
+where the generated shape would be wrong or risky. It's an ordinary collection,
+one file per class, and applies under every other collection:</p>
+<ul>
+<li><strong>Crowd control</strong> (Polymorph, Sap, Fear, Hibernate, ...): <code>/stopattack</code> first,
+    so auto-attack doesn't break it.</li>
+<li><strong>Stealth</strong>: Stealth (off the mount; Pick Pocket once stealthed), Vanish, Prowl,
+    and Ghost Wolf (not while mounted).</li>
+<li><strong>Res</strong>: one resurrection macro per class, on a dead friend under the mouse.</li>
+<li>A few others: Distract at the cursor, the best Healthstone you know.</li>
+</ul>
+<p>Each class file ends with its <strong>exclude list</strong>: spells that never get a generated
+macro, whatever collection the character follows.</p>
+<pre><code class="language-lua">ns.Exclude(&quot;HUNTER&quot;, {
+    &quot;Eyes of the Beast&quot;,
+    &quot;Track Beasts&quot;,
+    -- ...
+})</code></pre>
+<p>Learning an excluded spell says <code>no macro (excluded): ...</code> in chat, once. Add to
+either list as you find spells that need it; most players never need to.</p>
 <h2 id="editing-an-existing-collection">Editing an existing collection</h2>
 <p>All edits happen in the collection's class files, in any text editor. The
 addon reads them at load, so after saving:</p>
@@ -178,17 +199,18 @@ most 16 characters.</p>
 <h2 id="switching-collections">Switching collections</h2>
 <ul>
 <li><code>/mm use &lt;name&gt;</code> switches the current character; <code>/mm use none</code> stops
-    following a collection. After switching, <code>/mm resync</code> creates the new
-    collection's macros.</li>
+    following a collection. After switching, <code>/mm sync</code> creates the new
+    collection's macros for the spells you know (<code>/mm sync all</code> for all of them).</li>
 <li>Switching never deletes anything. The previous collection's macros stay on
     the character (and your bars) but are no longer managed.</li>
 <li>
 <p>For a clean switch:</p>
-<pre><code>/mm clear
+<pre><code>/mm clear -a
 /mm use ulako
-/mm resync</code></pre>
-<p><code>/mm clear</code> removes macros from <strong>every</strong> collection for the class, so the
-previous collection's macros go too.</p>
+/mm sync</code></pre>
+<p><code>/mm clear -a</code> removes <strong>every</strong> character macro (after a confirmation), so the
+previous collection's macros and any generated ones go too. Plain <code>/mm clear</code>
+removes only collection macros.</p>
 </li>
 </ul>
 <h2 id="clearing-macros-and-name-collisions">Clearing macros and name collisions</h2>
@@ -200,6 +222,8 @@ whose name appears in any collection's list for the character's class.</p>
     kept.</li>
 <li>General (account) macros are never touched.</li>
 <li>There's no confirmation, and deleted macros come off your action bars.</li>
+<li>Generated macros aren't in any collection, so <code>/mm clear</code> keeps them;
+    <code>/mm clear -a</code> deletes everything.</li>
 </ul>
 <p><strong>Collisions.</strong> Because macros are matched by name:</p>
 <ul>
