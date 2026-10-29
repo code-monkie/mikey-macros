@@ -488,6 +488,11 @@ end
 -- (the starting spells at level 1; on retail, spells the game places as you
 -- learn them). Empty buttons are never filled. Out of combat, empty cursor only.
 -- Returns the names of the macros it placed.
+-- General (account) macro swapped onto a new character's Attack button; made if missing.
+-- Slot 16 is the main hand, so the button shows your weapon.
+local ATTACK_MACRO = "Attack"
+local ATTACK_BODY = "#showtooltip 16\n/startattack"
+
 local function SwapIntoBars(made)
     local placed = {}
     if #made == 0 or InCombatLockdown() or GetCursorInfo() then return placed end
@@ -513,10 +518,42 @@ local function SwapIntoBars(made)
     return placed
 end
 
+-- The Attack macro onto ATTACK_SLOT, and the Attack spell off the rest of bar 1.
+-- Out of combat, empty cursor only. A button 9 already holding something else is
+-- left alone (said in chat), and then the Attack spell stays where it is too.
+local ATTACK_SLOT = 9 -- bar 1, button 9 (7 until Mikey moved it, 2026-10-29)
+local function PlaceAttack()
+    local index = GetMacroIndexByName(ATTACK_MACRO)
+    if index == 0 or InCombatLockdown() or GetCursorInfo() then return end
+    local kind, id = GetActionInfo(ATTACK_SLOT)
+    local isAttackSpell = function(k, i)
+        local name = k == "spell" and i and ((C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(i))
+            or (GetSpellInfo and GetSpellInfo(i)))
+        return name and name:lower() == "attack"
+    end
+    local mine = kind == "macro" and id == index
+    if kind and not mine and not isAttackSpell(kind, id) then
+        Print("bar 1 button " .. ATTACK_SLOT .. " is taken; drag the " .. ATTACK_MACRO .. " macro onto your bar by hand.")
+        return
+    end
+    if not mine then
+        PickupMacro(index)
+        PlaceAction(ATTACK_SLOT)
+        ClearCursor()
+    end
+    for slot = 1, 12 do
+        if slot ~= ATTACK_SLOT and isAttackSpell(GetActionInfo(slot)) then
+            PickupAction(slot)
+            ClearCursor()
+        end
+    end
+end
+
 local function AutoCreate()
     local db = CharDB()
     if db.auto == false or InCombatLockdown() then return end -- on unless switched off
     local current = ClassSpells()
+    local brandNew = false
     if not db.autoKnown then
         -- First time the addon sees this character: a brand-new (level 1) one gets
         -- macros for its starting spells; an existing one is left as it is.
@@ -527,6 +564,7 @@ local function AutoCreate()
             return
         end
         db.autoKnown = {}
+        brandNew = true
     end
     local known = db.autoKnown
     -- Collection macros by the spells that make them (followed collection first,
@@ -613,6 +651,22 @@ local function AutoCreate()
             ShowCharacterMacros()
             break
         end
+    end
+    -- A brand-new character gets the general (account) macro "Attack" on bar 1
+    -- button 9, made first if the account doesn't have it yet (an existing one is
+    -- used as it is, whatever its body). The game's own Attack spell is cleared
+    -- from bar 1, so Attack lives only on button 9 (Mikey's layout, 2026-10-29).
+    if brandNew then
+        if GetMacroIndexByName(ATTACK_MACRO) == 0 then
+            local numAccount = GetNumMacros()
+            if numAccount < AccountMax() then
+                CreateMacro(ATTACK_MACRO, ICON, ATTACK_BODY, false)
+                Print("new general macro: " .. ATTACK_MACRO)
+            else
+                Print("|cffff6060no free general slots|r for the " .. ATTACK_MACRO .. " macro")
+            end
+        end
+        PlaceAttack()
     end
     if #created > 0 then Print("new spell macro: " .. table.concat(created, ", ")) end
     if #skipped > 0 then Print("no macro (excluded): " .. table.concat(skipped, ", ")) end
