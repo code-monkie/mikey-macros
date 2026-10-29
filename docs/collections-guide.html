@@ -55,9 +55,14 @@ collection each character follows.</p>
 <p>A collection is one person's macro lists: a folder under <code>Collections/</code> named
 for its owner, with one file per class they cover.</p>
 <pre><code>Collections/
-  Default/ Druid.lua  Hunter.lua  Mage.lua  Paladin.lua  Priest.lua ...
-  Mikey/   Rogue.lua  Shaman.lua  Hunter.lua  Druid.lua
-  Ulako/   Shaman.lua  Mage.lua</code></pre>
+  Default/           Druid.lua  Hunter.lua  Mage.lua  Paladin.lua  Priest.lua ...
+  Mikey/             Rogue.lua  Shaman.lua  Hunter.lua  Druid.lua  Warlock.lua  Paladin.lua
+  Ulako/             Shaman.lua  Mage.lua
+  ClassicWowForever/ Rogue.lua</code></pre>
+<p><strong>ClassicWowForever</strong> is a snapshot of the macros published at
+<a href="https://classicwowforever.com/macros/">classicwowforever.com/macros</a> (CC BY 4.0),
+for players new to Forever or to a class: <code>/mm use classicwowforever</code>. Rogue
+only so far.</p>
 <p>Each file adds one class to its owner's collection:</p>
 <pre><code class="language-lua">local _, ns = ...
 

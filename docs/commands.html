@@ -173,11 +173,22 @@ starting spells. A character that's already leveled when the addon first sees it
 is left as it is (<code>/mm sync</code> catches it up), and so is everything a character
 knows when you turn auto mode back on with <code>/mm auto on</code>.</li>
 <li><strong>Class spells only:</strong> the class tabs of the spellbook. The General tab (Attack,
-racials, professions, mounts), passive spells and pet abilities are skipped.</li>
+racials, professions, mounts), passive spells and pet abilities are skipped. (Attack
+gets the one exception, below.)</li>
 <li><strong>On your bars:</strong> if the spell is already on an action button (your starting
 spells at level 1; on retail, spells the game places for you), the new macro takes
 its place. Empty buttons are never filled. If a new macro didn't land on a bar,
 the macro window opens on the character tab so you can drag it on.</li>
+<li id="attack-macro"><strong>The Attack macro:</strong> a brand-new (level 1) character also gets the
+general (account) macro <code>Attack</code> on bar 1, button 9, and the game's Attack spell is
+taken off the rest of bar 1. The macro is made if the account doesn't have one yet
+(<code>new general macro: Attack</code>):
+<pre><code>#showtooltip 16
+/startattack</code></pre>
+Slot 16 is the main hand, so the button shows your weapon. An <code>Attack</code> macro the
+account already has is used as it is, whatever it says. If button 9 already holds
+something else, it's left alone, chat says so, and the Attack spell stays where it
+is; drag the macro on by hand. Out of combat only, like everything on this list.</li>
 <li><strong>In chat:</strong> <code>new spell macro: ...</code> for each one made, and
 <code>no macro (excluded): ...</code> once for each excluded spell.</li>
 <li><strong>Names:</strong> the spell's name, or its initials when longer than 16 characters

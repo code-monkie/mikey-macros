@@ -20,8 +20,9 @@ tested on Classic Era (1.15.9) and retail (12.1.5).
 - **Works out of the box.** Auto mode gives every class spell you learn a
   macro, shaped for the spell: mouseover targeting on ranged spells,
   `/startattack` on attacks, `!` on toggles. At level 1 the starting spells on
-  your bar become their macros in place; later, the macro window opens so you
-  can drag new ones on.
+  your bar become their macros in place, and a general `Attack` macro
+  (`#showtooltip 16` / `/startattack`) goes on bar 1, button 9 in place of the
+  Attack spell; later, the macro window opens so you can drag new ones on.
 - **One rule for every macro.** For each spell: the macro from the collection
   you follow, else the **Default** collection's (hand-picked exceptions such as
   crowd control, stealth and resurrection), else a generated one, unless the

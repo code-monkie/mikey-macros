@@ -2,7 +2,7 @@
 
 Handoff notes for Claude sessions working on this addon. The README covers what
 the addon does for players; this covers how we work on it and where things
-stand. Last updated 25 October 2026.
+stand. Last updated 29 October 2026.
 
 ## What it is
 
@@ -59,6 +59,12 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   macro exists, it does.
 - **Refresh triggers:** login, `SPELLS_CHANGED`, `UPDATE_SHAPESHIFT_FORMS`,
   main-hand changes, leaving combat.
+- **Attack macro (2026-10-29):** a brand-new character (the `brandNew` branch
+  of `AutoCreate`) gets the general (account) macro `Attack`
+  (`#showtooltip 16` / `/startattack`), made if missing and otherwise used as
+  is. `PlaceAttack` puts it on bar 1 button 9 (`ATTACK_SLOT`; was 7 until Mikey
+  moved it) and clears the Attack spell from the rest of bar 1. A taken button
+  9 is left alone with a chat message. Documented in `docs/commands.html#attack-macro`.
 - **Limits:** 18 character macro slots on Classic clients (30 on retail);
   collections can get close.
 
