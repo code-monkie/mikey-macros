@@ -18,7 +18,7 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   message; never commit or push. Merges go through PRs on
   `code-monkie/mikey-macros` (trunk-based: short feature branches into `main`).
 - **Mikey tests in game.** There's no WoW client in the sandbox. Say what to
-  run (`/mm update`, `/mm sync`, `/mm list`) and what to look for.
+  run (`/mma update`, `/mma sync`, `/mma list`) and what to look for.
 - **Where to edit:** `C:\Blizzard\Wow\World of Warcraft\_classic_era_\Interface\AddOns\mikey-macros`
   until Mikey says otherwise. (Earlier work happened in `_retail_`; Forever
   live will be `_forever_`.)
@@ -37,7 +37,7 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
 
 - **Collections:** `ns.Collection("<Owner>").<CLASS> = { entries }`, one file
   per owner and class, every file listed in `mikey-macros.toc`. A character
-  follows one via `/mm use <name>`; Default applies under every collection.
+  follows one via `/mma use <name>`; Default applies under every collection.
 - **Default** (`Collections/Default/`): exceptions to generated macros (crowd
   control with `/stopattack`, stealth, res...) plus `ns.Exclude` lists. A
   Default macro is dropped for a character when the followed collection has a
@@ -65,6 +65,10 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   is. `PlaceAttack` puts it on bar 1 button 9 (`ATTACK_SLOT`; was 7 until Mikey
   moved it) and clears the Attack spell from the rest of bar 1. A taken button
   9 is left alone with a chat message. Documented in `docs/commands.html#attack-macro`.
+- **Bar swapping (`SwapIntoBars`):** a new macro replaces its spell on every
+  action slot 1-180, which takes in the stance and form bars too. Checked on
+  Retail 2026-10-30 (Mikey): spells the game puts on the rogue's stealth bar get
+  their macro there as well.
 - **Limits:** 18 character macro slots on Classic clients (30 on retail);
   collections can get close.
 
@@ -134,8 +138,8 @@ macros on the site, 358 of them non-PvP.
 - **Hunter `/startattack`** stays as is: Forever swaps between Auto Shot and
   melee by itself.
 - **Account-wide default collection** (planned; see `docs/roadmap.html`).
-- **Standard slash commands** across mikey addons: `/mikeymacros` plus a
-  short `/mma`.
+- **Slash commands (done 2026-10-30):** `/mma` and `/mikeymacros`, the mikey
+  addons' standard; the old `/mm` still works as a hidden alias.
 - **Linter:** the VS Code extension tolerates `learn` but doesn't check it
   (e.g. that `learn` names a spell in `spells`). It also flags names shared
   with other collections, which is expected for ClassicWowForever.

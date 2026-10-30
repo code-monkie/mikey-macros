@@ -47,9 +47,9 @@
     <a href="commands.html#which-macro">Which macro a spell gets</a>). At level 1 the
     starting spells on the bar become their macros in place; later, the macro
     window opens so you can drag new ones on.</li>
-<li><strong>With a collection (opt-in):</strong> <code>/mm use &lt;name&gt;</code>; its macros appear as
-    you learn their spells. <code>/mm sync</code> creates them for spells you already
-    know, and <code>/mm sync all</code> creates the whole class list at once, so you can
+<li><strong>With a collection (opt-in):</strong> <code>/mma use &lt;name&gt;</code>; its macros appear as
+    you learn their spells. <code>/mma sync</code> creates them for spells you already
+    know, and <code>/mma sync all</code> creates the whole class list at once, so you can
     lay out your bars once.</li>
 <li><strong>Trimming:</strong> each macro is written with only the spells the character
     knows (see <a href="writing-macros.html#trimming-rules">trimming rules</a>). Fall-through
@@ -79,7 +79,7 @@ because their <code>C_Spell.GetSpellInfo</code> reports the minimum and maximum 
 wrong way round.</p>
 <h2 id="saved-data">Saved data</h2>
 <p>Per character (<code>MikeyMacrosCharDB</code>): the collection chosen with
-<code>/mm use</code>, whether auto mode is on, and the names of the class spells auto mode has
+<code>/mma use</code>, whether auto mode is on, and the names of the class spells auto mode has
 already seen. The macro lists live in the addon's files; the macros themselves live
 in the game's own macro storage.</p>
 <h2 id="performance">Performance</h2>
@@ -90,7 +90,7 @@ comparison per macro.</p>
 <ul>
 <li>Character macros: 30 per character on Classic Era and retail. WoW: Forever
     is likely the same but not confirmed yet (<code>/dump MAX_CHARACTER_MACROS</code>).
-    <code>/mm sync</code> reports anything that didn't fit.</li>
+    <code>/mma sync</code> reports anything that didn't fit.</li>
 <li>255 characters per macro body, 16 per name.</li>
 <li>Macros can't be created or changed in combat.</li>
 </ul>
@@ -99,18 +99,18 @@ comparison per macro.</p>
 <li><strong>A key shows "?"</strong>: you don't know any of its spells yet. Expected.</li>
 <li><strong>A spell got no macro</strong>: check chat. <code>no macro (excluded)</code> means it's on the
     class's exclude list; <code>no free character slots</code> means you're full. A leveled
-    character the addon saw for the first time gets nothing until <code>/mm sync</code>.</li>
+    character the addon saw for the first time gets nothing until <code>/mma sync</code>.</li>
 <li><strong>A character follows a collection you didn't pick</strong>: it already had that
     collection's macros (they're stored on Blizzard's servers, so they survive a
-    cleared WTF folder), and the addon kept it following them. <code>/mm use default</code>
+    cleared WTF folder), and the addon kept it following them. <code>/mma use default</code>
     changes that.</li>
 <li><strong>A <code>conflict:</code> line at login</strong>: a spell is both excluded and in a macro
     this character follows. Take it off the exclude list or out of the macro.</li>
-<li><strong>A macro didn't update after training</strong>: <code>/mm update</code>. If it still
+<li><strong>A macro didn't update after training</strong>: <code>/mma update</code>. If it still
     doesn't, check the spell's name in <code>spells</code> matches the spellbook exactly.</li>
 <li><strong>A new class file isn't picked up</strong>: it must be listed in
     <code>mikey-macros.toc</code>, and a new file needs a full game restart.</li>
-<li><strong>A hand-made macro disappeared on <code>/mm clear</code></strong>: its name matched a
+<li><strong>A hand-made macro disappeared on <code>/mma clear</code></strong>: its name matched a
     collection macro; see
     <a href="collections-guide.html#clearing-macros-and-name-collisions">name collisions</a>.</li>
 <li><strong>Lua errors</strong>: install BugGrabber and BugSack and check what they caught.</li>

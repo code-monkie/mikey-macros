@@ -503,7 +503,7 @@ function crossFileProblems(docPath, text, io, path) {
             if (others.has(e.name)) {
                 doc.push({ start: e.nameStart, end: e.nameEnd, severity: "warning",
                     message: "'" + e.name + "' is also a " + own[2].toLowerCase() + " macro in " + others.get(e.name).join(", ") +
-                        "'s collection; /mm clear and switching collections treat them as the same macro." });
+                        "'s collection; /mma clear and switching collections treat them as the same macro." });
             }
         }
     }

@@ -28,8 +28,8 @@ tested on Classic Era (1.15.9) and retail (12.1.5).
   crowd control, stealth and resurrection), else a generated one, unless the
   spell is on the class's exclude list (Eyes of the Beast, tracking, ...).
 - **Collections, opt-in.** Follow someone's hand-written set with
-  `/mm use <name>`. Its macros appear as you learn their spells, or all at
-  once with `/mm sync all` so you can lay out your action bars at level 1.
+  `/mma use <name>`. Its macros appear as you learn their spells, or all at
+  once with `/mma sync all` so you can lay out your action bars at level 1.
 - **Always correct for your level.** Collection macros leave out spells you
   haven't trained and update themselves (after combat) as you learn them,
   keeping their places on your bars.
@@ -44,30 +44,30 @@ tested on Classic Era (1.15.9) and retail (12.1.5).
 2. Play. Each class spell you learn gets its own macro; drag it onto a bar.
 
 A character that's already leveled when the addon first sees it is left as it
-is: `/mm sync` gives it macros for everything it knows.
+is: `/mma sync` gives it macros for everything it knows.
 
-To follow a collection on a character: `/mm collections` to see what's
-installed, `/mm use <name>`, then `/mm sync` (or `/mm clear -a` first, for a
-clean switch). `/mm sync all` also creates the macros for spells you haven't
+To follow a collection on a character: `/mma collections` to see what's
+installed, `/mma use <name>`, then `/mma sync` (or `/mma clear -a` first, for a
+clean switch). `/mma sync all` also creates the macros for spells you haven't
 learned yet (they show a question mark and fill in as you train).
 
 ## Commands
 
 | Command | |
 |---|---|
-| `/mm list` | Macros for this character's class and their state |
-| `/mm sync` | Create the missing macros for the spells you know (normally automatic as you learn them) |
-| `/mm sync all` | The same, plus collection macros for spells you haven't learned yet |
-| `/mm resync` | `/mm sync all`, then rewrite the rest; nothing leaves your bars |
-| `/mm update` | Rewrite now (normally automatic) |
-| `/mm clear` | Delete this character's collection macros (by name) |
-| `/mm clear -a` | Delete all of this character's macros, after a confirmation |
-| `/mm collections` | Installed collections and the one this character follows |
-| `/mm use <name>` | Follow a collection on this character (`default`, or `none` to stop) |
-| `/mm auto on` / `off` | Auto mode (on by default): a macro for each new class spell |
-| `/mm docs` | The documentation's web address, ready to copy |
+| `/mma list` | Macros for this character's class and their state |
+| `/mma sync` | Create the missing macros for the spells you know (normally automatic as you learn them) |
+| `/mma sync all` | The same, plus collection macros for spells you haven't learned yet |
+| `/mma resync` | `/mma sync all`, then rewrite the rest; nothing leaves your bars |
+| `/mma update` | Rewrite now (normally automatic) |
+| `/mma clear` | Delete this character's collection macros (by name) |
+| `/mma clear -a` | Delete all of this character's macros, after a confirmation |
+| `/mma collections` | Installed collections and the one this character follows |
+| `/mma use <name>` | Follow a collection on this character (`default`, or `none` to stop) |
+| `/mma auto on` / `off` | Auto mode (on by default): a macro for each new class spell |
+| `/mma docs` | The documentation's web address, ready to copy |
 
-Details, including how `/mm clear` matches names: [Commands](docs/commands.html).
+Details, including how `/mma clear` matches names: [Commands](docs/commands.html).
 
 ## Included collections
 
@@ -101,7 +101,7 @@ Extensions → ⋯ → **Install from VSIX…** and pick the built `.vsix`. Deta
 
 ## Documentation
 
-Online at <https://code-monkie.github.io/mikey-macros/> (in game, `/mm docs`
+Online at <https://code-monkie.github.io/mikey-macros/> (in game, `/mma docs`
 gives you the address to copy).
 
 - [Collections guide](docs/collections-guide.html): edit an existing collection,
@@ -120,7 +120,7 @@ gives you the address to copy).
 Planned next:
 
 - **An account-wide default collection**: opt every character into a collection
-  at once (for the classes it covers), with `/mm use` still overriding it per
+  at once (for the classes it covers), with `/mma use` still overriding it per
   character.
 
 Ideas being kept for later (trade-offs in the [Roadmap](docs/roadmap.html)):

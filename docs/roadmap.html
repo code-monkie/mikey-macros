@@ -39,13 +39,13 @@
 <ul>
 <li><strong>Default collection for the whole addon.</strong> Opt every character into a
   collection at once, account-wide (for the classes it covers), instead of
-  choosing per character. <code>/mm use</code> per character still overrides it.</li>
+  choosing per character. <code>/mma use</code> per character still overrides it.</li>
 </ul>
 <h2 id="known-issues">Known issues</h2>
 <ul>
 <li><strong>Character macro slots.</strong> With auto mode, every class spell you learn gets
   a macro, and there are 30 character slots, so busy classes (hunter, warlock)
-  can still fill them by max level. <code>/mm</code> says when it runs out; growing the
+  can still fill them by max level. <code>/mma</code> says when it runs out; growing the
   exclude lists is the plan for now.</li>
 </ul>
 <h2 id="ideas-not-planned-yet">Ideas (not planned yet)</h2>
@@ -53,8 +53,8 @@
 <ul>
 <li><strong>Dirty macros.</strong> Remember, per character, the body last written to each
     macro. If the macro in game no longer matches, it was edited by hand: mark
-    it dirty and stop overwriting it. <code>/mm list</code> would show it as edited, with
-    <code>/mm diff &lt;name&gt;</code>, <code>/mm revert &lt;name&gt;</code> and <code>/mm export &lt;name&gt;</code> (a
+    it dirty and stop overwriting it. <code>/mma list</code> would show it as edited, with
+    <code>/mma diff &lt;name&gt;</code>, <code>/mma revert &lt;name&gt;</code> and <code>/mma export &lt;name&gt;</code> (a
     ready-to-paste class file entry). Blizzard's macro window becomes the
     editor. Trade-off: an in-game edit is the trimmed version, so a dirty macro
     stops gaining spells as you learn them, and it needs SavedVariables.</li>
@@ -70,7 +70,7 @@ applies afterwards.</li>
 whole class. A full copy would freeze the class and miss later fixes to
 the class file; overrides let everything else keep following the file.</li>
 <li>Account-wide per class (the same tweak on every rogue).</li>
-<li><code>/mm list</code> marks overridden macros; a revert drops an override and goes
+<li><code>/mma list</code> marks overridden macros; a revert drops an override and goes
 back to the file's version; an export prints the override as a
 ready-to-paste class file entry so it can become the default.</li>
 </ul>

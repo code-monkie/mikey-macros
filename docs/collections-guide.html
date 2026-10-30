@@ -61,7 +61,7 @@ for its owner, with one file per class they cover.</p>
   ClassicWowForever/ Rogue.lua</code></pre>
 <p><strong>ClassicWowForever</strong> is a snapshot of the macros published at
 <a href="https://classicwowforever.com/macros/">classicwowforever.com/macros</a> (CC BY 4.0),
-for players new to Forever or to a class: <code>/mm use classicwowforever</code>. Rogue
+for players new to Forever or to a class: <code>/mma use classicwowforever</code>. Rogue
 only so far.</p>
 <p>Each file adds one class to its owner's collection:</p>
 <pre><code class="language-lua">local _, ns = ...
@@ -87,25 +87,25 @@ ns.Collection(&quot;Mikey&quot;).ROGUE = {
 </ul>
 <h2 id="which-collection-a-character-follows">Which collection a character follows</h2>
 <p>A new (level 1) character starts on the <strong>Default</strong> collection. To use another,
-pick it with <code>/mm use &lt;name&gt;</code>; it must have a list for the character's class.
-<code>/mm use default</code> goes back, and <code>/mm use none</code> follows nothing.</p>
+pick it with <code>/mma use &lt;name&gt;</code>; it must have a list for the character's class.
+<code>/mma use default</code> goes back, and <code>/mma use none</code> follows nothing.</p>
 <p>Whatever a character follows, every spell it learns gets a macro by one rule
 (see <a href="commands.html#which-macro">Which macro a spell gets</a>): the followed
 collection's, else Default's, else a generated one, unless the spell is excluded.
 So a collection only needs the macros its owner wants to write by hand; auto mode
 and Default cover the rest.</p>
 <p>The choice is saved per character (<code>MikeyMacrosCharDB</code> in the character's
-SavedVariables). <code>/mm collections</code> lists every collection and the classes it
-covers, and marks the one the current character follows; <code>/mm list</code> starts with
+SavedVariables). <code>/mma collections</code> lists every collection and the classes it
+covers, and marks the one the current character follows; <code>/mma list</code> starts with
 it too.</p>
 <p>Examples with the collections above:</p>
 <div class="table-wrap"><table>
 <thead><tr><th>Character</th><th>Follows</th><th>Why</th></tr></thead>
 <tbody>
 <tr><td>New level-1 character</td><td>Default</td><td>where every new character starts</td></tr>
-<tr><td>Rogue after <code>/mm use mikey</code></td><td>Mikey</td><td>chosen, and Mikey has a rogue list; Default fills the gaps</td></tr>
-<tr><td>Shaman after <code>/mm use ulako</code></td><td>Ulako</td><td>chosen, and Ulako has a shaman list</td></tr>
-<tr><td>Mage after <code>/mm use mikey</code></td><td>unchanged</td><td>Mikey has no mage list, so the choice isn't saved</td></tr>
+<tr><td>Rogue after <code>/mma use mikey</code></td><td>Mikey</td><td>chosen, and Mikey has a rogue list; Default fills the gaps</td></tr>
+<tr><td>Shaman after <code>/mma use ulako</code></td><td>Ulako</td><td>chosen, and Ulako has a shaman list</td></tr>
+<tr><td>Mage after <code>/mma use mikey</code></td><td>unchanged</td><td>Mikey has no mage list, so the choice isn't saved</td></tr>
 <tr><td>Warrior</td><td>Default</td><td>no collection has a warrior list; every macro is generated</td></tr>
 </tbody>
 </table></div>
@@ -157,24 +157,24 @@ addon reads them at load, so after saving:</p>
 <li>Edit the macro's <code>body</code> (or <code>spells</code>) in
     <code>Collections/&lt;Owner&gt;/&lt;Class&gt;.lua</code>.</li>
 <li><code>/reload</code>. Characters following that collection update within a second.
-    <code>/mm update</code> forces it.</li>
+    <code>/mma update</code> forces it.</li>
 </ol>
 <h3 id="add-a-macro">Add a macro</h3>
 <ol>
 <li>Add an entry to the class list. The list's order is the order macros are
     created in.</li>
-<li><code>/reload</code>, then <code>/mm resync</code> on each character that should get it
+<li><code>/reload</code>, then <code>/mma resync</code> on each character that should get it
     (resync creates what's missing and leaves everything else on your bars).</li>
 </ol>
 <h3 id="remove-a-macro">Remove a macro</h3>
 <ol>
 <li>Delete its entry from the list.</li>
 <li><code>/reload</code>. The addon no longer manages it, so the macro stays on
-    characters that have it. Delete it in the macro window. (<code>/mm clear</code> only
+    characters that have it. Delete it in the macro window. (<code>/mma clear</code> only
     removes names that are still in a collection, so it won't find it.)</li>
 </ol>
 <h3 id="rename-a-macro">Rename a macro</h3>
-<p>Renaming (<code>name</code>) is a remove plus an add: <code>/mm resync</code> creates the new name,
+<p>Renaming (<code>name</code>) is a remove plus an add: <code>/mma resync</code> creates the new name,
 and the old macro is left behind for you to delete in the macro window.</p>
 <h3 id="add-a-class-to-a-collection">Add a class to a collection</h3>
 <ol>
@@ -185,7 +185,7 @@ and the old macro is left behind for you to delete in the macro window.</p>
 <pre><code>Collections\Mikey\Mage.lua</code></pre>
 </li>
 <li>
-<p>Restart the game, then <code>/mm list</code> and <code>/mm sync</code> on a character of that
+<p>Restart the game, then <code>/mma list</code> and <code>/mma sync</code> on a character of that
     class.</p>
 </li>
 </ol>
@@ -203,7 +203,7 @@ Example: Ulako starting from Mikey's druid.</p>
 <pre><code>Collections\Ulako\Druid.lua</code></pre>
 </li>
 <li>
-<p>Restart the game. On your druid: <code>/mm use ulako</code>, then <code>/mm resync</code>.</p>
+<p>Restart the game. On your druid: <code>/mma use ulako</code>, then <code>/mma resync</code>.</p>
 </li>
 <li>From now on, edit <code>Collections/Ulako/Druid.lua</code>. Nobody else's changes
     touch it.</li>
@@ -214,23 +214,23 @@ shaman prefixes every name with <code>U_</code> (<code>U_LB</code>, <code>U_Shoc
 most 16 characters.</p>
 <h2 id="switching-collections">Switching collections</h2>
 <ul>
-<li><code>/mm use &lt;name&gt;</code> switches the current character; <code>/mm use none</code> stops
-    following a collection. After switching, <code>/mm sync</code> creates the new
-    collection's macros for the spells you know (<code>/mm sync all</code> for all of them).</li>
+<li><code>/mma use &lt;name&gt;</code> switches the current character; <code>/mma use none</code> stops
+    following a collection. After switching, <code>/mma sync</code> creates the new
+    collection's macros for the spells you know (<code>/mma sync all</code> for all of them).</li>
 <li>Switching never deletes anything. The previous collection's macros stay on
     the character (and your bars) but are no longer managed.</li>
 <li>
 <p>For a clean switch:</p>
-<pre><code>/mm clear -a
-/mm use ulako
-/mm sync</code></pre>
-<p><code>/mm clear -a</code> removes <strong>every</strong> character macro (after a confirmation), so the
-previous collection's macros and any generated ones go too. Plain <code>/mm clear</code>
+<pre><code>/mma clear -a
+/mma use ulako
+/mma sync</code></pre>
+<p><code>/mma clear -a</code> removes <strong>every</strong> character macro (after a confirmation), so the
+previous collection's macros and any generated ones go too. Plain <code>/mma clear</code>
 removes only collection macros.</p>
 </li>
 </ul>
 <h2 id="clearing-macros-and-name-collisions">Clearing macros and name collisions</h2>
-<p><code>/mm clear</code> deletes this character's macros <strong>by name</strong>: any character macro
+<p><code>/mma clear</code> deletes this character's macros <strong>by name</strong>: any character macro
 whose name appears in any collection's list for the character's class.</p>
 <ul>
 <li>Shaman example: everything named like Mikey's (<code>LB</code>, <code>Shock</code>, <code>Earth</code>, ...)
@@ -238,13 +238,13 @@ whose name appears in any collection's list for the character's class.</p>
     kept.</li>
 <li>General (account) macros are never touched.</li>
 <li>There's no confirmation, and deleted macros come off your action bars.</li>
-<li>Generated macros aren't in any collection, so <code>/mm clear</code> keeps them;
-    <code>/mm clear -a</code> deletes everything.</li>
+<li>Generated macros aren't in any collection, so <code>/mma clear</code> keeps them;
+    <code>/mma clear -a</code> deletes everything.</li>
 </ul>
 <p><strong>Collisions.</strong> Because macros are matched by name:</p>
 <ul>
 <li>a macro you made by hand with the same name as any collection macro for the
-    class is deleted by <code>/mm clear</code> (and adopted by <code>/mm sync</code>/<code>/mm update</code> if
+    class is deleted by <code>/mma clear</code> (and adopted by <code>/mma sync</code>/<code>/mma update</code> if
     it matches the collection you follow);</li>
 <li>two collections using the same name for different macros can't be told
     apart: switching between them rewrites the macro in place.</li>

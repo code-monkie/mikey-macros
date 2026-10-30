@@ -1,5 +1,5 @@
 -- mikey-macros: per-character class macros that maintain themselves.
--- Macro definitions live in Collections\<Owner>\<Class>.lua. /mm sync creates them all once;
+-- Macro definitions live in Collections\<Owner>\<Class>.lua. /mma sync creates them all once;
 -- after that each macro is rewritten automatically (out of combat) to contain
 -- only the spells you know, so fall-through lines and icons always work.
 -- The addon owns these macros: change them in the data file, not in game
@@ -11,7 +11,7 @@ local _, ns = ...
 -- The Default collection (Collections\Default) holds the exceptions to auto
 -- mode's generated macros and applies under every collection: the followed
 -- collection wins where it has a macro for the spell. New characters start on
--- Default; /mm use <name> picks another.
+-- Default; /mma use <name> picks another.
 local DEFAULT = "Default"
 local PREFERRED = "Mikey" -- only used to adopt characters set up before opting in existed
 ns.collections = {}
@@ -248,7 +248,7 @@ local function FindCollection(name)
 end
 
 -- Whose list this character follows for `class`: the collection chosen with
--- /mm use, if it has the class. Nothing is followed until you opt in.
+-- /mma use, if it has the class. Nothing is followed until you opt in.
 local function ActiveCollection(class)
     local chosen = CharDB().collection
     if chosen and ns.collections[chosen] and ns.collections[chosen][class] then return chosen end
@@ -315,9 +315,9 @@ local function ClassList()
         local _, class = UnitClass("player")
         local chosen = CharDB().collection
         if chosen and ns.collections[chosen] then
-            Print(chosen .. "'s collection has no " .. class:lower() .. " macros. Pick another with /mm use <name>:")
+            Print(chosen .. "'s collection has no " .. class:lower() .. " macros. Pick another with /mma use <name>:")
         else
-            Print("this character doesn't follow a collection (auto mode makes its macros). To use one, /mm use <name>:")
+            Print("this character doesn't follow a collection (auto mode makes its macros). To use one, /mma use <name>:")
         end
         Collections()
     end
@@ -375,10 +375,10 @@ local function Update()
 end
 
 -- Auto mode ---------------------------------------------------------------------
--- With /mm auto on, every class spell this character learns from then on gets a
+-- With /mma auto on, every class spell this character learns from then on gets a
 -- macro, by priority: the followed collection's macro for the spell, else the
 -- Default collection's, else a generated one (see AutoBody), unless the spell
--- is excluded. /mm sync does the same for every spell you already know. Spells are matched by name, so
+-- is excluded. /mma sync does the same for every spell you already know. Spells are matched by name, so
 -- only a new spell (rank 1 or unranked) counts, never a higher rank. These
 -- macros are yours: the addon never rewrites or clears them.
 
@@ -675,7 +675,7 @@ local function AutoCreate()
     end
 end
 
--- /mm sync: what auto mode would have made for every spell you already know
+-- /mma sync: what auto mode would have made for every spell you already know
 -- (collection macro, else Default's, else generated unless excluded; generated
 -- only while auto mode is on). With all, collection macros for spells not
 -- learned yet are created too, as placeholders. Existing macros are left alone.
@@ -732,7 +732,7 @@ local function Sync(all)
     return true
 end
 
--- /mm auto [on|off]
+-- /mma auto [on|off]
 local function Auto(arg)
     local db = CharDB()
     arg = (arg or ""):lower()
@@ -745,7 +745,7 @@ local function Auto(arg)
         db.auto = false
         Print("auto mode |cffff6060off|r. Macros it made are kept.")
     else
-        Print("auto mode is " .. (db.auto ~= false and "|cff60ff60on|r" or "|cffff6060off|r") .. ". /mm auto on, /mm auto off.")
+        Print("auto mode is " .. (db.auto ~= false and "|cff60ff60on|r" or "|cffff6060off|r") .. ". /mma auto on, /mma auto off.")
     end
 end
 
@@ -775,7 +775,7 @@ local function Adopt()
         for _, def in ipairs(ns.collections[owner][class]) do
             if have[def.name] then
                 db.collection = owner
-                Print("this character keeps following |cffffd040" .. owner .. "|r's collection (/mm use none to stop).")
+                Print("this character keeps following |cffffd040" .. owner .. "|r's collection (/mma use none to stop).")
                 return
             end
         end
@@ -846,7 +846,7 @@ end)
 -- for its class (Mikey's, Ulako's, ...). Anything else (e.g. a macro called
 -- "test") is kept, as are general (account) macros. A hand-made macro that
 -- happens to share a name with a collection macro is deleted too.
--- /mm clear -a: every character macro, whatever made it, after a Yes/No popup.
+-- /mma clear -a: every character macro, whatever made it, after a Yes/No popup.
 StaticPopupDialogs.MIKEYMACROS_CLEAR_ALL = {
     text = "Delete all %d of this character's macros, hand-made ones too?",
     button1 = YES,
@@ -856,7 +856,7 @@ StaticPopupDialogs.MIKEYMACROS_CLEAR_ALL = {
         local _, numChar = GetNumMacros()
         local first = AccountMax() + 1
         for index = first + numChar - 1, first, -1 do DeleteMacro(index) end
-        Print("deleted all " .. numChar .. " character macros. /mm sync makes yours again.")
+        Print("deleted all " .. numChar .. " character macros. /mma sync makes yours again.")
     end,
     showAlert = true,
     timeout = 0,
@@ -925,10 +925,10 @@ function Collections()
     if not active then Print("this character follows no collection.") end
 end
 
--- Follow a collection on this character, or none ("/mm use none").
+-- Follow a collection on this character, or none ("/mma use none").
 local function Use(name)
     if name == "" then
-        Print("/mm use <name>, or /mm use none. The collections:")
+        Print("/mma use <name>, or /mma use none. The collections:")
         Collections()
         return
     end
@@ -936,12 +936,12 @@ local function Use(name)
     if name:lower() == "none" then
         CharDB().collection = nil
         CharDB().adopted = true
-        Print("this character follows no collection now. Its collection macros are kept but no longer updated; /mm clear -a, then /mm sync for a clean switch.")
+        Print("this character follows no collection now. Its collection macros are kept but no longer updated; /mma clear -a, then /mma sync for a clean switch.")
         return
     else
         local owner = FindCollection(name)
         if not owner then
-            Print("no collection called " .. name .. ". /mm collections shows the names.")
+            Print("no collection called " .. name .. ". /mma collections shows the names.")
             return
         end
         CharDB().collection = owner
@@ -951,7 +951,7 @@ local function Use(name)
         end
     end
     Print("now following |cffffd040" .. ActiveCollection(class) .. "|r's collection. "
-        .. "For a clean switch: /mm clear -a, then /mm sync.")
+        .. "For a clean switch: /mma clear -a, then /mma sync.")
 end
 
 -- The documentation's web address, shown ready to copy. Addons can't use the
@@ -1022,7 +1022,9 @@ local function ShowDocs()
     docsBox:Raise()
 end
 
-SLASH_MIKEYMACROS1 = "/mm"
+SLASH_MIKEYMACROS1 = "/mma"
+SLASH_MIKEYMACROS2 = "/mikeymacros"
+SLASH_MIKEYMACROS3 = "/mm"   -- the old command, kept working (renamed 2026-10-30)
 SlashCmdList.MIKEYMACROS = function(msg)
     local cmd, arg = (msg or ""):match("^%s*(%S*)%s*(%S*)")
     cmd = cmd:lower()
@@ -1048,16 +1050,16 @@ SlashCmdList.MIKEYMACROS = function(msg)
             ShowCharacterMacros()
         end
     else
-        Print("/mm list - your class macros and their state")
-        Print("/mm sync - create the macros for the spells you know (normally automatic as you learn them)")
-        Print("/mm sync all - also create collection macros for spells you haven't learned yet")
-        Print("/mm update - force a refresh now (normally automatic)")
-        Print("/mm clear - delete this character's macros that come from any collection (others are kept)")
-        Print("/mm clear -a - delete all of this character's macros, whatever made them")
-        Print("/mm resync - create anything missing and rewrite the rest (macros stay on your bars)")
-        Print("/mm collections - whose macro sets are installed")
-        Print("/mm use <name> - follow someone's collection on this character (/mm use none to stop)")
-        Print("/mm auto on or off - make a macro for each new class spell you learn (this character)")
-        Print("/mm docs - the documentation's web address, ready to copy")
+        Print("/mma list - your class macros and their state")
+        Print("/mma sync - create the macros for the spells you know (normally automatic as you learn them)")
+        Print("/mma sync all - also create collection macros for spells you haven't learned yet")
+        Print("/mma update - force a refresh now (normally automatic)")
+        Print("/mma clear - delete this character's macros that come from any collection (others are kept)")
+        Print("/mma clear -a - delete all of this character's macros, whatever made them")
+        Print("/mma resync - create anything missing and rewrite the rest (macros stay on your bars)")
+        Print("/mma collections - whose macro sets are installed")
+        Print("/mma use <name> - follow someone's collection on this character (/mma use none to stop)")
+        Print("/mma auto on or off - make a macro for each new class spell you learn (this character)")
+        Print("/mma docs - the documentation's web address, ready to copy")
     end
 end
