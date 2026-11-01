@@ -525,6 +525,24 @@ local function SwapIntoBars(made)
     return placed
 end
 
+-- Index of the general (account) macro called `name`, or 0. Unlike
+-- GetMacroIndexByName, a character macro with the same name doesn't count.
+local function GeneralMacroIndex(name)
+    for index = 1, (GetNumMacros()) do
+        if GetMacroInfo(index) == name then return index end
+    end
+    return 0
+end
+
+-- The action slot behind bar 1's button `n` as the bar shows it now. A warrior
+-- (always in a stance), a druid in a form or a rogue in stealth sees a bonus
+-- page (slots 73 and up) there, not slots 1-12.
+local function Bar1Slot(n)
+    local offset = GetBonusBarOffset and GetBonusBarOffset() or 0
+    if offset > 0 then return 72 + (offset - 1) * 12 + n end
+    return n
+end
+
 -- A spell's name from its action-slot id, on any client.
 local function ActionSpellName(kind, id)
     return kind == "spell" and id and ((C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id))
@@ -534,10 +552,11 @@ end
 -- The Ranged macro onto bar 1: in place of the Throw spell if it's there, else
 -- on the first empty button. Nothing if it's already on bar 1 or the bar is full.
 local function PlaceRanged()
-    local index = GetMacroIndexByName(RANGED_MACRO)
+    local index = GeneralMacroIndex(RANGED_MACRO)
     if index == 0 or InCombatLockdown() or GetCursorInfo() then return end
     local throw, empty
-    for slot = 1, 12 do
+    for n = 1, 12 do
+        local slot = Bar1Slot(n)
         local kind, id = GetActionInfo(slot)
         if kind == "macro" and id == index then return end
         local name = ActionSpellName(kind, id)
@@ -561,7 +580,8 @@ local ATTACK_SLOT = 9 -- bar 1, button 9 (7 until Mikey moved it, 2026-10-29)
 local function PlaceAttack()
     local index = GetMacroIndexByName(ATTACK_MACRO)
     if index == 0 or InCombatLockdown() or GetCursorInfo() then return end
-    local kind, id = GetActionInfo(ATTACK_SLOT)
+    local target = Bar1Slot(ATTACK_SLOT)
+    local kind, id = GetActionInfo(target)
     local isAttackSpell = function(k, i)
         local name = ActionSpellName(k, i)
         return name and name:lower() == "attack"
@@ -573,11 +593,12 @@ local function PlaceAttack()
     end
     if not mine then
         PickupMacro(index)
-        PlaceAction(ATTACK_SLOT)
+        PlaceAction(target)
         ClearCursor()
     end
-    for slot = 1, 12 do
-        if slot ~= ATTACK_SLOT and isAttackSpell(GetActionInfo(slot)) then
+    for n = 1, 12 do
+        local slot = Bar1Slot(n)
+        if slot ~= target and isAttackSpell(GetActionInfo(slot)) then
             PickupAction(slot)
             ClearCursor()
         end
@@ -705,7 +726,7 @@ local function AutoCreate()
         -- Warriors and rogues also get the general macro "Ranged" (made if
         -- missing, an existing one used as it is), in place of Throw on bar 1.
         if RANGED_CLASSES[class] then
-            if GetMacroIndexByName(RANGED_MACRO) == 0 then
+            if GeneralMacroIndex(RANGED_MACRO) == 0 then
                 if GetNumMacros() < AccountMax() then
                     CreateMacro(RANGED_MACRO, ICON, RANGED_BODY, false)
                     Print("new general macro: " .. RANGED_MACRO)
