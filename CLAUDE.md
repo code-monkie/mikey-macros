@@ -65,16 +65,17 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   is. `PlaceAttack` puts it on bar 1 button 9 (`ATTACK_SLOT`; was 7 until Mikey
   moved it) and clears the Attack spell from the rest of bar 1. A taken button
   9 is left alone with a chat message. Documented in `docs/commands.html#attack-macro`.
+- **Ranged macro (2026-11-01):** in the same branch, a brand-new warrior or
+  rogue (`RANGED_CLASSES`) also gets the general macro `Ranged` (mouseover
+  enemy becomes the target, then `#showtooltip 18` and Throw / !Shoot Bow /
+  Gun / Crossbow by `[equipped:...]`), made if missing. `PlaceRanged` puts it
+  where Throw is on bar 1, else on the first empty button. It was briefly a
+  Default collection macro; that was dropped because auto mode skips the
+  General tab (Throw, Shoot), so it never appeared on its own.
 - **Bar swapping (`SwapIntoBars`):** a new macro replaces its spell on every
   action slot 1-180, which takes in the stance and form bars too. Checked on
   Retail 2026-10-30 (Mikey): spells the game puts on the rogue's stealth bar get
   their macro there as well.
-- **Ranged (Default warrior, rogue, hunter; 2026-11-01):** mouseover enemy
-  becomes the target, then `#showtooltip 18` and `[equipped:Thrown] Throw;
-  [equipped:Bows] !Shoot Bow; ...` (hunter: `Throw; !Auto Shot`). Throw and
-  the Shoot spells are General-tab spells, which auto mode (`ClassSpells`)
-  skips, so `/mma sync` makes it. A followed collection with its own macro for
-  one of these spells (e.g. Mikey hunter's `AS` for Auto Shot) drops Default's.
 - **Limits:** 18 character macro slots on Classic clients (30 on retail);
   collections can get close.
 
@@ -82,7 +83,7 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
 
 | Collection | Classes | Notes |
 |---|---|---|
-| Default | Druid, Hunter, Mage, Paladin, Priest, Rogue, Shaman, Warlock, Warrior | Prowl is a `c.form` built body. Warrior, Rogue and Hunter have `Ranged` (below). |
+| Default | Druid, Hunter, Mage, Paladin, Priest, Rogue, Shaman, Warlock | No Warrior file yet. Prowl is a `c.form` built body. |
 | Mikey | Rogue, Shaman, Hunter, Druid, Warlock, Paladin | Mikey's own; his style rules below. |
 | Ulako | Shaman, Mage | Placeholder; don't review. |
 | ClassicWowForever | Rogue | Snapshot of classicwowforever.com; 8 classes to go. |

@@ -12,16 +12,6 @@ ns.Collection("Default").HUNTER = {
         /stopattack
         /use [@mouseover,harm,nodead] [] Scare Beast
     ]] },
-    -- Ranged pull: an enemy under the mouse becomes your target, then your
-    -- target gets Throw with a thrown weapon, else Auto Shot (hunters have no
-    -- Shoot spells: Auto Shot fires bows, guns and crossbows). The icon is the
-    -- ranged weapon itself. If auto mode doesn't make it (Throw is on the
-    -- General tab, which it skips), /mma sync does.
-    { name = "Ranged", spells = { "Throw", "Auto Shot" }, body = [[
-        #showtooltip 18
-        /target [@mouseover,harm,nodead]
-        /use [equipped:Thrown] Throw; !Auto Shot
-    ]] },
 }
 
 ns.Exclude("HUNTER", {
