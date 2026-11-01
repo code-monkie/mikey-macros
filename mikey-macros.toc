@@ -2,6 +2,7 @@
 ## Title: mikey-macros
 ## Notes: Creates your class macros for the spells you know. Type /mma for commands.
 ## Author: mikey
+## Category: Mikey
 ## Version: 0.2.1
 ## IconTexture: Interface\Icons\INV_Misc_Book_09
 ## SavedVariablesPerCharacter: MikeyMacrosCharDB
