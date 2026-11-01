@@ -492,6 +492,13 @@ end
 -- Slot 16 is the main hand, so the button shows your weapon.
 local ATTACK_MACRO = "Attack"
 local ATTACK_BODY = "#showtooltip 16\n/startattack"
+-- The Ranged macro: an enemy under the mouse becomes your target, then your
+-- target gets whatever the ranged slot (18) holds. Account-wide like Attack,
+-- so nothing trims it: a clause for a weapon you can't use is never reached.
+local RANGED_MACRO = "Ranged"
+local RANGED_BODY = "#showtooltip 18\n/target [@mouseover,harm,nodead]\n"
+    .. "/use [equipped:Thrown] Throw; [equipped:Bows] !Shoot Bow; [equipped:Guns] !Shoot Gun; [equipped:Crossbows] !Shoot Crossbow"
+local RANGED_CLASSES = { WARRIOR = true, ROGUE = true } -- the classes that start with Throw
 
 local function SwapIntoBars(made)
     local placed = {}
@@ -518,6 +525,35 @@ local function SwapIntoBars(made)
     return placed
 end
 
+-- A spell's name from its action-slot id, on any client.
+local function ActionSpellName(kind, id)
+    return kind == "spell" and id and ((C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id))
+        or (GetSpellInfo and GetSpellInfo(id)))
+end
+
+-- The Ranged macro onto bar 1: in place of the Throw spell if it's there, else
+-- on the first empty button. Nothing if it's already on bar 1 or the bar is full.
+local function PlaceRanged()
+    local index = GetMacroIndexByName(RANGED_MACRO)
+    if index == 0 or InCombatLockdown() or GetCursorInfo() then return end
+    local throw, empty
+    for slot = 1, 12 do
+        local kind, id = GetActionInfo(slot)
+        if kind == "macro" and id == index then return end
+        local name = ActionSpellName(kind, id)
+        if not throw and name and name:lower() == "throw" then throw = slot end
+        if not empty and not kind then empty = slot end
+    end
+    local slot = throw or empty
+    if not slot then
+        Print("bar 1 is full; drag the " .. RANGED_MACRO .. " macro onto your bar by hand.")
+        return
+    end
+    PickupMacro(index)
+    PlaceAction(slot) -- a Throw spell there comes back on the cursor
+    ClearCursor()
+end
+
 -- The Attack macro onto ATTACK_SLOT, and the Attack spell off the rest of bar 1.
 -- Out of combat, empty cursor only. A button 9 already holding something else is
 -- left alone (said in chat), and then the Attack spell stays where it is too.
@@ -527,8 +563,7 @@ local function PlaceAttack()
     if index == 0 or InCombatLockdown() or GetCursorInfo() then return end
     local kind, id = GetActionInfo(ATTACK_SLOT)
     local isAttackSpell = function(k, i)
-        local name = k == "spell" and i and ((C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(i))
-            or (GetSpellInfo and GetSpellInfo(i)))
+        local name = ActionSpellName(k, i)
         return name and name:lower() == "attack"
     end
     local mine = kind == "macro" and id == index
@@ -667,6 +702,19 @@ local function AutoCreate()
             end
         end
         PlaceAttack()
+        -- Warriors and rogues also get the general macro "Ranged" (made if
+        -- missing, an existing one used as it is), in place of Throw on bar 1.
+        if RANGED_CLASSES[class] then
+            if GetMacroIndexByName(RANGED_MACRO) == 0 then
+                if GetNumMacros() < AccountMax() then
+                    CreateMacro(RANGED_MACRO, ICON, RANGED_BODY, false)
+                    Print("new general macro: " .. RANGED_MACRO)
+                else
+                    Print("|cffff6060no free general slots|r for the " .. RANGED_MACRO .. " macro")
+                end
+            end
+            PlaceRanged()
+        end
     end
     if #created > 0 then Print("new spell macro: " .. table.concat(created, ", ")) end
     if #skipped > 0 then Print("no macro (excluded): " .. table.concat(skipped, ", ")) end

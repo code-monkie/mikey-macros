@@ -2,7 +2,7 @@
 
 Handoff notes for Claude sessions working on this addon. The README covers what
 the addon does for players; this covers how we work on it and where things
-stand. Last updated 29 October 2026.
+stand. Last updated 1 November 2026.
 
 ## What it is
 
@@ -65,6 +65,13 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   is. `PlaceAttack` puts it on bar 1 button 9 (`ATTACK_SLOT`; was 7 until Mikey
   moved it) and clears the Attack spell from the rest of bar 1. A taken button
   9 is left alone with a chat message. Documented in `docs/commands.html#attack-macro`.
+- **Ranged macro (2026-11-01):** in the same branch, a brand-new warrior or
+  rogue (`RANGED_CLASSES`) also gets the general macro `Ranged` (mouseover
+  enemy becomes the target, then `#showtooltip 18` and Throw / !Shoot Bow /
+  Gun / Crossbow by `[equipped:...]`), made if missing. `PlaceRanged` puts it
+  where Throw is on bar 1, else on the first empty button. It was briefly a
+  Default collection macro; that was dropped because auto mode skips the
+  General tab (Throw, Shoot), so it never appeared on its own.
 - **Bar swapping (`SwapIntoBars`):** a new macro replaces its spell on every
   action slot 1-180, which takes in the stance and form bars too. Checked on
   Retail 2026-10-30 (Mikey): spells the game puts on the rogue's stealth bar get
