@@ -2,7 +2,7 @@
 
 Handoff notes for Claude sessions working on this addon. The README covers what
 the addon does for players; this covers how we work on it and where things
-stand. Last updated 29 October 2026.
+stand. Last updated 1 November 2026.
 
 ## What it is
 
@@ -69,6 +69,12 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   action slot 1-180, which takes in the stance and form bars too. Checked on
   Retail 2026-10-30 (Mikey): spells the game puts on the rogue's stealth bar get
   their macro there as well.
+- **Ranged (Default warrior, rogue, hunter; 2026-11-01):** mouseover enemy
+  becomes the target, then `#showtooltip 18` and `[equipped:Thrown] Throw;
+  [equipped:Bows] !Shoot Bow; ...` (hunter: `Throw; !Auto Shot`). Throw and
+  the Shoot spells are General-tab spells, which auto mode (`ClassSpells`)
+  skips, so `/mma sync` makes it. A followed collection with its own macro for
+  one of these spells (e.g. Mikey hunter's `AS` for Auto Shot) drops Default's.
 - **Limits:** 18 character macro slots on Classic clients (30 on retail);
   collections can get close.
 
@@ -76,7 +82,7 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
 
 | Collection | Classes | Notes |
 |---|---|---|
-| Default | Druid, Hunter, Mage, Paladin, Priest, Rogue, Shaman, Warlock | No Warrior file yet. Prowl is a `c.form` built body. |
+| Default | Druid, Hunter, Mage, Paladin, Priest, Rogue, Shaman, Warlock, Warrior | Prowl is a `c.form` built body. Warrior, Rogue and Hunter have `Ranged` (below). |
 | Mikey | Rogue, Shaman, Hunter, Druid, Warlock, Paladin | Mikey's own; his style rules below. |
 | Ulako | Shaman, Mage | Placeholder; don't review. |
 | ClassicWowForever | Rogue | Snapshot of classicwowforever.com; 8 classes to go. |

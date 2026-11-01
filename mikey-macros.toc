@@ -16,6 +16,7 @@ Collections\Default\Priest.lua
 Collections\Default\Rogue.lua
 Collections\Default\Shaman.lua
 Collections\Default\Warlock.lua
+Collections\Default\Warrior.lua
 Collections\Mikey\Rogue.lua
 Collections\Mikey\Shaman.lua
 Collections\Mikey\Hunter.lua
