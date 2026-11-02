@@ -33,9 +33,11 @@ ns.Collection("Mikey").ROGUE = {
         /use [@mouseover,harm,nodead,nostealth] [nostealth] Kick
     ]] },
 
-    -- Later levels.
-    { name = "Stun", spells = { "Cheap Shot", "Kidney Shot" }, body = [[
+    -- Later levels. From stealth: Pick Pocket, then Cheap Shot, in one press (2026-11-02); out of it, Kidney Shot.
+    -- Made at Cheap Shot, not at Pick Pocket (level 4), which would have made it early as a lone Pick Pocket.
+    { name = "Stun", learn = "Cheap Shot", spells = { "Pick Pocket", "Cheap Shot", "Kidney Shot" }, body = [[
         #showtooltip
+        /use [stealth] Pick Pocket
         /use [stealth] Cheap Shot; Kidney Shot
     ]] },
 }

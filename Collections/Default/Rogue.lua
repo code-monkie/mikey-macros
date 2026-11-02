@@ -29,6 +29,15 @@ ns.Collection("Default").ROGUE = {
         /stopattack
         /use [stealth,@mouseover,harm,nodead] [stealth] Pick Pocket; !Stealth
     ]] },
+    -- Opener (2026-11-02, Mikey's macro): Pick Pocket, then Cheap Shot, in one press from stealth (Pick Pocket
+    -- doesn't trigger the global cooldown). No /startattack: the generated Cheap Shot had one, and pressed out of
+    -- range it started auto-attack, whose first swing broke stealth. Made when Cheap Shot is learned, not at Pick
+    -- Pocket (level 4), which would have made it early, trimmed to a second Pick Pocket button.
+    { name = "Cheap Shot", learn = "Cheap Shot", spells = { "Pick Pocket", "Cheap Shot" }, body = [[
+        #showtooltip
+        /use [stealth] Pick Pocket
+        /use Cheap Shot
+    ]] },
     -- Vanish in combat; out of combat it's Stealth, so a Vanish is never wasted.
     -- The icon and cooldown always show Vanish.
     { name = "Vanish", spells = { "Vanish" }, body = [[
