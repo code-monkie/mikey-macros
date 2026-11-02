@@ -194,12 +194,13 @@ something else, it's left alone, chat says so, and the Attack spell stays where 
 is; drag the macro on by hand. Out of combat only, like everything on this list.</li>
 <li id="ranged-macro"><strong>The Ranged macro:</strong> a brand-new warrior or rogue also gets the
 general macro <code>Ranged</code> on bar 1, in place of the Throw spell (or on the first empty
-button):
+button). A brand-new priest, mage or warlock gets it on bar 1, button 2, if that button is
+empty; if not, chat says so and you drag it on by hand:
 <pre><code>#showtooltip 18
 /target [@mouseover,harm,nodead]
-/use [equipped:Thrown] !Throw; [equipped:Bows] !Shoot Bow; [equipped:Guns] !Shoot Gun; [equipped:Crossbows] !Shoot Crossbow</code></pre>
+/use [equipped:Thrown] Throw; [equipped:Bows] Shoot Bow; [equipped:Guns] Shoot Gun; [equipped:Crossbows] Shoot Crossbow; [equipped:Wands] !Shoot</code></pre>
 An enemy under the mouse becomes your target first; then your target gets whatever the
-ranged slot (18) holds, and the button shows that weapon.</li>
+ranged slot (18) holds (a wand fires <code>Shoot</code>), and the button shows that weapon.</li>
 <li><strong>In chat:</strong> <code>new spell macro: ...</code> for each one made, and
 <code>no macro (excluded): ...</code> once for each excluded spell.</li>
 <li><strong>Names:</strong> the spell's name, or its initials when longer than 16 characters

@@ -67,8 +67,11 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   9 is left alone with a chat message. Documented in `docs/commands.html#attack-macro`.
 - **Ranged macro (2026-11-01):** in the same branch, a brand-new warrior or
   rogue (`RANGED_CLASSES`) also gets the general macro `Ranged` (mouseover
-  enemy becomes the target, then `#showtooltip 18` and Throw / !Shoot Bow /
-  Gun / Crossbow by `[equipped:...]`), made if missing. `PlaceRanged` puts it
+  enemy becomes the target, then `#showtooltip 18` and Throw / Shoot Bow /
+  Gun / Crossbow, or the wand's !Shoot (added 2026-11-02), by
+  `[equipped:...]`), made if missing. Only the wand clause has `!`: in Classic,
+  wand Shoot repeats, but Throw and bow/gun/crossbow fire once per press
+  (Mikey, 2026-11-02). `PlaceRanged` puts it
   where Throw is on bar 1, else on the first empty button. It was briefly a
   Default collection macro; that was dropped because auto mode skips the
   General tab (Throw, Shoot), so it never appeared on its own. The leftover
@@ -79,7 +82,10 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   makes `Attack` and `Ranged` once per login (the first `Schedule` pass, out
   of combat), on any class and with auto mode on or off, if the account lacks
   them. Existing ones are used as is. Placement on bar 1 is still brand-new
-  only (`PlaceAttack`, and `PlaceRanged` for `RANGED_CLASSES`).
+  only (`PlaceAttack`, and `PlaceRanged` for `RANGED_CLASSES`). `RANGED_CLASSES`
+  maps class to placement: warrior and rogue `"throw"` (Throw's button, else the
+  first empty one); priest, mage and warlock button 2 if it's empty, else a chat
+  message (Mikey, 2026-11-02).
 - **Bar swapping (`SwapIntoBars`):** a new macro replaces its spell on every
   action slot 1-180, which takes in the stance and form bars too. Checked on
   Retail 2026-10-30 (Mikey): spells the game puts on the rogue's stealth bar get

@@ -497,8 +497,10 @@ local ATTACK_BODY = "#showtooltip 16\n/startattack"
 -- so nothing trims it: a clause for a weapon you can't use is never reached.
 local RANGED_MACRO = "Ranged"
 local RANGED_BODY = "#showtooltip 18\n/target [@mouseover,harm,nodead]\n"
-    .. "/use [equipped:Thrown] !Throw; [equipped:Bows] !Shoot Bow; [equipped:Guns] !Shoot Gun; [equipped:Crossbows] !Shoot Crossbow"
-local RANGED_CLASSES = { WARRIOR = true, ROGUE = true } -- start with Throw; Ranged goes on their bar 1
+    .. "/use [equipped:Thrown] Throw; [equipped:Bows] Shoot Bow; [equipped:Guns] Shoot Gun; [equipped:Crossbows] Shoot Crossbow; [equipped:Wands] !Shoot"
+-- Where a brand-new character's Ranged goes on bar 1: "throw" (warriors and
+-- rogues start with Throw) or a button number (wand users, Mikey 2026-11-02).
+local RANGED_CLASSES = { WARRIOR = "throw", ROGUE = "throw", PRIEST = 2, MAGE = 2, WARLOCK = 2 }
 
 local function SwapIntoBars(made)
     local placed = {}
@@ -549,9 +551,10 @@ local function ActionSpellName(kind, id)
         or (GetSpellInfo and GetSpellInfo(id)))
 end
 
--- The Ranged macro onto bar 1: in place of the Throw spell if it's there, else
--- on the first empty button. Nothing if it's already on bar 1 or the bar is full.
-local function PlaceRanged()
+-- The Ranged macro onto bar 1. `where` "throw": in place of the Throw spell if
+-- it's there, else on the first empty button. A number: on that button if it's
+-- empty. Nothing if it's already on bar 1; chat says so if there's no room.
+local function PlaceRanged(where)
     local index = GeneralMacroIndex(RANGED_MACRO)
     if index == 0 or InCombatLockdown() or GetCursorInfo() then return end
     local throw, empty
@@ -563,10 +566,19 @@ local function PlaceRanged()
         if not throw and name and name:lower() == "throw" then throw = slot end
         if not empty and not kind then empty = slot end
     end
-    local slot = throw or empty
-    if not slot then
-        Print("bar 1 is full; drag the " .. RANGED_MACRO .. " macro onto your bar by hand.")
-        return
+    local slot
+    if where == "throw" then
+        slot = throw or empty
+        if not slot then
+            Print("bar 1 is full; drag the " .. RANGED_MACRO .. " macro onto your bar by hand.")
+            return
+        end
+    else
+        slot = Bar1Slot(where)
+        if GetActionInfo(slot) then
+            Print("bar 1 button " .. where .. " is taken; drag the " .. RANGED_MACRO .. " macro onto your bar by hand.")
+            return
+        end
     end
     PickupMacro(index)
     PlaceAction(slot) -- a Throw spell there comes back on the cursor
@@ -729,10 +741,11 @@ local function AutoCreate()
     -- A brand-new character gets the general (account) macro "Attack" on bar 1
     -- button 9 (EnsureGeneral has made it by now). The game's own Attack spell is
     -- cleared from bar 1, so Attack lives only on button 9 (Mikey's layout,
-    -- 2026-10-29). Warriors and rogues also get "Ranged", in place of Throw.
+    -- 2026-10-29). Warriors and rogues also get "Ranged", in place of Throw;
+    -- priests, mages and warlocks get it on button 2 (see RANGED_CLASSES).
     if brandNew then
         PlaceAttack()
-        if RANGED_CLASSES[class] then PlaceRanged() end
+        if RANGED_CLASSES[class] then PlaceRanged(RANGED_CLASSES[class]) end
     end
     if #created > 0 then Print("new spell macro: " .. table.concat(created, ", ")) end
     if #skipped > 0 then Print("no macro (excluded): " .. table.concat(skipped, ", ")) end
