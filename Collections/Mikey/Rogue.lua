@@ -6,12 +6,25 @@
 local _, ns = ...
 
 ns.Collection("Mikey").ROGUE = {
-    -- Ambush from stealth; out of it, Backstab, else Sinister Strike.
-    { name = "Attack", spells = { "Sinister Strike", "Backstab", "Ambush" }, body = [[
-        #showtooltip
+    -- 2026-11-02: "Attack" (Ambush / Backstab / Sinister Strike in one) split into SS and Backstab. In stealth both
+    -- target the nearest enemy if you have none or yours is dead (/startattack would do that but breaks stealth;
+    -- out of stealth it picks up a target by itself, checked in game) and pick its pocket first. The icon is named:
+    -- a bare #showtooltip would show Pick Pocket on both buttons while stealthed.
+    { name = "SS", learn = "Sinister Strike", spells = { "Pick Pocket", "Sinister Strike" }, body = [[
+        #showtooltip Sinister Strike
+        /targetenemy [stealth,noharm][stealth,dead]
+        /use [stealth] Pick Pocket
+        /startattack [nostealth]
+        /use Sinister Strike
+    ]] },
+
+    -- Ambush from stealth, Backstab out of it.
+    { name = "Backstab", learn = "Backstab", spells = { "Pick Pocket", "Ambush", "Backstab" }, body = [[
+        #showtooltip [stealth] Ambush; Backstab
+        /targetenemy [stealth,noharm][stealth,dead]
+        /use [stealth] Pick Pocket
         /startattack [nostealth]
         /use [stealth] Ambush; Backstab
-        /use [nostealth] Sinister Strike
     ]] },
 
     { name = "Bleed", spells = { "Garrote", "Rupture" }, body = [[

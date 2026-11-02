@@ -138,6 +138,12 @@ macros on the site, 358 of them non-PvP.
 
 ## Parked ideas (Mikey's call when to pick up)
 
+- **`/startattack` acquires a target by itself** (confirmed by Mikey in game
+  on Classic, Retail and Forever, 2026-11-02): with no target, or a dead one,
+  it picks one up. So out of stealth nothing extra is needed. In stealth, where
+  `/startattack` would break stealth, the rogue's pattern is
+  `/targetenemy [stealth,noharm][stealth,dead]` (stealth inside each bracket;
+  `[stealth][noharm][dead]` would retarget on every press in stealth).
 - **`/targetenemy [noharm][dead]` before `/startattack`** as the standard
   "acquire then act" pattern. It would be stealth-gated for rogue/druid and
   skipped for CC, heals and pet spells, and could go into the Mikey
