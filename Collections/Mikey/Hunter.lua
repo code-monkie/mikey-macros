@@ -9,13 +9,26 @@
 local _, ns = ...
 
 ns.Collection("Mikey").HUNTER = {
-    { name = "AS", spells = { "Auto Shot" }, body = [[
-        #showtooltip
-        /startattack
-        /use !Auto Shot
-        /petattack [pet]
-        /petdefensive [pet,group]
-        /petassist [pet,nogroup]
+    -- Clears a dead or friendly target, picks the nearest enemy if there's none,
+    -- then shoots the mouseover, else the target. No pet rider (Mikey, 2026-11-02).
+    { name = "Shot", spells = { "Auto Shot" }, body = [[
+        #showtooltip Auto Shot
+        /cleartarget [dead][help]
+        /targetenemy [noexists]
+        /cast [@mouseover,harm,exists,nodead] !Auto Shot; !Auto Shot
+    ]] },
+
+    -- Aimed Shot opener: same targeting as Shot, Raptor Strike if in melee,
+    -- then Aimed Shot, Auto Shot, and the pet goes in. Made when Aimed Shot
+    -- (talent) is learned.
+    { name = "AP", learn = "Aimed Shot", spells = { "Raptor Strike", "Aimed Shot", "Auto Shot" }, body = [[
+        #showtooltip Aimed Shot
+        /cleartarget [dead][help]
+        /targetenemy [noexists]
+        /cast Raptor Strike
+        /cast Aimed Shot
+        /cast !Auto Shot
+        /petattack
     ]] },
 
     { name = "Arcane", spells = { "Arcane Shot" }, body = [[
@@ -75,42 +88,12 @@ ns.Collection("Mikey").HUNTER = {
         /petassist [pet,nogroup]
     ]] },
 
-    { name = "Raptor", spells = { "Raptor Strike" }, body = [[
-        #showtooltip
-        /startattack
-        /use Raptor Strike
-        /petattack [pet]
-        /petdefensive [pet,group]
-        /petassist [pet,nogroup]
-    ]] },
-
-    { name = "Mongoose", spells = { "Mongoose Bite" }, body = [[
-        #showtooltip
-        /startattack
-        /use Mongoose Bite
-        /petattack [pet]
-        /petdefensive [pet,group]
-        /petassist [pet,nogroup]
-    ]] },
-
     -- Cheetah and Hawk in turn.
     { name = "Aspect", spells = { "Aspect of the Hawk", "Aspect of the Cheetah" }, body = [[
         #showtooltip
         /castsequence Aspect of the Cheetah, Aspect of the Hawk
     ]] },
 
-    -- Lands where the mouse points.
-    { name = "Flare", spells = { "Flare" }, body = [[
-        #showtooltip Flare
-        /cast [@cursor] Flare
-    ]] },
-
-    { name = "Pet Stop", spells = {}, body = [[
-        #showtooltip Pet Passive
-        /petpassive
-        /petfollow
-        /petstopattack
-    ]] },
 
     -- Talent.
     { name = "Intimidation", spells = { "Intimidation" }, body = [[

@@ -2,7 +2,7 @@
 
 Handoff notes for Claude sessions working on this addon. The README covers what
 the addon does for players; this covers how we work on it and where things
-stand. Last updated 1 November 2026.
+stand. Last updated 2 November 2026.
 
 ## What it is
 
@@ -19,9 +19,9 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   `code-monkie/mikey-macros` (trunk-based: short feature branches into `main`).
 - **Mikey tests in game.** There's no WoW client in the sandbox. Say what to
   run (`/mma update`, `/mma sync`, `/mma list`) and what to look for.
-- **Where to edit:** `C:\Blizzard\Wow\World of Warcraft\_classic_era_\Interface\AddOns\mikey-macros`
-  until Mikey says otherwise. (Earlier work happened in `_retail_`; Forever
-  live will be `_forever_`.)
+- **Where to edit:** `C:\Blizzard\Wow\World of Warcraft\_forever_\Interface\AddOns\mikey-macros`
+  only (Mikey, 2026-11-02). The `_classic_era_` and `_retail_` clones are
+  older working copies; pull there if they're needed, but don't edit them.
 - **Line endings:** the Windows checkout is CRLF and the repo stores LF. Keep
   CRLF when editing. From a Linux shell every file can show as modified; use
   `git diff --ignore-cr-at-eol` to see real changes.

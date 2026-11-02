@@ -7,10 +7,43 @@
 local _, ns = ...
 
 ns.Collection("Default").HUNTER = {
+    -- Melee: Mongoose Bite when it's lit (after a dodge), else Raptor Strike.
+    -- ! so mashing doesn't un-queue Raptor Strike (it waits for the next swing).
+    { name = "Raptor Strike", learn = "Raptor Strike", spells = { "Raptor Strike", "Mongoose Bite" }, body = [[
+        #showtooltip Raptor Strike
+        /cast Mongoose Bite
+        /cast !Raptor Strike
+    ]] },
+
     { name = "Scare Beast", spells = { "Scare Beast" }, body = [[
         #showtooltip
         /stopattack
         /use [@mouseover,harm,nodead] [] Scare Beast
+    ]] },
+
+    -- Pet passive and home first, so it doesn't keep the mob on you; out of
+    -- combat it only calls the pet back.
+    { name = "Feign Death", spells = { "Feign Death" }, body = [[
+        #showtooltip Feign Death
+        /petpassive
+        /petfollow
+        /stopattack
+        /stopcasting
+        /cast [combat] Feign Death
+    ]] },
+
+    -- Lands where the mouse points.
+    { name = "Flare", spells = { "Flare" }, body = [[
+        #showtooltip Flare
+        /cast [@cursor] Flare
+    ]] },
+
+    -- All-in-one pet: Call Pet with none out, Revive Pet if it's dead, else
+    -- Mend Pet (Leaku's guide). Didn't seem to work on Forever when Mikey tried
+    -- it (2026-11-02); likely a dead pet counting as no pet. Test and adjust.
+    { name = "Pet", learn = "Call Pet", spells = { "Call Pet", "Revive Pet", "Mend Pet" }, body = [[
+        #showtooltip
+        /cast [nopet] Call Pet; [@pet,dead] Revive Pet; Mend Pet
     ]] },
 }
 
@@ -26,10 +59,6 @@ ns.Exclude("HUNTER", {
     "Track Demons",
     "Track Giants",
     "Track Dragonkin",
-    "Call Pet",
     "Dismiss Pet",
-    "Revive Pet",
     "Feed Pet",
-    "Flare",
-    "Feign Death",
 })
