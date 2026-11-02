@@ -71,7 +71,15 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   Gun / Crossbow by `[equipped:...]`), made if missing. `PlaceRanged` puts it
   where Throw is on bar 1, else on the first empty button. It was briefly a
   Default collection macro; that was dropped because auto mode skips the
-  General tab (Throw, Shoot), so it never appeared on its own.
+  General tab (Throw, Shoot), so it never appeared on its own. The leftover
+  `Collections/Default/Warrior.lua` (not in the `.toc`) was deleted 2026-11-02.
+  No Default collection has a ranged, wand or Shoot macro; only hunters get one
+  (Mikey's `AS`), and everything else goes through the general `Ranged` macro.
+- **Guaranteed general macros (2026-11-02, Mikey's call):** `EnsureGeneral`
+  makes `Attack` and `Ranged` once per login (the first `Schedule` pass, out
+  of combat), on any class and with auto mode on or off, if the account lacks
+  them. Existing ones are used as is. Placement on bar 1 is still brand-new
+  only (`PlaceAttack`, and `PlaceRanged` for `RANGED_CLASSES`).
 - **Bar swapping (`SwapIntoBars`):** a new macro replaces its spell on every
   action slot 1-180, which takes in the stance and form bars too. Checked on
   Retail 2026-10-30 (Mikey): spells the game puts on the rogue's stealth bar get

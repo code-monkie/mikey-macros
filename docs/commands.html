@@ -180,25 +180,26 @@ gets the one exception, below.)</li>
 spells at level 1; on retail, spells the game places for you), the new macro takes
 its place. Empty buttons are never filled. If a new macro didn't land on a bar,
 the macro window opens on the character tab so you can drag it on.</li>
+<li id="general-macros"><strong>Always there:</strong> at every login, on any character and with
+auto mode on or off, the general (account) macros <code>Attack</code> and <code>Ranged</code> are made if
+the account doesn't have them (<code>new general macro: ...</code>). An existing one is used as
+it is, whatever it says, so a deleted one comes back on the next login.</li>
 <li id="attack-macro"><strong>The Attack macro:</strong> a brand-new (level 1) character also gets the
 general (account) macro <code>Attack</code> on bar 1, button 9, and the game's Attack spell is
-taken off the rest of bar 1. The macro is made if the account doesn't have one yet
-(<code>new general macro: Attack</code>):
+taken off the rest of bar 1:
 <pre><code>#showtooltip 16
 /startattack</code></pre>
-Slot 16 is the main hand, so the button shows your weapon. An <code>Attack</code> macro the
-account already has is used as it is, whatever it says. If button 9 already holds
+Slot 16 is the main hand, so the button shows your weapon. If button 9 already holds
 something else, it's left alone, chat says so, and the Attack spell stays where it
 is; drag the macro on by hand. Out of combat only, like everything on this list.</li>
 <li id="ranged-macro"><strong>The Ranged macro:</strong> a brand-new warrior or rogue also gets the
 general macro <code>Ranged</code> on bar 1, in place of the Throw spell (or on the first empty
-button). It's made if the account doesn't have one yet (<code>new general macro: Ranged</code>):
+button):
 <pre><code>#showtooltip 18
 /target [@mouseover,harm,nodead]
-/use [equipped:Thrown] Throw; [equipped:Bows] !Shoot Bow; [equipped:Guns] !Shoot Gun; [equipped:Crossbows] !Shoot Crossbow</code></pre>
+/use [equipped:Thrown] !Throw; [equipped:Bows] !Shoot Bow; [equipped:Guns] !Shoot Gun; [equipped:Crossbows] !Shoot Crossbow</code></pre>
 An enemy under the mouse becomes your target first; then your target gets whatever the
-ranged slot (18) holds, and the button shows that weapon. An existing <code>Ranged</code>
-macro is used as it is.</li>
+ranged slot (18) holds, and the button shows that weapon.</li>
 <li><strong>In chat:</strong> <code>new spell macro: ...</code> for each one made, and
 <code>no macro (excluded): ...</code> once for each excluded spell.</li>
 <li><strong>Names:</strong> the spell's name, or its initials when longer than 16 characters

@@ -497,8 +497,8 @@ local ATTACK_BODY = "#showtooltip 16\n/startattack"
 -- so nothing trims it: a clause for a weapon you can't use is never reached.
 local RANGED_MACRO = "Ranged"
 local RANGED_BODY = "#showtooltip 18\n/target [@mouseover,harm,nodead]\n"
-    .. "/use [equipped:Thrown] Throw; [equipped:Bows] !Shoot Bow; [equipped:Guns] !Shoot Gun; [equipped:Crossbows] !Shoot Crossbow"
-local RANGED_CLASSES = { WARRIOR = true, ROGUE = true } -- the classes that start with Throw
+    .. "/use [equipped:Thrown] !Throw; [equipped:Bows] !Shoot Bow; [equipped:Guns] !Shoot Gun; [equipped:Crossbows] !Shoot Crossbow"
+local RANGED_CLASSES = { WARRIOR = true, ROGUE = true } -- start with Throw; Ranged goes on their bar 1
 
 local function SwapIntoBars(made)
     local placed = {}
@@ -601,6 +601,24 @@ local function PlaceAttack()
         if slot ~= target and isAttackSpell(GetActionInfo(slot)) then
             PickupAction(slot)
             ClearCursor()
+        end
+    end
+end
+
+-- The general (account) macros made at login when missing, whatever the class
+-- (2026-11-02, Mikey's call): Attack and Ranged. An existing one is used as it
+-- is, whatever its body, so a deleted one comes back on the next login.
+local GUARANTEED = { { ATTACK_MACRO, ATTACK_BODY }, { RANGED_MACRO, RANGED_BODY } }
+local function EnsureGeneral()
+    for _, m in ipairs(GUARANTEED) do
+        local name, body = m[1], m[2]
+        if GeneralMacroIndex(name) == 0 then
+            if GetNumMacros() < AccountMax() then
+                CreateMacro(name, ICON, body, false)
+                Print("new general macro: " .. name)
+            else
+                Print("|cffff6060no free general slots|r for the " .. name .. " macro")
+            end
         end
     end
 end
@@ -709,33 +727,12 @@ local function AutoCreate()
         end
     end
     -- A brand-new character gets the general (account) macro "Attack" on bar 1
-    -- button 9, made first if the account doesn't have it yet (an existing one is
-    -- used as it is, whatever its body). The game's own Attack spell is cleared
-    -- from bar 1, so Attack lives only on button 9 (Mikey's layout, 2026-10-29).
+    -- button 9 (EnsureGeneral has made it by now). The game's own Attack spell is
+    -- cleared from bar 1, so Attack lives only on button 9 (Mikey's layout,
+    -- 2026-10-29). Warriors and rogues also get "Ranged", in place of Throw.
     if brandNew then
-        if GetMacroIndexByName(ATTACK_MACRO) == 0 then
-            local numAccount = GetNumMacros()
-            if numAccount < AccountMax() then
-                CreateMacro(ATTACK_MACRO, ICON, ATTACK_BODY, false)
-                Print("new general macro: " .. ATTACK_MACRO)
-            else
-                Print("|cffff6060no free general slots|r for the " .. ATTACK_MACRO .. " macro")
-            end
-        end
         PlaceAttack()
-        -- Warriors and rogues also get the general macro "Ranged" (made if
-        -- missing, an existing one used as it is), in place of Throw on bar 1.
-        if RANGED_CLASSES[class] then
-            if GeneralMacroIndex(RANGED_MACRO) == 0 then
-                if GetNumMacros() < AccountMax() then
-                    CreateMacro(RANGED_MACRO, ICON, RANGED_BODY, false)
-                    Print("new general macro: " .. RANGED_MACRO)
-                else
-                    Print("|cffff6060no free general slots|r for the " .. RANGED_MACRO .. " macro")
-                end
-            end
-            PlaceRanged()
-        end
+        if RANGED_CLASSES[class] then PlaceRanged() end
     end
     if #created > 0 then Print("new spell macro: " .. table.concat(created, ", ")) end
     if #skipped > 0 then Print("no macro (excluded): " .. table.concat(skipped, ", ")) end
@@ -884,6 +881,7 @@ end
 -- Keep macros current as spells, forms (form numbers) and the main-hand weapon change.
 -- Changes wait until combat ends.
 local pending = false
+local ensured = false -- EnsureGeneral runs once per login
 local events = CreateFrame("Frame")
 local function Schedule()
     if pending then return end
@@ -891,6 +889,10 @@ local function Schedule()
     C_Timer.After(0.5, function()
         if InCombatLockdown() then return end -- PLAYER_REGEN_ENABLED retries
         pending = false
+        if not ensured then
+            ensured = true
+            EnsureGeneral()
+        end
         Adopt()
         CheckConflicts()
         Refresh()
