@@ -42,6 +42,9 @@ function ns.Exclude(class, spells, owner)
 end
 
 local ICON = 134400 -- question mark; #showtooltip supplies the real icon
+-- A collection entry's own `icon` (a texture name), for macros whose spells
+-- #showtooltip can't show, such as pet spells (2026-11-03).
+local function IconFor(def) return def.icon or ICON end
 local MAX_BODY = 255
 
 local function Print(...)
@@ -56,8 +59,19 @@ local function CharacterMax()
     return MAX_CHARACTER_MACROS or (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and 30 or 18)
 end
 
+-- A spellbook entry's real spell name, from its ID. The spellbook can show
+-- another name: Call Pet (883) is listed as "Call <your pet's name>" (checked
+-- on Classic Era 2026-11-03, Mikey's hunter), but macros and collections use
+-- the real one.
+local function RealName(id, shown)
+    local name = id and ((GetSpellInfo and GetSpellInfo(id))
+        or (C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id)))
+    return name or shown
+end
+
 -- Names (lowercased) of every spell in the player's spellbook that is actually
--- learned: no future spells, no off-spec spells.
+-- learned: no future spells, no off-spec spells. Both the name shown and the
+-- real one count.
 local function KnownSpells()
     local known = {}
     if C_SpellBook and C_SpellBook.GetNumSpellBookSkillLines then -- retail
@@ -70,6 +84,7 @@ local function KnownSpells()
                     if item and item.name and not item.isOffSpec
                         and item.itemType == Enum.SpellBookItemType.Spell then
                         known[item.name:lower()] = true
+                        known[RealName(item.spellID, item.name):lower()] = true
                     end
                 end
             end
@@ -79,9 +94,10 @@ local function KnownSpells()
             local _, _, offset, count = GetSpellTabInfo(tab)
             for i = offset + 1, offset + count do
                 local kind = GetSpellBookItemInfo(i, BOOKTYPE_SPELL)
-                local name = GetSpellBookItemName(i, BOOKTYPE_SPELL)
+                local name, _, id = GetSpellBookItemName(i, BOOKTYPE_SPELL)
                 if kind == "SPELL" and name then
                     known[name:lower()] = true
+                    known[RealName(id, name):lower()] = true
                 end
             end
         end
@@ -353,9 +369,10 @@ local function Refresh(force)
         if index then
             local body = Clean(def, ctx)
             if #body <= MAX_BODY then
-                local _, _, current = GetMacroInfo(index)
-                if force or current ~= body then
-                    EditMacro(index, def.name, ICON, body)
+                local _, icon, current = GetMacroInfo(index)
+                -- a macro still on the question mark gets its entry's icon
+                if force or current ~= body or (def.icon and icon == ICON) then
+                    EditMacro(index, def.name, IconFor(def), body)
                     updated[#updated + 1] = def.name
                 end
             end
@@ -384,7 +401,8 @@ end
 
 -- Names (lowercase -> as shown) of the usable spells on the class tabs of the
 -- spellbook: no General tab (Attack, racials, professions, mounts), no
--- passives, no off-spec or future spells.
+-- passives, no off-spec or future spells. Real names (RealName), so Call Pet
+-- gets the Pet macros, not a "Call <pet>" macro.
 local function ClassSpells()
     local spells = {}
     if C_SpellBook and C_SpellBook.GetNumSpellBookSkillLines then -- retail
@@ -396,7 +414,8 @@ local function ClassSpells()
                     local item = C_SpellBook.GetSpellBookItemInfo(i, bank)
                     if item and item.name and not item.isPassive and not item.isOffSpec
                         and item.itemType == Enum.SpellBookItemType.Spell then
-                        spells[item.name:lower()] = item.name
+                        local name = RealName(item.spellID, item.name)
+                        spells[name:lower()] = name
                     end
                 end
             end
@@ -406,8 +425,9 @@ local function ClassSpells()
             local _, _, offset, count = GetSpellTabInfo(tab)
             for i = offset + 1, offset + count do
                 local kind = GetSpellBookItemInfo(i, BOOKTYPE_SPELL)
-                local name = GetSpellBookItemName(i, BOOKTYPE_SPELL)
+                local name, _, id = GetSpellBookItemName(i, BOOKTYPE_SPELL)
                 if kind == "SPELL" and name and not IsPassiveSpell(i, BOOKTYPE_SPELL) then
+                    name = RealName(id, name)
                     spells[name:lower()] = name
                 end
             end
@@ -725,7 +745,7 @@ local function AutoCreate()
                 else
                     ctx = ctx or Context(KnownSpells())
                     local body = Clean(def, ctx)
-                    CreateMacro(def.name, ICON, body, true)
+                    CreateMacro(def.name, IconFor(def), body, true)
                     have[def.name] = true
                     count = count + 1
                     created[#created + 1] = def.name
@@ -791,13 +811,13 @@ local function Sync(all)
     local ctx = Context(known)
     local have, count = CharacterMacros()
     local created, full, tooLong, covered = {}, {}, {}, {}
-    local function add(name, body, label)
+    local function add(name, body, label, icon)
         if #body > MAX_BODY then
             tooLong[#tooLong + 1] = name
         elseif count >= CharacterMax() then
             full[#full + 1] = name
         else
-            CreateMacro(name, ICON, body, true)
+            CreateMacro(name, icon or ICON, body, true)
             have[name] = true
             count = count + 1
             created[#created + 1] = label or name
@@ -806,7 +826,7 @@ local function Sync(all)
     for _, def in ipairs(Definitions()) do
         if all or IsLearned(def, known) then
             for _, spell in ipairs(def.spells) do covered[spell:lower()] = true end
-            if not have[def.name] then add(def.name, Clean(def, ctx)) end
+            if not have[def.name] then add(def.name, Clean(def, ctx), nil, def.icon) end
         end
     end
     if CharDB().auto ~= false then

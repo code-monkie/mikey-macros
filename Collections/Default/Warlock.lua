@@ -19,8 +19,9 @@ ns.Collection("Default").WARLOCK = {
     ]] },
     -- Demon in: Assist stance (Mikey's trial, 2026-11-02), attack the mouseover,
     -- else your target. Made with Summon Imp (level 1); the general Pet Stop
-    -- macro puts it back on passive.
-    { name = "Pet Attack", learn = "Summon Imp", spells = { "Summon Imp" }, body = [[
+    -- macro puts it back on passive. The pet bar's Attack icon, as it has no
+    -- spell of yours to show.
+    { name = "Pet Attack", learn = "Summon Imp", spells = { "Summon Imp" }, icon = "Ability_GhoulFrenzy", body = [[
         /petassist
         /petattack [@mouseover,harm,nodead] []
     ]] },

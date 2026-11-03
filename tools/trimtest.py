@@ -2,7 +2,7 @@
 
 There's no Lua runtime in the Claude sandboxes, so this is a Python copy of
 Core.lua's KnownOnly (keep it in step if KnownOnly changes). It reads plain
-`{ name = ..., [learn = ...,] spells = { ... }, body = [[ ... ]] }` entries;
+`{ name = ..., [learn = ...,] spells = { ... }, [icon = ...,] body = [[ ... ]] }` entries;
 function bodies are skipped.
 
     python tools/trimtest.py Collections/ClassicWowForever/Rogue.lua \
@@ -16,7 +16,7 @@ import sys
 
 ENTRY = re.compile(
     r'\{\s*name\s*=\s*"([^"]+)",(?:\s*learn\s*=\s*"([^"]+)",)?\s*spells\s*=\s*\{([^}]*)\},'
-    r'\s*body\s*=\s*\[(=*)\[\n(.*?)\n\s*\]\4\]', re.S)
+    r'(?:\s*icon\s*=\s*"[^"]*",)?\s*body\s*=\s*\[(=*)\[\n(.*?)\n\s*\]\4\]', re.S)
 
 
 def base(t):

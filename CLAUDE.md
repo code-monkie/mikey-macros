@@ -48,6 +48,10 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   - `learn` (optional, string or list): the spell(s) that make the macro when
     learned. Defaults to all of `spells`. Added for ClassicWowForever, where
     one macro names several spells but belongs to one.
+  - `icon` (optional, 2026-11-03): a texture name for macros whose spells
+    `#showtooltip` can't show (pet spells); Pet Attack uses the pet bar's
+    `Ability_GhoulFrenzy`. Otherwise the question mark, so `#showtooltip`
+    picks the icon. Refresh also sets it on a macro still on the question mark.
   - `body`: macro text (at most 255 after trimming), or `function(c)` returning
     it. Context: `c.knows(spell)`, `c.dagger`, `c.form("Cat Form")` (the
     form's current `[form:N]` number, or nil).
@@ -57,6 +61,12 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
 - **Covered spells:** a spell on a macro you *have* (a modifier or sequence
   step, not what it's made for) gets no generated macro of its own. Until that
   macro exists, it does.
+- **Real spell names (2026-11-03):** the spellbook can show a spell under
+  another name: Call Pet (883) is listed as "Call <pet's name>" (Classic Era,
+  Mikey's hunter). `RealName` looks the name up from the spell ID;
+  `KnownSpells` keeps both names and `ClassSpells` uses the real one, so Call
+  Pet makes Default hunter's Pet and Pet Attack instead of a "Call Murray"
+  macro. Not yet checked on Forever.
 - **Refresh triggers:** login, `SPELLS_CHANGED`, `UPDATE_SHAPESHIFT_FORMS`,
   main-hand changes, leaving combat.
 - **Attack macro (2026-10-29):** a brand-new character (the `brandNew` branch
@@ -85,6 +95,16 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   account's own `~Cancel` macro (never made by the addon) on MultiBar5 button 4
   (`MULTIACTIONBAR5BUTTON4`, slot 148, bound to X) for a brand-new character of
   any class; a taken button is left alone with a chat message.
+  Checked on Classic Era 2026-11-03 (Mikey): a new level-1 rogue got the
+  right starting bar, ~Attack and ~Ranged placed, and ~Cancel on bar 5
+  button 4. Everything up to this point counts as tested.
+  The Mikey rogue's Sap → Disorient rename checked in game too (Mikey,
+  2026-11-03), and Default hunter's Eagle Eye (`!` lets you recast it to
+  move the eye without the view snapping back). Untested: `learn` on the Mikey druid's bear macros (Maul,
+  Swipe, Growl, Roar, Bash).
+  The bear test waits for Mikey's Forever druid to reach Bear Form (10-14):
+  plain `/mma sync` should bring back no Swipe or Bash before they're learned
+  (`sync all` ignores `learn`, so it can't test this).
 - **Guaranteed general macros (2026-11-02, Mikey's call):** `EnsureGeneral`
   makes `~Attack` and `~Ranged` once per login (the first `Schedule` pass, out
   of combat), on any class and with auto mode on or off, if the account lacks
@@ -97,8 +117,8 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   action slot 1-180, which takes in the stance and form bars too. Checked on
   Retail 2026-10-30 (Mikey): spells the game puts on the rogue's stealth bar get
   their macro there as well.
-- **Limits:** 18 character macro slots on Classic clients (30 on retail);
-  collections can get close.
+- **Limits:** 30 character macro slots on Classic Era now (Mikey's hunter,
+  2026-11-03; was 18) and on retail; collections can get close.
 
 ## Collections
 
