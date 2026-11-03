@@ -46,8 +46,9 @@ ns.Collection("Default").HUNTER = {
     ]] },
 
     -- All-in-one pet: Call Pet with none out, Revive Pet if it's dead, else
-    -- Mend Pet (Leaku's guide). Didn't seem to work on Forever when Mikey tried
-    -- it (2026-11-02); likely a dead pet counting as no pet. Test and adjust.
+    -- Mend Pet (Leaku's guide). It first failed because the spellbook lists
+    -- Call Pet as "Call <pet's name>"; fixed in Core (RealName) and checked on
+    -- Classic Era 2026-11-03 (Mikey).
     { name = "Pet", learn = "Call Pet", spells = { "Call Pet", "Revive Pet", "Mend Pet" }, body = [[
         #showtooltip
         /cast [nopet] Call Pet; [@pet,dead] Revive Pet; Mend Pet

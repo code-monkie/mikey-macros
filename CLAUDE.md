@@ -66,7 +66,9 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   Mikey's hunter). `RealName` looks the name up from the spell ID;
   `KnownSpells` keeps both names and `ClassSpells` uses the real one, so Call
   Pet makes Default hunter's Pet and Pet Attack instead of a "Call Murray"
-  macro. Not yet checked on Forever.
+  macro. Checked on Classic Era 2026-11-03 (Mikey): Pet and Pet Attack made
+  and working, hunter ready to go. Classic Era has no Assist stance, so
+  `/petassist` does nothing there; Forever has it. Not yet checked on Forever.
 - **Refresh triggers:** login, `SPELLS_CHANGED`, `UPDATE_SHAPESHIFT_FORMS`,
   main-hand changes, leaving combat.
 - **Attack macro (2026-10-29):** a brand-new character (the `brandNew` branch
