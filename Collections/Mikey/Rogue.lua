@@ -33,8 +33,9 @@ ns.Collection("Mikey").ROGUE = {
         /startattack [nostealth]
     ]] },
 
-    -- Sap from stealth, Gouge in combat.
-    { name = "Sap", spells = { "Sap", "Gouge" }, body = [[
+    -- Sap from stealth, Gouge in combat. Named for neither: Gouge (level 6)
+    -- comes before Sap (level 10) (Mikey, 2026-11-03).
+    { name = "Disorient", spells = { "Sap", "Gouge" }, body = [[
         #showtooltip
         /stopattack
         /use [@mouseover,harm,nodead,stealth] [stealth] Sap; [@mouseover,harm,nodead] [] Gouge

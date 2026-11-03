@@ -46,35 +46,37 @@ ns.Collection("Mikey").DRUID = {
     ]] },
 
     -- Bear ---------------------------------------------------------------------
+    -- Each bear ability's macro is made when that ability is learned (`learn`),
+    -- not with Bear Form, which comes first (Mikey, 2026-11-03).
     -- Into Bear Form; in bear, Frenzied Regeneration (36).
     { name = "Bear", spells = { "Bear Form", "Frenzied Regeneration" }, body = [[
         #showtooltip
         /use [noform:1] !Bear Form; Frenzied Regeneration
     ]] },
 
-    { name = "Maul", spells = { "Maul", "Bear Form" }, body = [[
+    { name = "Maul", learn = "Maul", spells = { "Maul", "Bear Form" }, body = [[
         #showtooltip Maul
         /startattack
         /use [noform:1] !Bear Form; Maul
     ]] },
 
-    { name = "Swipe", spells = { "Swipe", "Bear Form" }, body = [[
+    { name = "Swipe", learn = "Swipe", spells = { "Swipe", "Bear Form" }, body = [[
         #showtooltip Swipe
         /startattack
         /use [noform:1] !Bear Form; Swipe
     ]] },
 
-    { name = "Growl", spells = { "Growl", "Bear Form" }, body = [[
+    { name = "Growl", learn = "Growl", spells = { "Growl", "Bear Form" }, body = [[
         #showtooltip Growl
         /use [noform:1] !Bear Form; [@mouseover,harm,nodead] [] Growl
     ]] },
 
-    { name = "Roar", spells = { "Demoralizing Roar", "Bear Form" }, body = [[
+    { name = "Roar", learn = "Demoralizing Roar", spells = { "Demoralizing Roar", "Bear Form" }, body = [[
         #showtooltip Demoralizing Roar
         /use [noform:1] !Bear Form; Demoralizing Roar
     ]] },
 
-    { name = "Bash", spells = { "Bash", "Bear Form" }, body = [[
+    { name = "Bash", learn = "Bash", spells = { "Bash", "Bear Form" }, body = [[
         #showtooltip Bash
         /use [noform:1] !Bear Form; [@mouseover,harm,nodead] [] Bash
     ]] },
