@@ -4,7 +4,10 @@
 -- One spell per macro, no modifier branches: Shift and Ctrl are their own
 -- bars (Shift+1-7, Ctrl+1-7). Traps and the other aspects are dragged from
 -- the spellbook, so auto mode makes no macros for them (exclude list at the bottom).
--- Pet rider on attacks: attack, defensive in a group, assist when solo.
+-- No pet rider on attacks (2026-11-02, Mikey): Default's Pet Attack sends the
+-- pet and the general Pet Stop calls it back. AP's /petattack is the one
+-- exception. Macros that differed from auto mode's only by the old rider were
+-- dropped (Serpent, Scorpid, Intimidation).
 
 local _, ns = ...
 
@@ -36,36 +39,13 @@ ns.Collection("Mikey").HUNTER = {
         /startattack
         /use Arcane Shot
         /use !Auto Shot
-        /petattack [pet]
-        /petdefensive [pet,group]
-        /petassist [pet,nogroup]
     ]] },
 
-    -- Stings: mouseover, else target; the pet goes for your target.
-    { name = "Serpent", spells = { "Serpent Sting" }, body = [[
-        #showtooltip
-        /use [@mouseover,harm,nodead] [] Serpent Sting
-        /petattack [pet]
-        /petdefensive [pet,group]
-        /petassist [pet,nogroup]
-    ]] },
-
-    { name = "Scorpid", spells = { "Scorpid Sting" }, body = [[
-        #showtooltip
-        /use [@mouseover,harm,nodead] [] Scorpid Sting
-        /petattack [pet]
-        /petdefensive [pet,group]
-        /petassist [pet,nogroup]
-    ]] },
-
-    -- The opener: a mouseover becomes your target, marked, and the pet goes in.
+    -- The opener: a mouseover becomes your target, then marked.
     { name = "Mark", spells = { "Hunter's Mark" }, body = [[
         #showtooltip
         /target [@mouseover,harm,nodead]
         /use Hunter's Mark
-        /petattack [pet]
-        /petdefensive [pet,group]
-        /petassist [pet,nogroup]
     ]] },
 
     { name = "Multi", spells = { "Multi-Shot" }, body = [[
@@ -73,9 +53,6 @@ ns.Collection("Mikey").HUNTER = {
         /startattack
         /use Multi-Shot
         /use !Auto Shot
-        /petattack [pet]
-        /petdefensive [pet,group]
-        /petassist [pet,nogroup]
     ]] },
 
     { name = "Aimed", spells = { "Aimed Shot" }, body = [[
@@ -83,25 +60,12 @@ ns.Collection("Mikey").HUNTER = {
         /startattack
         /use Aimed Shot
         /use !Auto Shot
-        /petattack [pet]
-        /petdefensive [pet,group]
-        /petassist [pet,nogroup]
     ]] },
 
     -- Cheetah and Hawk in turn.
     { name = "Aspect", spells = { "Aspect of the Hawk", "Aspect of the Cheetah" }, body = [[
         #showtooltip
         /castsequence Aspect of the Cheetah, Aspect of the Hawk
-    ]] },
-
-
-    -- Talent.
-    { name = "Intimidation", spells = { "Intimidation" }, body = [[
-        #showtooltip
-        /petattack [pet]
-        /petdefensive [pet,group]
-        /petassist [pet,nogroup]
-        /use Intimidation
     ]] },
 }
 

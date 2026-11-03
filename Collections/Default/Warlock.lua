@@ -17,6 +17,13 @@ ns.Collection("Default").WARLOCK = {
         #showtooltip
         /use Create Healthstone (Major); Create Healthstone (Greater); Create Healthstone; Create Healthstone (Lesser); Create Healthstone (Minor)
     ]] },
+    -- Demon in: Assist stance (Mikey's trial, 2026-11-02), attack the mouseover,
+    -- else your target. Made with Summon Imp (level 1); the general Pet Stop
+    -- macro puts it back on passive.
+    { name = "Pet Attack", learn = "Summon Imp", spells = { "Summon Imp" }, body = [[
+        /petassist
+        /petattack [@mouseover,harm,nodead] []
+    ]] },
 }
 
 ns.Exclude("WARLOCK", {

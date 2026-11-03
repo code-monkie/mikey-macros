@@ -45,6 +45,19 @@ ns.Collection("Default").HUNTER = {
         #showtooltip
         /cast [nopet] Call Pet; [@pet,dead] Revive Pet; Mend Pet
     ]] },
+
+    -- Pet in: Assist stance (Mikey's trial, 2026-11-02), attack the mouseover,
+    -- else your target, with its gap closer (Dash, Dive or a boar's Charge).
+    -- Pet spells aren't in your spellbook, so they're not listed; the general
+    -- Pet Stop macro puts it back on passive.
+    { name = "Pet Attack", learn = "Call Pet", spells = { "Call Pet" }, body = [[
+        #showtooltip
+        /petassist
+        /petattack [@mouseover,harm,nodead] []
+        /cast Dash
+        /cast Dive
+        /cast [@mouseover,harm,nodead] [] Charge
+    ]] },
 }
 
 ns.Exclude("HUNTER", {

@@ -16,20 +16,8 @@ ns.Collection("Mikey").WARLOCK = {
         /use [@mouseover,nodead,harm] [] Shadow Bolt
     ]] },
 
-    { name = "I", spells = { "Immolate" }, body = [[
-        #showtooltip
-        /startattack
-        /petassist
-        /petattack
-        /use [@mouseover,nodead,harm] [] Immolate
-    ]] },
-
-    { name = "C", spells = { "Corruption" }, body = [[
-        #showtooltip
-        /startattack
-        /petattack
-        /use [@mouseover,nodead,harm] [] Corruption
-    ]] },
+    -- Immolate and Corruption differed from auto mode's macros only by a pet
+    -- rider; dropped 2026-11-02 (Default's Pet Attack sends the demon).
 
     -- Curses ----------------------------------------------------------------------
     { name = "BoA", spells = { "Bane of Agony" }, body = [[
@@ -124,8 +112,9 @@ ns.Exclude("WARLOCK", {
     "Create Spellstone (Major)",
     "Ritual of Summoning",
     "Eye of Kilrogg",
-    -- mikey-ring Demons ring
-    "Summon Imp",
+    -- mikey-ring Demons ring (Summon Imp isn't listed: Default's Pet Attack is
+    -- tied to it, so it gets no macro of its own anyway, and listing it would
+    -- drop Pet Attack)
     "Summon Succubus",
     "Summon Felhunter",
     "Summon Felguard",
