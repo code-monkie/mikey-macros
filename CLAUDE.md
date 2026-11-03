@@ -60,13 +60,13 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
 - **Refresh triggers:** login, `SPELLS_CHANGED`, `UPDATE_SHAPESHIFT_FORMS`,
   main-hand changes, leaving combat.
 - **Attack macro (2026-10-29):** a brand-new character (the `brandNew` branch
-  of `AutoCreate`) gets the general (account) macro `Attack`
+  of `AutoCreate`) gets the general (account) macro `~Attack`
   (`#showtooltip 16` / `/startattack`), made if missing and otherwise used as
   is. `PlaceAttack` puts it on bar 1 button 9 (`ATTACK_SLOT`; was 7 until Mikey
   moved it) and clears the Attack spell from the rest of bar 1. A taken button
   9 is left alone with a chat message. Documented in `docs/commands.html#attack-macro`.
 - **Ranged macro (2026-11-01):** in the same branch, a brand-new warrior or
-  rogue (`RANGED_CLASSES`) also gets the general macro `Ranged` (mouseover
+  rogue (`RANGED_CLASSES`) also gets the general macro `~Ranged` (mouseover
   enemy becomes the target; with none, `/cleartarget [dead][help]` and
   `/targetenemy [noexists]`, added 2026-11-02; then `#showtooltip 18` and Throw / Shoot Bow /
   Gun / Crossbow, or the wand's !Shoot (added 2026-11-02), by
@@ -78,9 +78,15 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   General tab (Throw, Shoot), so it never appeared on its own. The leftover
   `Collections/Default/Warrior.lua` (not in the `.toc`) was deleted 2026-11-02.
   No Default collection has a ranged, wand or Shoot macro; only hunters get one
-  (Mikey's `AS`), and everything else goes through the general `Ranged` macro.
+  (Mikey's `AS`), and everything else goes through the general `~Ranged` macro.
+- **~ names (2026-11-03, Mikey):** the general macros the addon handles start
+  with `~` (`~Attack`, `~Ranged`); the old `Attack` and `Ranged` names aren't
+  recognised any more (no migration, Mikey's call). `PlaceCancel` puts the
+  account's own `~Cancel` macro (never made by the addon) on MultiBar5 button 4
+  (`MULTIACTIONBAR5BUTTON4`, slot 148, bound to X) for a brand-new character of
+  any class; a taken button is left alone with a chat message.
 - **Guaranteed general macros (2026-11-02, Mikey's call):** `EnsureGeneral`
-  makes `Attack` and `Ranged` once per login (the first `Schedule` pass, out
+  makes `~Attack` and `~Ranged` once per login (the first `Schedule` pass, out
   of combat), on any class and with auto mode on or off, if the account lacks
   them. Existing ones are used as is. Placement on bar 1 is still brand-new
   only (`PlaceAttack`, and `PlaceRanged` for `RANGED_CLASSES`). `RANGED_CLASSES`

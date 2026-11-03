@@ -489,15 +489,16 @@ end
 -- learn them). Empty buttons are never filled. Out of combat, empty cursor only.
 -- Returns the names of the macros it placed.
 -- General (account) macro swapped onto a new character's Attack button; made if missing.
--- Slot 16 is the main hand, so the button shows your weapon.
-local ATTACK_MACRO = "Attack"
+-- Slot 16 is the main hand, so the button shows your weapon. The general macros
+-- the addon handles start with ~ (Mikey, 2026-11-03).
+local ATTACK_MACRO = "~Attack"
 local ATTACK_BODY = "#showtooltip 16\n/startattack"
 -- The Ranged macro: an enemy under the mouse becomes your target; with none,
 -- a dead or friendly target is dropped and the nearest enemy picked (Mikey,
 -- 2026-11-02). Then your target gets whatever the ranged slot (18) holds.
 -- Account-wide like Attack, so nothing trims it: a clause for a weapon you
 -- can't use is never reached.
-local RANGED_MACRO = "Ranged"
+local RANGED_MACRO = "~Ranged"
 local RANGED_BODY = "#showtooltip 18\n/target [@mouseover,harm,nodead]\n"
     .. "/cleartarget [dead][help]\n/targetenemy [noexists]\n"
     .. "/use [equipped:Thrown] Throw; [equipped:Bows] Shoot Bow; [equipped:Guns] Shoot Gun; [equipped:Crossbows] Shoot Crossbow; [equipped:Wands] !Shoot"
@@ -620,8 +621,29 @@ local function PlaceAttack()
     end
 end
 
+-- The ~Cancel macro onto MultiBar5's button 4 (MULTIACTIONBAR5BUTTON4, slot 148)
+-- for a brand-new character (Mikey, 2026-11-03). It's the account's own macro:
+-- never made here, so nothing happens without it. A taken button is left alone
+-- (said in chat). Out of combat, empty cursor only.
+local CANCEL_MACRO = "~Cancel"
+local function PlaceCancel()
+    local index = GeneralMacroIndex(CANCEL_MACRO)
+    if index == 0 or InCombatLockdown() or GetCursorInfo() then return end
+    local button = _G.MultiBar5Button4
+    local slot = button and button.action or 148
+    local kind, id = GetActionInfo(slot)
+    if kind == "macro" and id == index then return end
+    if kind then
+        Print("bar 5 button 4 is taken; drag the " .. CANCEL_MACRO .. " macro onto your bar by hand.")
+        return
+    end
+    PickupMacro(index)
+    PlaceAction(slot)
+    ClearCursor()
+end
+
 -- The general (account) macros made at login when missing, whatever the class
--- (2026-11-02, Mikey's call): Attack and Ranged. An existing one is used as it
+-- (2026-11-02, Mikey's call): ~Attack and ~Ranged. An existing one is used as it
 -- is, whatever its body, so a deleted one comes back on the next login.
 local GUARANTEED = { { ATTACK_MACRO, ATTACK_BODY }, { RANGED_MACRO, RANGED_BODY } }
 local function EnsureGeneral()
@@ -741,14 +763,16 @@ local function AutoCreate()
             break
         end
     end
-    -- A brand-new character gets the general (account) macro "Attack" on bar 1
+    -- A brand-new character gets the general (account) macro "~Attack" on bar 1
     -- button 9 (EnsureGeneral has made it by now). The game's own Attack spell is
-    -- cleared from bar 1, so Attack lives only on button 9 (Mikey's layout,
-    -- 2026-10-29). Warriors and rogues also get "Ranged", in place of Throw;
+    -- cleared from bar 1, so ~Attack lives only on button 9 (Mikey's layout,
+    -- 2026-10-29). Warriors and rogues also get "~Ranged", in place of Throw;
     -- priests, mages and warlocks get it on button 2 (see RANGED_CLASSES).
+    -- Every class gets "~Cancel" on bar 5 button 4.
     if brandNew then
         PlaceAttack()
         if RANGED_CLASSES[class] then PlaceRanged(RANGED_CLASSES[class]) end
+        PlaceCancel()
     end
     if #created > 0 then Print("new spell macro: " .. table.concat(created, ", ")) end
     if #skipped > 0 then Print("no macro (excluded): " .. table.concat(skipped, ", ")) end

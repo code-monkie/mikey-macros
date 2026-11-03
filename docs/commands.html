@@ -181,19 +181,19 @@ spells at level 1; on retail, spells the game places for you), the new macro tak
 its place. Empty buttons are never filled. If a new macro didn't land on a bar,
 the macro window opens on the character tab so you can drag it on.</li>
 <li id="general-macros"><strong>Always there:</strong> at every login, on any character and with
-auto mode on or off, the general (account) macros <code>Attack</code> and <code>Ranged</code> are made if
+auto mode on or off, the general (account) macros <code>~Attack</code> and <code>~Ranged</code> are made if
 the account doesn't have them (<code>new general macro: ...</code>). An existing one is used as
 it is, whatever it says, so a deleted one comes back on the next login.</li>
-<li id="attack-macro"><strong>The Attack macro:</strong> a brand-new (level 1) character also gets the
-general (account) macro <code>Attack</code> on bar 1, button 9, and the game's Attack spell is
+<li id="attack-macro"><strong>The ~Attack macro:</strong> a brand-new (level 1) character also gets the
+general (account) macro <code>~Attack</code> on bar 1, button 9, and the game's Attack spell is
 taken off the rest of bar 1:
 <pre><code>#showtooltip 16
 /startattack</code></pre>
 Slot 16 is the main hand, so the button shows your weapon. If button 9 already holds
 something else, it's left alone, chat says so, and the Attack spell stays where it
 is; drag the macro on by hand. Out of combat only, like everything on this list.</li>
-<li id="ranged-macro"><strong>The Ranged macro:</strong> a brand-new warrior or rogue also gets the
-general macro <code>Ranged</code> on bar 1, in place of the Throw spell (or on the first empty
+<li id="ranged-macro"><strong>The ~Ranged macro:</strong> a brand-new warrior or rogue also gets the
+general macro <code>~Ranged</code> on bar 1, in place of the Throw spell (or on the first empty
 button). A brand-new priest, mage or warlock gets it on bar 1, button 2, if that button is
 empty; if not, chat says so and you drag it on by hand:
 <pre><code>#showtooltip 18
@@ -205,6 +205,9 @@ An enemy under the mouse becomes your target first. With none, a dead or friendl
 target is dropped and the nearest enemy picked, so one press shoots again after a kill.
 Then your target gets whatever the
 ranged slot (18) holds (a wand fires <code>Shoot</code>), and the button shows that weapon.</li>
+<li id="cancel-macro"><strong>The ~Cancel macro:</strong> a brand-new character of any class also gets
+the general macro <code>~Cancel</code> on bar 5, button 4, if the account has one (the addon
+never makes it) and that button is empty; if it's taken, chat says so.</li>
 <li><strong>In chat:</strong> <code>new spell macro: ...</code> for each one made, and
 <code>no macro (excluded): ...</code> once for each excluded spell.</li>
 <li><strong>Names:</strong> the spell's name, or its initials when longer than 16 characters
