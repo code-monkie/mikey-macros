@@ -45,24 +45,15 @@ ns.Collection("Mikey").WARLOCK = {
     ]] },
 
     -- Channels and mana -----------------------------------------------------------
-    { name = "LT", spells = { "Life Tap" }, body = [[
-        #showtooltip
-        /stopattack
-        /use Life Tap
-    ]] },
-
+    -- Life Tap and Health Funnel were dropped 2026-11-03: /stopattack did nothing
+    -- for them, so they're auto mode's macros now.
+    -- Drain: no melee or wand killing blow (that loses the shard); /stopcasting
+    -- cuts a wand or Shadow Bolt off so the drain lands on the kill.
     { name = "Drain", spells = { "Drain Soul" }, body = [[
         #showtooltip
         /stopattack
         /stopcasting
         /use Drain Soul
-    ]] },
-
-    { name = "HF", spells = { "Health Funnel" }, body = [[
-        #showtooltip
-        /stopattack
-        /stopcasting
-        /use Health Funnel
     ]] },
 
     -- Armor -----------------------------------------------------------------------

@@ -12,11 +12,6 @@ ns.Collection("Default").DRUID = {
         /stopattack
         /use [@mouseover,harm,nodead] [] Hibernate
     ]] },
-    { name = "Soothe Animal", spells = { "Soothe Animal" }, body = [[
-        #showtooltip
-        /stopattack
-        /use [@mouseover,harm,nodead] [] Soothe Animal
-    ]] },
     -- Into Cat Form first, then Prowl (out of combat); more presses don't drop it.
     -- Cat Form's number depends on which forms you have, so it's filled in.
     { name = "Prowl", learn = "Prowl", spells = { "Prowl", "Cat Form" }, body = function(c)

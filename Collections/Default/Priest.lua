@@ -12,11 +12,6 @@ ns.Collection("Default").PRIEST = {
         /stopattack
         /use [@mouseover,harm,nodead] [] Shackle Undead
     ]] },
-    { name = "Mind Soothe", spells = { "Mind Soothe" }, body = [[
-        #showtooltip
-        /stopattack
-        /use [@mouseover,harm,nodead] [] Mind Soothe
-    ]] },
     -- Dead friend under the mouse, else your dead target.
     { name = "Res", spells = { "Resurrection" }, body = [[
         #showtooltip

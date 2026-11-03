@@ -12,10 +12,12 @@ ns.Collection("Default").ROGUE = {
         /stopattack
         /use Sap
     ]] },
+    -- /stopattack after: a melee ability switches auto-attack on as it fires,
+    -- and the next swing would break the Gouge.
     { name = "Gouge", spells = { "Gouge" }, body = [[
         #showtooltip
-        /stopattack
         /use Gouge
+        /stopattack
     ]] },
     { name = "Blind", spells = { "Blind" }, body = [[
         #showtooltip
