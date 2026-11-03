@@ -38,6 +38,13 @@ ns.Collection("Default").HUNTER = {
         /cast [@cursor] Flare
     ]] },
 
+    -- ! so a second press doesn't end the channel and snap the view back to
+    -- you: you can recast it to move the eye, like a priest's Mind Vision.
+    { name = "Eagle Eye", spells = { "Eagle Eye" }, body = [[
+        #showtooltip Eagle Eye
+        /cast !Eagle Eye
+    ]] },
+
     -- All-in-one pet: Call Pet with none out, Revive Pet if it's dead, else
     -- Mend Pet (Leaku's guide). Didn't seem to work on Forever when Mikey tried
     -- it (2026-11-02); likely a dead pet counting as no pet. Test and adjust.

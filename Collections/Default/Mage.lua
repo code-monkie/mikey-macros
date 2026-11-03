@@ -12,10 +12,21 @@ ns.Collection("Default").MAGE = {
         /stopattack
         /use [@mouseover,harm,nodead] [] Polymorph
     ]] },
+    -- Best mana gem in your bags first. The gems are items, so `spells` only
+    -- holds the spell that makes the macro (Conjure Mana Agate, level 28); a
+    -- gem you're not carrying is just skipped.
+    { name = "Mana Gem", learn = "Conjure Mana Agate", spells = { "Conjure Mana Agate" }, body = [[
+        #showtooltip Mana Ruby
+        /use Mana Ruby
+        /use Mana Citrine
+        /use Mana Jade
+        /use Mana Agate
+    ]] },
 }
 
+-- Conjure Mana Agate isn't listed: the Mana Gem macro above is made for it, so
+-- it gets no macro of its own anyway (and listing it would warn).
 ns.Exclude("MAGE", {
-    "Conjure Mana Agate",
     "Conjure Mana Jade",
     "Conjure Mana Citrine",
     "Conjure Mana Ruby",
