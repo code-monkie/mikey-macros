@@ -198,8 +198,12 @@ button). A brand-new priest, mage or warlock gets it on bar 1, button 2, if that
 empty; if not, chat says so and you drag it on by hand:
 <pre><code>#showtooltip 18
 /target [@mouseover,harm,nodead]
+/cleartarget [dead][help]
+/targetenemy [noexists]
 /use [equipped:Thrown] Throw; [equipped:Bows] Shoot Bow; [equipped:Guns] Shoot Gun; [equipped:Crossbows] Shoot Crossbow; [equipped:Wands] !Shoot</code></pre>
-An enemy under the mouse becomes your target first; then your target gets whatever the
+An enemy under the mouse becomes your target first. With none, a dead or friendly
+target is dropped and the nearest enemy picked, so one press shoots again after a kill.
+Then your target gets whatever the
 ranged slot (18) holds (a wand fires <code>Shoot</code>), and the button shows that weapon.</li>
 <li><strong>In chat:</strong> <code>new spell macro: ...</code> for each one made, and
 <code>no macro (excluded): ...</code> once for each excluded spell.</li>

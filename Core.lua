@@ -492,11 +492,14 @@ end
 -- Slot 16 is the main hand, so the button shows your weapon.
 local ATTACK_MACRO = "Attack"
 local ATTACK_BODY = "#showtooltip 16\n/startattack"
--- The Ranged macro: an enemy under the mouse becomes your target, then your
--- target gets whatever the ranged slot (18) holds. Account-wide like Attack,
--- so nothing trims it: a clause for a weapon you can't use is never reached.
+-- The Ranged macro: an enemy under the mouse becomes your target; with none,
+-- a dead or friendly target is dropped and the nearest enemy picked (Mikey,
+-- 2026-11-02). Then your target gets whatever the ranged slot (18) holds.
+-- Account-wide like Attack, so nothing trims it: a clause for a weapon you
+-- can't use is never reached.
 local RANGED_MACRO = "Ranged"
 local RANGED_BODY = "#showtooltip 18\n/target [@mouseover,harm,nodead]\n"
+    .. "/cleartarget [dead][help]\n/targetenemy [noexists]\n"
     .. "/use [equipped:Thrown] Throw; [equipped:Bows] Shoot Bow; [equipped:Guns] Shoot Gun; [equipped:Crossbows] Shoot Crossbow; [equipped:Wands] !Shoot"
 -- Where a brand-new character's Ranged goes on bar 1: "throw" (warriors and
 -- rogues start with Throw) or a button number (wand users, Mikey 2026-11-02).

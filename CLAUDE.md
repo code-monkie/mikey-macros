@@ -67,7 +67,8 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   9 is left alone with a chat message. Documented in `docs/commands.html#attack-macro`.
 - **Ranged macro (2026-11-01):** in the same branch, a brand-new warrior or
   rogue (`RANGED_CLASSES`) also gets the general macro `Ranged` (mouseover
-  enemy becomes the target, then `#showtooltip 18` and Throw / Shoot Bow /
+  enemy becomes the target; with none, `/cleartarget [dead][help]` and
+  `/targetenemy [noexists]`, added 2026-11-02; then `#showtooltip 18` and Throw / Shoot Bow /
   Gun / Crossbow, or the wand's !Shoot (added 2026-11-02), by
   `[equipped:...]`), made if missing. Only the wand clause has `!`: in Classic,
   wand Shoot repeats, but Throw and bow/gun/crossbow fire once per press
