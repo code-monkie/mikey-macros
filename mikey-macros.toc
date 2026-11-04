@@ -22,6 +22,7 @@ Collections\Mikey\Hunter.lua
 Collections\Mikey\Druid.lua
 Collections\Mikey\Warlock.lua
 Collections\Mikey\Paladin.lua
+Collections\Mikey\Mage.lua
 Collections\Ulako\Shaman.lua
 Collections\Ulako\Mage.lua
 Collections\ClassicWowForever\Rogue.lua

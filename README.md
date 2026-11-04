@@ -74,7 +74,7 @@ Details, including how `/mma clear` matches names: [Commands](docs/commands.html
 | Collection | Classes |
 |---|---|
 | Default | Druid, Hunter, Mage, Paladin, Priest, Rogue, Shaman, Warlock (exceptions and exclude lists) |
-| Mikey | Rogue, Shaman, Hunter, Druid, Warlock, Paladin |
+| Mikey | Rogue, Shaman, Hunter, Druid, Warlock, Paladin, Mage |
 | Ulako | Shaman, Mage |
 | ClassicWowForever | Rogue (snapshot of [classicwowforever.com/macros](https://classicwowforever.com/macros/), CC BY 4.0) |
 

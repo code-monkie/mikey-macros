@@ -7,9 +7,12 @@
 local _, ns = ...
 
 ns.Collection("Default").MAGE = {
+    -- /stopattack only when Polymorph goes on your target, i.e. when the mouseover clause below fails (no
+    -- mouseover, a friendly one, or a dead one). Sheeping a mob under the mouse leaves your attack on your
+    -- target running (2026-11-04, Mikey's ask).
     { name = "Polymorph", spells = { "Polymorph" }, body = [[
         #showtooltip
-        /stopattack
+        /stopattack [@mouseover,noexists][@mouseover,noharm][@mouseover,dead]
         /use [@mouseover,harm,nodead] [] Polymorph
     ]] },
     -- Best mana gem in your bags first. The gems are items, so `spells` only

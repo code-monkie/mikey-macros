@@ -2,7 +2,7 @@
 
 Handoff notes for Claude sessions working on this addon. The README covers what
 the addon does for players; this covers how we work on it and where things
-stand. Last updated 2 November 2026.
+stand. Last updated 4 November 2026.
 
 ## What it is
 
@@ -127,14 +127,21 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
 | Collection | Classes | Notes |
 |---|---|---|
 | Default | Druid, Hunter, Mage, Paladin, Priest, Rogue, Shaman, Warlock | No Warrior file yet. Prowl is a `c.form` built body. |
-| Mikey | Rogue, Shaman, Hunter, Druid, Warlock, Paladin | Mikey's own; his style rules below. |
+| Mikey | Rogue, Shaman, Hunter, Druid, Warlock, Paladin, Mage | Mikey's own; his style rules below. Mage added 2026-11-04 (Polymorph only). |
 | Ulako | Shaman, Mage | Placeholder; don't review. |
 | ClassicWowForever | Rogue | Snapshot of classicwowforever.com; 8 classes to go. |
 
 **Mikey's macro style** (his collection only; others' collections are theirs):
 - No Shift/Ctrl branches inside macros: Shift+1-7 and Ctrl+1-7 are separate
   bars.
-- No `@player`, `@focus` or `@cursor` variants.
+- No `@player`, `@focus` or `@cursor` variants. One exception (2026-11-04,
+  Mikey's ask): the mage's Polymorph sets your focus (mouseover enemy, else
+  target, replacing any focus) and casts on `[@focus]`, so the sheep stays
+  your focus; it pairs with mikey-focuscast's buttons.
+- `/stopattack` only when the spell goes on your target, never when it goes on
+  a mouseover: `/stopattack [@mouseover,noexists][@mouseover,noharm][@mouseover,dead]`
+  is true exactly when `[@mouseover,harm,nodead]` fails (2026-11-04, Mikey's
+  ask; the mage's Polymorph in Mikey and Default so far).
 - Mouseover on harmful ranged spells (`[@mouseover,harm,nodead] []`), but not
   on melee spam.
 - Lay on Hands is mouseover-only on purpose (no fallback, so it never lands on
