@@ -223,6 +223,14 @@ ranged slot (18) holds (a wand fires <code>Shoot</code>), and the button shows t
 <li id="cancel-macro"><strong>The ~Cancel macro:</strong> a brand-new character of any class also gets
 the general macro <code>~Cancel</code> on bar 5, button 4, if the account has one (the addon
 never makes it) and that button is empty; if it's taken, chat says so.</li>
+<li id="rm-macro"><strong>The ~RM macro</strong> (0.2.3): every character's account gets the general
+macro <code>~RM</code>, made at login if it's missing (it isn't put on a bar). It marks a group
+of three with the game's own target markers:
+<pre><code>/tm [@player] 6
+/tm [@party1] 5
+/tm [@party2] 4</code></pre>
+You get the blue square, the others the moon and the green triangle, in the party's
+order on that window. <code>/tm</code> toggles, so a second press takes the marks off.</li>
 <li><strong>In chat:</strong> <code>new spell macro: ...</code> for each one made, and
 <code>no macro (excluded): ...</code> once for each excluded spell.</li>
 <li><strong>Names:</strong> the spell's name, or its initials when longer than 16 characters

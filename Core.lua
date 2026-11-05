@@ -525,6 +525,13 @@ local RANGED_BODY = "#showtooltip 18\n/target [@mouseover,harm,nodead]\n"
 -- Where a brand-new character's Ranged goes on bar 1: "throw" (warriors and
 -- rogues start with Throw) or a button number (wand users, Mikey 2026-11-02).
 local RANGED_CLASSES = { WARRIOR = "throw", ROGUE = "throw", PRIEST = 2, MAGE = 2, WARLOCK = 2 }
+-- The raid marker macro (0.2.3, Mikey's ask, Forever launch night 2026-11-05): marks a group of three, you with
+-- the blue square (6), party1 with the moon (5), party2 with the green triangle (4). /tm is the game's own marker
+-- command, so it isn't blocked the way an addon setting markers is. It toggles: pressing it again takes the
+-- marks off. Which follower gets which depends on the window's party order. Never placed on a bar.
+local MARK_MACRO = "~RM"
+local MARK_BODY = "/tm [@player] 6\n/tm [@party1] 5\n/tm [@party2] 4"
+local MARK_ICON = 236188   -- ability_hunter_markedfordeath (Wowhead Forever's icon list, 2026-11-05), Mikey's ask
 
 local function SwapIntoBars(made)
     local placed = {}
@@ -663,19 +670,26 @@ local function PlaceCancel()
 end
 
 -- The general (account) macros made at login when missing, whatever the class
--- (2026-11-02, Mikey's call): ~Attack and ~Ranged. An existing one is used as it
--- is, whatever its body, so a deleted one comes back on the next login.
-local GUARANTEED = { { ATTACK_MACRO, ATTACK_BODY }, { RANGED_MACRO, RANGED_BODY } }
+-- (2026-11-02, Mikey's call): ~Attack and ~Ranged, and ~RM (0.2.3). An existing one
+-- is used as it is, whatever its body, so a deleted one comes back on the next login.
+-- An entry's third value is its icon (0.2.3, ~RM's); without one it's the question mark, which #showtooltip
+-- replaces. A macro that has an icon here but still wears the question mark (made before it had one) gets the
+-- icon; its body is left alone.
+local GUARANTEED = { { ATTACK_MACRO, ATTACK_BODY }, { RANGED_MACRO, RANGED_BODY }, { MARK_MACRO, MARK_BODY, MARK_ICON } }
 local function EnsureGeneral()
     for _, m in ipairs(GUARANTEED) do
-        local name, body = m[1], m[2]
-        if GeneralMacroIndex(name) == 0 then
+        local name, body, icon = m[1], m[2], m[3]
+        local index = GeneralMacroIndex(name)
+        if index == 0 then
             if GetNumMacros() < AccountMax() then
-                CreateMacro(name, ICON, body, false)
+                CreateMacro(name, icon or ICON, body, false)
                 Print("new general macro: " .. name)
             else
                 Print("|cffff6060no free general slots|r for the " .. name .. " macro")
             end
+        elseif icon then
+            local _, current, oldBody = GetMacroInfo(index)
+            if current == ICON then EditMacro(index, name, icon, oldBody) end
         end
     end
 end

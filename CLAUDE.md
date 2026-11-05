@@ -107,8 +107,21 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   The bear test waits for Mikey's Forever druid to reach Bear Form (10-14):
   plain `/mma sync` should bring back no Swipe or Bash before they're learned
   (`sync all` ignores `learn`, so it can't test this).
+- **`~RM` (0.2.3, Mikey's ask, 2026-11-05):** a third guaranteed general
+  macro, for his three-character groups: `/tm [@player] 6` (blue square, you),
+  `/tm [@party1] 5` (moon), `/tm [@party2] 4` (green triangle). `/tm` is the
+  game's own marker command, not an addon call, so it isn't blocked (cf.
+  mikey-castorb 0.14.1). It toggles: a second press clears the marks. Which
+  follower gets moon or triangle follows that window's party order. Made if
+  missing, never placed on a bar. Icon: `ability_hunter_markedfordeath`
+  (236188); a `GUARANTEED` entry's third value is its icon, and an existing
+  macro still wearing the question mark gets it (body untouched). **To
+  check:** warcraft.wiki.gg says `/tm` only marks the current target and
+  `SetRaidTarget` is protected since 12.0 (so `/run` would be blocked); if
+  `[@player]` / `[@party1]` don't take, the fallback is `/target party1`,
+  `/tm 5`, and so on, which changes your target. Not yet checked in game.
 - **Guaranteed general macros (2026-11-02, Mikey's call):** `EnsureGeneral`
-  makes `~Attack` and `~Ranged` once per login (the first `Schedule` pass, out
+  makes `~Attack` and `~Ranged` (and `~RM` since 0.2.3) once per login (the first `Schedule` pass, out
   of combat), on any class and with auto mode on or off, if the account lacks
   them. Existing ones are used as is. Placement on bar 1 is still brand-new
   only (`PlaceAttack`, and `PlaceRanged` for `RANGED_CLASSES`). `RANGED_CLASSES`
