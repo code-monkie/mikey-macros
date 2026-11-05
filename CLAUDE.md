@@ -115,6 +115,15 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   maps class to placement: warrior and rogue `"throw"` (Throw's button, else the
   first empty one); priest, mage and warlock button 2 if it's empty, else a chat
   message (Mikey, 2026-11-02).
+- **`/mma bar` (0.2.2, Mikey's ask, Forever launch night 2026-11-04):**
+  `PlaceBar` runs the brand-new placement on demand: `EnsureGeneral`, then
+  `PlaceAttack`, `PlaceRanged` (`RANGED_CLASSES`) and `PlaceCancel`, out of
+  combat with an empty cursor. Why: the general macros were restored after
+  some characters' first login, which reordered them; action slots hold a
+  general macro by index, so placed buttons showed the wrong macro, and
+  `AutoCreate` only places once. Repeatable: each Place* skips a button that
+  already has its macro and leaves a taken one alone (chat message).
+  Documented in `docs/commands.html#mm-bar`. Not yet checked in game.
 - **Bar swapping (`SwapIntoBars`):** a new macro replaces its spell on every
   action slot 1-180, which takes in the stance and form bars too. Checked on
   Retail 2026-10-30 (Mikey): spells the game puts on the rogue's stealth bar get

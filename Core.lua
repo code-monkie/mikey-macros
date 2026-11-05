@@ -680,6 +680,23 @@ local function EnsureGeneral()
     end
 end
 
+-- /mma bar (Mikey, 2026-11-04, Forever launch night): the brand-new character's bar placement (~Attack, ~Ranged
+-- for RANGED_CLASSES, ~Cancel) on demand. On launch night the general macros were restored after some characters'
+-- first login, which reordered them; bars point at a general macro by its place in the list, so the placed
+-- buttons showed the wrong macro and AutoCreate never places twice. Safe to repeat: each Place* skips a button
+-- that already holds its macro, and leaves a taken one alone with a chat message.
+local function PlaceBar()
+    if InCombatLockdown() then Print("not in combat; try /mma bar again after the fight.") return end
+    if GetCursorInfo() then Print("empty the cursor first, then /mma bar again.") return end
+    EnsureGeneral()
+    local _, class = UnitClass("player")
+    PlaceAttack()
+    if RANGED_CLASSES[class] then PlaceRanged(RANGED_CLASSES[class]) end
+    PlaceCancel()
+    Print("bar macros placed: " .. ATTACK_MACRO .. (RANGED_CLASSES[class] and (", " .. RANGED_MACRO) or "")
+        .. ", " .. CANCEL_MACRO .. " (any button that was taken is named above).")
+end
+
 local function AutoCreate()
     local db = CharDB()
     if db.auto == false or InCombatLockdown() then return end -- on unless switched off
@@ -1180,6 +1197,8 @@ SlashCmdList.MIKEYMACROS = function(msg)
             Update()
             ShowCharacterMacros()
         end
+    elseif cmd == "bar" then
+        PlaceBar()
     else
         Print("/mma list - your class macros and their state")
         Print("/mma sync - create the macros for the spells you know (normally automatic as you learn them)")
@@ -1188,6 +1207,7 @@ SlashCmdList.MIKEYMACROS = function(msg)
         Print("/mma clear - delete this character's macros that come from any collection (others are kept)")
         Print("/mma clear -a - delete all of this character's macros, whatever made them")
         Print("/mma resync - create anything missing and rewrite the rest (macros stay on your bars)")
+        Print("/mma bar - put ~Attack, ~Ranged and ~Cancel on your bars, as a new character gets them")
         Print("/mma collections - whose macro sets are installed")
         Print("/mma use <name> - follow someone's collection on this character (/mma use none to stop)")
         Print("/mma auto on or off - make a macro for each new class spell you learn (this character)")
