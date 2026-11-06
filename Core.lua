@@ -348,11 +348,12 @@ local function CanEdit()
     return true
 end
 
--- Open Blizzard's macro window on the character-specific tab.
+-- Point you at the character macros in Blizzard's macro window. Until 0.2.8 this opened the window and clicked
+-- its character tab from our code, which tainted the window: a later save there (switching tabs runs EditMacro)
+-- was blocked and blamed on mikey-macros (ADDON_ACTION_BLOCKED, BugSack on wow1, 2026-11-05). Now it only says
+-- so in chat (Mikey's call); a window you open yourself is untouched. Don't open Blizzard's windows from here.
 local function ShowCharacterMacros()
-    if InCombatLockdown() then return end
-    if not (MacroFrame and MacroFrame:IsShown()) and ShowMacroFrame then ShowMacroFrame() end
-    if MacroFrameTab2 then MacroFrameTab2:Click() end
+    Print("open /macro, Character tab, to put the new macros on your bars.")
 end
 
 -- Rewrite existing macros to match the data file and the spells you know
@@ -490,6 +491,9 @@ end
 --   ranged helpful -> [@mouseover,help,nodead] []
 --   pet-only       -> no mouseover (the spell picks your pet itself)
 --   toggles        -> ! so a second press doesn't cancel it
+-- Hunters too: on Forever /startattack starts Auto Shot at range, as on Retail (Mikey, in game, 2026-11-05).
+-- 0.2.4 gave a hunter's shots "/use !Auto Shot" instead, on Classic's rule that /startattack is melee; 0.2.6
+-- took that back out.
 local function AutoBody(spell)
     local f = SpellFacts(spell)
     local body = "#showtooltip\n"
@@ -530,8 +534,15 @@ local RANGED_CLASSES = { WARRIOR = "throw", ROGUE = "throw", PRIEST = 2, MAGE = 
 -- command, so it isn't blocked the way an addon setting markers is. It toggles: pressing it again takes the
 -- marks off. Which follower gets which depends on the window's party order. Never placed on a bar.
 local MARK_MACRO = "~RM"
-local MARK_BODY = "/tm [@player] 6\n/tm [@party1] 5\n/tm [@party2] 4"
+-- 0.2.5: ",exists" on the party lines, so a group of two marks just the two of you
+local MARK_BODY = "/tm [@player] 6\n/tm [@party1,exists] 5\n/tm [@party2,exists] 4"
 local MARK_ICON = 236188   -- ability_hunter_markedfordeath (Wowhead Forever's icon list, 2026-11-05), Mikey's ask
+-- The focus macro (0.2.7, Mikey's ask, 2026-11-05): the unit under the mouse becomes your focus, else your target.
+-- For mikey-follow's Partner mode: a heal bot follows, assists and heals its focus. The focus is lost at every
+-- reload and logout, so this is pressed once a session. /focus is the game's own command.
+local FOCUS_MACRO = "~Focus"
+local FOCUS_BODY = "/focus [@mouseover,exists] []"
+local FOCUS_ICON = 132212  -- ability_hunter_snipershot (Wowhead Forever's icon list, 2026-11-05)
 
 local function SwapIntoBars(made)
     local placed = {}
@@ -675,7 +686,8 @@ end
 -- An entry's third value is its icon (0.2.3, ~RM's); without one it's the question mark, which #showtooltip
 -- replaces. A macro that has an icon here but still wears the question mark (made before it had one) gets the
 -- icon; its body is left alone.
-local GUARANTEED = { { ATTACK_MACRO, ATTACK_BODY }, { RANGED_MACRO, RANGED_BODY }, { MARK_MACRO, MARK_BODY, MARK_ICON } }
+local GUARANTEED = { { ATTACK_MACRO, ATTACK_BODY }, { RANGED_MACRO, RANGED_BODY }, { MARK_MACRO, MARK_BODY, MARK_ICON },
+    { FOCUS_MACRO, FOCUS_BODY, FOCUS_ICON } }   -- ~Focus: 0.2.7
 local function EnsureGeneral()
     for _, m in ipairs(GUARANTEED) do
         local name, body, icon = m[1], m[2], m[3]
@@ -806,7 +818,7 @@ local function AutoCreate()
             end
         end
     end
-    -- Anything that didn't land on a bar: open the macro window to drag it there.
+    -- Anything that didn't land on a bar: chat says to open the macro window and drag it there (0.2.8).
     local placed = SwapIntoBars(made)
     for _, m in ipairs(made) do
         if not placed[m.name] then

@@ -115,11 +115,12 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   follower gets moon or triangle follows that window's party order. Made if
   missing, never placed on a bar. Icon: `ability_hunter_markedfordeath`
   (236188); a `GUARANTEED` entry's third value is its icon, and an existing
-  macro still wearing the question mark gets it (body untouched). **To
-  check:** warcraft.wiki.gg says `/tm` only marks the current target and
-  `SetRaidTarget` is protected since 12.0 (so `/run` would be blocked); if
-  `[@player]` / `[@party1]` don't take, the fallback is `/target party1`,
-  `/tm 5`, and so on, which changes your target. Not yet checked in game.
+  macro still wearing the question mark gets it (body untouched).
+  `SetRaidTarget` is protected since 12.0 (warcraft.wiki.gg), so `/run`
+  would be blocked; `/tm` is the way. The wiki also says `/tm` only marks the
+  current target, but on Forever `[@player]` / `[@party1]` work: the same
+  lines on mikey-follow 0.7.6's Leader right-click marked all three (Mikey,
+  2026-11-05).
 - **Guaranteed general macros (2026-11-02, Mikey's call):** `EnsureGeneral`
   makes `~Attack` and `~Ranged` (and `~RM` since 0.2.3) once per login (the first `Schedule` pass, out
   of combat), on any class and with auto mode on or off, if the account lacks
@@ -137,6 +138,47 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   `AutoCreate` only places once. Repeatable: each Place* skips a button that
   already has its macro and leaves a taken one alone (chat message).
   Documented in `docs/commands.html#mm-bar`. Not yet checked in game.
+- **Pet Attack picks up a target (0.2.10, Mikey's ask, 2026-11-06):** the
+  hunter and warlock Pet Attack macros start with `/target [noexists]
+  mouseover`: with no target, the mouseover becomes it, so you and the pet
+  are on the same mob; a target you have is kept. Pet Attack sends any
+  demon (voidwalker too), unlike mikey-follow's Assist. Checked in game on
+  Forever (Mikey, 2026-11-06): updated by itself and works.
+- **No more opening the macro window (0.2.8, Mikey's call, 2026-11-05):**
+  `ShowCharacterMacros` used to `ShowMacroFrame()` and click `MacroFrameTab2`
+  after auto mode, `/mma sync` and `/mma resync`. That tainted Blizzard's
+  macro window: switching tabs there later runs `EditMacro` (its save), which
+  was blocked and blamed on mikey-macros (BugSack, wow1). Now it only prints
+  "open /macro, Character tab, ...". Don't open or click Blizzard windows
+  from addon code.
+- **`~Focus` (0.2.7, Mikey's ask, 2026-11-05):** a fourth guaranteed
+  general macro, `/focus [@mouseover,exists] []` (mouseover, else target),
+  icon `ability_hunter_snipershot` (132212). For mikey-follow's Partner mode
+  (a heal bot outside the group works off its focus). Focus doesn't survive a
+  reload or logout (Mikey), so it's pressed once a session. Checked in game
+  with mikey-follow's Partner mode (Mikey, 2026-11-05).
+- **Switching collections (2026-11-05):** Mikey's rogues were on Default, so
+  they had auto mode's `Sinister Strike`, not the Mikey collection's `SS` /
+  `Backstab` (Pick Pocket in stealth). `/mma use mikey` + `/mma sync` made
+  `SS` and `Backstab` next to the old macro (different names, and sync never
+  touches existing ones); the old one is deleted by hand. Plain `/mma clear`
+  wouldn't have removed it: it only deletes collection names. Worked as
+  expected (Mikey).
+- **`~RM` in a group of two (0.2.5, 2026-11-05):** the party lines are
+  `[@party1,exists]` / `[@party2,exists]`, so a missing member is skipped
+  (same change as mikey-follow 0.7.7). An existing `~RM` keeps its old body:
+  delete it and `/reload` to get this one.
+- **Hunter review (0.2.4 and 0.2.6, Mikey's ask, 2026-11-05):** every
+  character follows Default, and Default had no Hunter's Mark.
+  - Default hunter gets **Hunter's Mark** (the Mikey collection's Mark body:
+    `/target [@mouseover,harm,nodead]`, `/cast Hunter's Mark`; no
+    `/startattack`: marking comes before the pull).
+  - **`/startattack` on a hunter starts Auto Shot at range on Forever** (as
+    on Retail; on Classic it's melee). Mikey checked it in game. 0.2.4 had
+    swapped a hunter's `/startattack` for `/use !Auto Shot` on Classic's
+    rule; 0.2.6 put it back: `AutoBody` has no hunter case, and the Mikey
+    collection's Arcane, Multi and Aimed are `/startattack` + the shot. The
+    hunters' existing generated macros were already right.
 - **Bar swapping (`SwapIntoBars`):** a new macro replaces its spell on every
   action slot 1-180, which takes in the stance and form bars too. Checked on
   Retail 2026-10-30 (Mikey): spells the game puts on the rogue's stealth bar get

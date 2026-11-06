@@ -34,11 +34,12 @@ ns.Collection("Mikey").HUNTER = {
         /petattack
     ]] },
 
+    -- Arcane, Multi and Aimed: /startattack, then the shot (0.2.6). On Forever /startattack starts Auto Shot at
+    -- range (Mikey, in game, 2026-11-05), so the old "/use !Auto Shot" line isn't needed.
     { name = "Arcane", spells = { "Arcane Shot" }, body = [[
         #showtooltip
         /startattack
         /use Arcane Shot
-        /use !Auto Shot
     ]] },
 
     -- The opener: a mouseover becomes your target, then marked.
@@ -52,14 +53,12 @@ ns.Collection("Mikey").HUNTER = {
         #showtooltip
         /startattack
         /use Multi-Shot
-        /use !Auto Shot
     ]] },
 
     { name = "Aimed", spells = { "Aimed Shot" }, body = [[
         #showtooltip
         /startattack
         /use Aimed Shot
-        /use !Auto Shot
     ]] },
 
     -- Cheetah and Hawk in turn.

@@ -15,6 +15,15 @@ ns.Collection("Default").HUNTER = {
         /cast !Raptor Strike
     ]] },
 
+    -- The opener (0.2.4, from the Mikey collection, 2026-11-05): an enemy under the mouse becomes your target, then
+    -- it's marked. No /startattack (auto mode's generated macro had one): marking comes before the pull, so it
+    -- shouldn't start shooting (on Forever /startattack starts Auto Shot).
+    { name = "Hunter's Mark", spells = { "Hunter's Mark" }, body = [[
+        #showtooltip
+        /target [@mouseover,harm,nodead]
+        /cast Hunter's Mark
+    ]] },
+
     { name = "Scare Beast", spells = { "Scare Beast" }, body = [[
         #showtooltip
         /stopattack
@@ -45,13 +54,19 @@ ns.Collection("Default").HUNTER = {
         /cast !Eagle Eye
     ]] },
 
-    -- All-in-one pet: Call Pet with none out, Revive Pet if it's dead, else
+    -- All-in-one pet: Revive Pet if it's dead, Call Pet with none out, else
     -- Mend Pet (Leaku's guide). It first failed because the spellbook lists
     -- Call Pet as "Call <pet's name>"; fixed in Core (RealName) and checked on
     -- Classic Era 2026-11-03 (Mikey).
+    -- 0.2.9 (Forever, 2026-11-05): a dead pet that has despawned counts as no
+    -- pet, so [nopet] Call Pet fired and failed ("your pet is dead") and Revive
+    -- was never reached. Revive comes first now, and a second line revives when
+    -- Call Pet fails (a failed cast doesn't stop the next line). No modifier
+    -- (Mikey's Shift and Ctrl are bars). Checked in game on Forever (Mikey).
     { name = "Pet", learn = "Call Pet", spells = { "Call Pet", "Revive Pet", "Mend Pet" }, body = [[
         #showtooltip
-        /cast [nopet] Call Pet; [@pet,dead] Revive Pet; Mend Pet
+        /cast [@pet,dead] Revive Pet; [nopet] Call Pet; Mend Pet
+        /cast [nopet] Revive Pet
     ]] },
 
     -- Pet in: Assist stance (Mikey's trial, 2026-11-02), attack the mouseover,
@@ -59,8 +74,11 @@ ns.Collection("Default").HUNTER = {
     -- Pet spells aren't in your spellbook, so they're not listed; the general
     -- Pet Stop macro puts it back on passive. #showtooltip can't show pet
     -- spells, so it has the pet bar's Attack icon.
+    -- 0.2.10 (Mikey's ask, 2026-11-06): with no target, the mouseover becomes it, so you and the pet are on the
+    -- same mob ([noexists] checks your target; an existing target is kept).
     { name = "Pet Attack", learn = "Call Pet", spells = { "Call Pet" }, icon = "Ability_GhoulFrenzy", body = [[
         #showtooltip
+        /target [noexists] mouseover
         /petassist
         /petattack [@mouseover,harm,nodead] []
         /cast Dash

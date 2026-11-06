@@ -60,7 +60,7 @@
 </tr>
 <tr>
 <td><code>/mma sync</code></td>
-<td>Create the missing macros for the spells you know, by the <a href="#which-macro">usual rule</a>, then open the macro window on the character tab. Never touches existing ones.</td>
+<td>Create the missing macros for the spells you know, by the <a href="#which-macro">usual rule</a>; chat tells you to open <code>/macro</code> to place them. Never touches existing ones.</td>
 </tr>
 <tr>
 <td><code>/mma sync all</code></td>
@@ -72,7 +72,7 @@
 </tr>
 <tr>
 <td><code>/mma resync</code></td>
-<td><code>/mma sync all</code> plus <code>/mma update</code>: create anything missing, rewrite the rest, open the macro window. Macros stay on your bars.</td>
+<td><code>/mma sync all</code> plus <code>/mma update</code>: create anything missing, rewrite the rest. Macros stay on your bars.</td>
 </tr>
 <tr>
 <td><code>/mma bar</code></td>
@@ -180,6 +180,7 @@ macro is shaped by what the game says about the spell:</p>
 <pre><code>#showtooltip
 /startattack
 /use [@mouseover,harm,nodead] [] Frostbolt</code></pre>
+<p>Hunters get the same shape: on Forever, <code>/startattack</code> starts Auto Shot at range.</p>
 <ul>
 <li><strong>Only new spells:</strong> a spell counts once, when its first rank (or the unranked
 spell) is learned; higher ranks don't make another macro. A spell is only ever handled
@@ -194,7 +195,8 @@ gets the one exception, below.)</li>
 <li><strong>On your bars:</strong> if the spell is already on an action button (your starting
 spells at level 1; on retail, spells the game places for you), the new macro takes
 its place. Empty buttons are never filled. If a new macro didn't land on a bar,
-the macro window opens on the character tab so you can drag it on.</li>
+chat tells you to open <code>/macro</code> (Character tab) and drag it on. (Until 0.2.8 the
+window opened by itself, which could get a later macro edit there blocked.)</li>
 <li id="general-macros"><strong>Always there:</strong> at every login, on any character and with
 auto mode on or off, the general (account) macros <code>~Attack</code> and <code>~Ranged</code> are made if
 the account doesn't have them (<code>new general macro: ...</code>). An existing one is used as
@@ -227,10 +229,16 @@ never makes it) and that button is empty; if it's taken, chat says so.</li>
 macro <code>~RM</code>, made at login if it's missing (it isn't put on a bar). It marks a group
 of three with the game's own target markers:
 <pre><code>/tm [@player] 6
-/tm [@party1] 5
-/tm [@party2] 4</code></pre>
+/tm [@party1,exists] 5
+/tm [@party2,exists] 4</code></pre>
 You get the blue square, the others the moon and the green triangle, in the party's
 order on that window. <code>/tm</code> toggles, so a second press takes the marks off.</li>
+<li id="focus-macro"><strong>The ~Focus macro</strong> (0.2.7): made at login if it's missing, like
+<code>~RM</code>. The unit under the mouse becomes your focus, else your target:
+<pre><code>/focus [@mouseover,exists] []</code></pre>
+For mikey-follow's Partner mode, where a character outside your group follows, assists and
+heals its focus. The game forgets your focus at every reload and logout, so press it once a
+session.</li>
 <li><strong>In chat:</strong> <code>new spell macro: ...</code> for each one made, and
 <code>no macro (excluded): ...</code> once for each excluded spell.</li>
 <li><strong>Names:</strong> the spell's name, or its initials when longer than 16 characters
