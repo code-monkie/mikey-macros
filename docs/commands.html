@@ -67,6 +67,10 @@
 <td>The same, plus collection macros for spells you haven't learned yet (placeholders).</td>
 </tr>
 <tr>
+<td><code>/mma sync -n &lt;name&gt;</code></td>
+<td>Just the macro with that name, by the same <a href="#which-macro">usual rule</a>: creates it if you don't have it, rewrites it if you do (it keeps its bar spots).</td>
+</tr>
+<tr>
 <td><code>/mma update</code></td>
 <td>Rewrite every existing collection macro now. Normally automatic.</td>
 </tr>
@@ -132,6 +136,12 @@ while auto mode is on) and never touches macros that already exist.</p>
 <p><code>/mma sync all</code> also creates the collection's macros for spells you don't know
 yet, so you can lay out your bars once; they show a question mark and fill in as
 you train. Both report anything that didn't fit in your free character slots.</p>
+<p><code>/mma sync -n &lt;name&gt;</code> does the same for one macro, named as it is in your
+macro window (any case; spaces are fine, as in <code>/mma sync -n Pet Attack</code>). The
+macro comes from the collection you follow, else Default, else the generated one
+for that spell, as always. If you already have it, it's rewritten to the current
+version in place, so it stays on your bars; that includes a generated macro you've
+edited by hand. Like plain sync, it only makes macros for spells you've learned.</p>
 <h3 id="mm-update"><code>/mma update</code></h3>
 <p><code>/mma update</code> is rarely needed: collection macros are rewritten
 automatically when you learn a spell or change your main-hand weapon (after

@@ -25,10 +25,13 @@ ns.Collection("Default").ROGUE = {
         /use [@mouseover,harm,nodead] [] Blind
     ]] },
     -- Off the mount and into Stealth; Pick Pocket (mouseover, else target) once you're in stealth.
+    -- 2026-11-07 (Mikey's ask): in stealth with no live enemy targeted, target the nearest one first (as SS and
+    -- Backstab in the Mikey collection), so a press with no target still picks a pocket.
     { name = "Stealth", spells = { "Stealth", "Pick Pocket" }, body = [[
         #showtooltip
         /dismount [mounted]
         /stopattack
+        /targetenemy [stealth,noharm][stealth,dead]
         /use [stealth,@mouseover,harm,nodead] [stealth] Pick Pocket; !Stealth
     ]] },
     -- Opener (2026-11-02, Mikey's macro): Pick Pocket, then Cheap Shot, in one press from stealth (Pick Pocket
@@ -57,4 +60,5 @@ ns.Collection("Default").ROGUE = {
 ns.Exclude("ROGUE", {
     "Pick Lock",
     "Disarm Trap",
+    "Evasion",       -- 0.2.13 (Mikey's ask, 2026-11-07); the ClassicWowForever collection's own Evasion macro still wins
 })

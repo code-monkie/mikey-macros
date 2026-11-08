@@ -144,6 +144,45 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   are on the same mob; a target you have is kept. Pet Attack sends any
   demon (voidwalker too), unlike mikey-follow's Assist. Checked in game on
   Forever (Mikey, 2026-11-06): updated by itself and works.
+- **Mikey hunter: every aspect excluded (0.2.17, Mikey's ask, 2026-11-08):**
+  Hawk and Cheetah joined Monkey, Pack, Wild and Beast on the Mikey collection's
+  hunter exclude list, and its "Aspect" macro (a Cheetah/Hawk castsequence) was
+  dropped, since a collection's own macro beats its exclude list. Aspects are cast
+  from mikey-halo's hunter Ring 1. An existing "Aspect" macro stays until deleted.
+  Not yet checked in game.
+- **Mikey hunter's Shot keeps your target (0.2.16, Mikey's ask, 2026-11-08):**
+  it used to shoot `[@mouseover,harm,nodead]` over the target, so scanning with
+  the mouse started Auto Shot on other mobs. Now `/target [noexists] mouseover`
+  (then `/cleartarget [dead][help]` again for a friendly or dead mouseover),
+  `/targetenemy [noexists]`, and a plain `/cast !Auto Shot` on the target.
+  Not yet checked in game.
+- **Weapon imbues excluded for every shaman (0.2.15, Mikey's ask, 2026-11-07):**
+  Rockbiter, Flametongue, Frostbrand and Windfury Weapon moved to Default's exclude
+  list too (Mikey's shaman follows Default), so the Mikey collection has no
+  shaman-only exclusions left. Not yet checked in game.
+- **Totems excluded for every shaman (0.2.14, Mikey's ask, 2026-11-07):** the
+  totem list (earth, fire, water, air, and the Call / Totemic Recall spells) moved
+  from the Mikey collection's exclude list to Default's, so auto mode never makes a
+  totem macro whatever collection a shaman follows. Totem macros already made stay
+  until deleted. Not yet checked in game.
+- **Evasion excluded for rogues (0.2.13, Mikey's ask, 2026-11-07):** added
+  to the Default `ns.Exclude("ROGUE", ...)` list, so auto mode never generates
+  an Evasion macro. A collection that defines one (ClassicWowForever's Evasion +
+  Sprint) still makes it for its followers. An Evasion macro already made stays
+  until deleted. Not yet checked in game.
+- **`/mma sync -n <name>` (0.2.12, Mikey's ask, 2026-11-07):** one macro
+  by name (any case, spaces allowed), through sync's usual fall-through
+  (followed collection, Default, generated). Missing: created. Present:
+  rewritten in place (keeps bar spots), generated ones included, since naming
+  it is asking for it. Learned spells only, like plain sync. `SyncOne` in
+  `Core.lua`; documented in `docs/commands.html#mm-sync` and the README.
+  **Checked in game (Mikey, 2026-11-07):** works.
+- **Default rogue Stealth picks up a target (0.2.11, Mikey's ask,
+  2026-11-07):** `/targetenemy [stealth,noharm][stealth,dead]` before the
+  Pick Pocket line, as the Mikey collection's SS and Backstab: in stealth with
+  no live enemy targeted, it targets the nearest one; a mouseover still wins.
+  Existing Stealth macros are rewritten at the next refresh (body differs).
+  **Checked in game (Mikey, 2026-11-07):** updated and works.
 - **No more opening the macro window (0.2.8, Mikey's call, 2026-11-05):**
   `ShowCharacterMacros` used to `ShowMacroFrame()` and click `MacroFrameTab2`
   after auto mode, `/mma sync` and `/mma resync`. That tainted Blizzard's

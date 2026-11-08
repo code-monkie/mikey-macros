@@ -58,6 +58,7 @@ learned yet (they show a question mark and fill in as you train).
 | `/mma list` | Macros for this character's class and their state |
 | `/mma sync` | Create the missing macros for the spells you know (normally automatic as you learn them) |
 | `/mma sync all` | The same, plus collection macros for spells you haven't learned yet |
+| `/mma sync -n <name>` | Just that one macro: create it, or rewrite it if you have it |
 | `/mma resync` | `/mma sync all`, then rewrite the rest; nothing leaves your bars |
 | `/mma update` | Rewrite now (normally automatic) |
 | `/mma clear` | Delete this character's collection macros (by name) |

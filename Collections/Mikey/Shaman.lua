@@ -47,43 +47,4 @@ ns.Collection("Mikey").SHAMAN = {
     ]] },
 }
 
--- Mikey's characters only (on top of Default's list): mikey-ring drops these.
-ns.Exclude("SHAMAN", {
-    -- Weapon imbues
-    "Rockbiter Weapon",
-    "Flametongue Weapon",
-    "Frostbrand Weapon",
-    "Windfury Weapon",
-    -- Earth totems
-    "Stoneskin Totem",
-    "Earthbind Totem",
-    "Stoneclaw Totem",
-    "Strength of Earth Totem",
-    "Tremor Totem",
-    -- Fire totems
-    "Searing Totem",
-    "Fire Nova Totem",
-    "Frost Resistance Totem",
-    "Magma Totem",
-    "Flametongue Totem",
-    -- Water totems
-    "Healing Stream Totem",
-    "Mana Spring Totem",
-    "Poison Cleansing Totem",
-    "Disease Cleansing Totem",
-    "Fire Resistance Totem",
-    "Mana Tide Totem",
-    -- Air totems
-    "Grounding Totem",
-    "Nature Resistance Totem",
-    "Windfury Totem",
-    "Sentry Totem",
-    "Windwall Totem",
-    "Grace of Air Totem",
-    "Tranquil Air Totem",
-    -- Totem calls
-    "Call of the Elements",
-    "Call of the Ancestors",
-    "Call of the Spirits",
-    "Totemic Recall",
-}, "Mikey")
+-- No Mikey-only exclusions left: weapon imbues and totems are in the Default list since 0.2.14/0.2.15.

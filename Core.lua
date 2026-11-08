@@ -901,6 +901,71 @@ local function Sync(all)
     return true
 end
 
+-- /mma sync -n <name> (0.2.12, Mikey's ask, 2026-11-07): just the one macro of that name (any case), through the
+-- same fall-through as sync: the followed collection's macro, else Default's, else the generated one for a class
+-- spell (auto mode on, not excluded, not covered by a collection macro you'd have). Made if missing; if you have
+-- it, rewritten to the current body (that's why you'd name it), keeping its bar spots. Learned spells only, as
+-- plain sync. Returns true when it made one (for the macro-window hint).
+local function SyncOne(wanted)
+    if not CanEdit() then return end
+    if wanted == "" then Print("which macro? /mma sync -n <name>") return end
+    local low = wanted:lower()
+    local known = KnownSpells()
+    local ctx = Context(known)
+    local have, count = CharacterMacros()
+    local name, body, icon, notLearned
+    local covered = {}
+    for _, def in ipairs(Definitions()) do
+        local learned = IsLearned(def, known)
+        if learned then
+            for _, spell in ipairs(def.spells) do covered[spell:lower()] = true end
+        end
+        if not name and def.name:lower() == low then
+            if learned then
+                name, body, icon = def.name, Clean(def, ctx), IconFor(def)
+            else
+                notLearned = def.name
+            end
+        end
+    end
+    if not name and CharDB().auto ~= false then
+        local _, class = UnitClass("player")
+        local excluded = Excluded(class)
+        for spellLow, spell in pairs(ClassSpells()) do
+            if AutoName(spell):lower() == low and not covered[spellLow] and not excluded[spellLow] then
+                name, body = AutoName(spell), AutoBody(spell)
+                break
+            end
+        end
+    end
+    if not name then
+        if notLearned then
+            Print(notLearned .. ": none of its spells are learned yet (/mma sync all makes it as a placeholder).")
+        else
+            Print("no macro called \"" .. wanted .. "\" for this character (/mma list shows them).")
+        end
+        return
+    end
+    if #body > MAX_BODY then
+        Print("|cffff6060over 255 characters, skipped|r: " .. name)
+        return
+    end
+    local index = have[name]
+    if index then
+        local _, current = GetMacroInfo(index)
+        EditMacro(index, name, icon or current, body)
+        Print("rewrote " .. name .. ".")
+        return
+    end
+    if count >= CharacterMax() then
+        Print("|cffff6060no free character slots|r for: " .. name)
+        return
+    end
+    CreateMacro(name, icon or ICON, body, true)
+    Print("created " .. name .. ".")
+    return true
+end
+
 -- /mma auto [on|off]
 local function Auto(arg)
     local db = CharDB()
@@ -1203,7 +1268,10 @@ SlashCmdList.MIKEYMACROS = function(msg)
     local cmd, arg = (msg or ""):match("^%s*(%S*)%s*(%S*)")
     cmd = cmd:lower()
     if cmd == "sync" then
-        if Sync(arg:lower() == "all") then ShowCharacterMacros() end
+        local one = (msg or ""):match("^%s*%S+%s+%-n%s*(.-)%s*$")   -- 0.2.12: "-n <name>", spaces allowed
+        if one then
+            if SyncOne(one) then ShowCharacterMacros() end
+        elseif Sync(arg:lower() == "all") then ShowCharacterMacros() end
     elseif cmd == "update" then
         Update()
     elseif cmd == "list" then
@@ -1229,6 +1297,7 @@ SlashCmdList.MIKEYMACROS = function(msg)
         Print("/mma list - your class macros and their state")
         Print("/mma sync - create the macros for the spells you know (normally automatic as you learn them)")
         Print("/mma sync all - also create collection macros for spells you haven't learned yet")
+        Print("/mma sync -n <name> - just that macro: create it, or rewrite it if you have it")
         Print("/mma update - force a refresh now (normally automatic)")
         Print("/mma clear - delete this character's macros that come from any collection (others are kept)")
         Print("/mma clear -a - delete all of this character's macros, whatever made them")
