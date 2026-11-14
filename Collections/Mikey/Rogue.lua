@@ -18,13 +18,18 @@ ns.Collection("Mikey").ROGUE = {
         /use Sinister Strike
     ]] },
 
-    -- Ambush from stealth, Backstab out of it.
-    { name = "Backstab", learn = "Backstab", spells = { "Pick Pocket", "Ambush", "Backstab" }, body = [[
-        #showtooltip [stealth] Ambush; Backstab
+    -- Ambush from stealth, Backstab out of it. 0.2.19 (Mikey's ask, 2026-11-08): both need a dagger, so with no
+    -- dagger equipped it's Sinister Strike instead. ([equipped:Daggers] is any dagger in either hand; Backstab and
+    -- Ambush want it in the main hand.) 0.2.24 (Mikey, 2026-11-11: learning Ambush didn't update it): with Ambush
+    -- known the body came to 273 characters, over 255, so the refresh skipped it. Then (Mikey's call, same day) Pick
+    -- Pocket came out of this one (SS still picks pockets), so a bare #showtooltip shows what the last line casts:
+    -- Ambush in stealth with a dagger, Backstab with one, else Sinister Strike. "worn:" is the game's own alias for
+    -- "equipped:".
+    { name = "Backstab", learn = "Backstab", spells = { "Ambush", "Backstab", "Sinister Strike" }, body = [[
+        #showtooltip
         /targetenemy [stealth,noharm][stealth,dead]
-        /use [stealth] Pick Pocket
         /startattack [nostealth]
-        /use [stealth] Ambush; Backstab
+        /use [stealth,worn:Daggers] Ambush; [worn:Daggers] Backstab; Sinister Strike
     ]] },
 
     { name = "Bleed", spells = { "Garrote", "Rupture" }, body = [[

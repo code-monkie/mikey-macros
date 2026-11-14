@@ -84,7 +84,7 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   Gun / Crossbow, or the wand's !Shoot (added 2026-11-02), by
   `[equipped:...]`), made if missing. Only the wand clause has `!`: in Classic,
   wand Shoot repeats, but Throw and bow/gun/crossbow fire once per press
-  (Mikey, 2026-11-02). `PlaceRanged` puts it
+  (Mikey, 2026-11-02; checked again on Forever 2026-11-11, see 0.2.23). `PlaceRanged` puts it
   where Throw is on bar 1, else on the first empty button. It was briefly a
   Default collection macro; that was dropped because auto mode skips the
   General tab (Throw, Shoot), so it never appeared on its own. The leftover
@@ -97,6 +97,13 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   account's own `~Cancel` macro (never made by the addon) on MultiBar5 button 4
   (`MULTIACTIONBAR5BUTTON4`, slot 148, bound to X) for a brand-new character of
   any class; a taken button is left alone with a chat message.
+  **By key (0.2.20, Mikey's ask, 2026-11-09):** `PlaceKeyMacros` puts account
+  macros on whatever button a key is bound to, from the `KEY_MACROS` table:
+  "To the Face" (`/yell To the FACE!!!`, the account's own) on the **0** key
+  (`MULTIACTIONBAR3BUTTON1`, right bar button 1, on all three accounts). The key
+  is looked up with `GetBindingAction` each time, the slot from the button
+  (`button.action`; bar 1 through `Bar1Slot`), so a rebind moves it. Brand-new
+  characters and `/mma bar`, same rules as ~Cancel. Not yet checked in game.
   Checked on Classic Era 2026-11-03 (Mikey): a new level-1 rogue got the
   right starting bar, ~Attack and ~Ranged placed, and ~Cancel on bar 5
   button 4. Everything up to this point counts as tested.
@@ -144,6 +151,98 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   are on the same mob; a target you have is kept. Pet Attack sends any
   demon (voidwalker too), unlike mikey-follow's Assist. Checked in game on
   Forever (Mikey, 2026-11-06): updated by itself and works.
+- **Mikey warlock's SB acquires a target (0.2.21, Mikey's ask, 2026-11-10):**
+  the hunter Shot's targeting lines (`/cleartarget [dead][help]`, `/target
+  [noexists] mouseover`, `/cleartarget [dead][help]`, `/targetenemy [noexists]`),
+  then a plain `/use Shadow Bolt` on the target (no mouseover cast, as Shot)
+  and `/startattack`, then `/petattack [pet:Imp]` (only the Imp is sent; any
+  other demon is left to Pet Attack).
+  An existing SB is rewritten at the next refresh (body differs).
+  **Checked in game (Mikey, 2026-11-10):** the imp goes in.
+- **Mikey rogue's Backstab checks for a dagger (0.2.19, Mikey's ask, 2026-11-08):**
+  Ambush in stealth and Backstab out of it only with `[equipped:Daggers]`; with no
+  dagger it's Sinister Strike (in or out of stealth). `[equipped:Daggers]` is any
+  dagger in either hand, while the spells want one in the main hand. An existing
+  Backstab macro is rewritten at the next refresh (body differs). Not yet checked
+  in game.
+- **~Ranged: `!` on every shoot (0.2.22, Mikey's ask, 2026-11-11):** `!Shoot Bow`,
+  `!Shoot Gun` and `!Shoot Crossbow`, as the wand's `!Shoot`, so a second press never
+  stops a repeating shot (on one that fires once, `!` does nothing). To fit 255, no
+  spaces after the `;`s (252 characters). `RANGED_OLD` is now a list (0.2.17's and
+  0.2.18's bodies), so an unedited ~Ranged is rewritten in place at login; all three
+  accounts had 0.2.18's.
+- **@target named in friendly macros (0.2.27, Mikey, 2026-11-13):** 0.2.25's
+  `[help,nodead] [@player]` didn't help: any clause with no `@unit` counts the
+  soft-target NPC as your target. Naming it does (Mikey, in game: "naming the
+  target explicitly fixed it"). Now:
+  - Auto mode's helpful macros, the Mikey druid's HT / HT2 and the Mikey
+    shaman's Cure Poison / Cure Disease: `[@mouseover,help,nodead]
+    [@target,help,nodead] [@player]`.
+  - Default Res (paladin, priest, shaman, druid's Revive / Rebirth):
+    `[@mouseover,help,dead] [@target,help,dead] []`, the last `[]` kept for
+    the targeting hand (Mikey's call).
+  - LoH: `[@mouseover,help,nodead] [@target,help,nodead]` (Mikey's call, same
+    day: mouseover, else friendly target; no `[@player]` step). Harmful `[]`
+    lines and Ulako's collections are left as they are (Mikey's calls).
+  - The Mikey paladin's skip list adds the seven seals (Righteousness,
+    Crusader, Light, Wisdom, Justice, Command, Fury) and the seven auras
+    (Devotion, Retribution, Concentration, Shadow / Frost / Fire Resistance,
+    Sanctity); mikey-halo's seal and aura rings cast them.
+  Collection macros are rewritten at the next refresh; generated ones already
+  made keep the old body until `/mma sync -n <name>` (Mikey does those by
+  hand). Not yet checked in game.
+  - **`/use`, not `/cast`** (Mikey's house rule, same day): every `/cast`
+    line in the Default and Mikey collections is `/use` now (hunter, druid
+    Prowl, warlock, paladin LoH). Same command on Forever (spells by name,
+    `!`, conditions; `/use !Stealth` etc. already worked). `/castsequence`
+    stays. Ulako's and ClassicWowForever's collections left as they are.
+    Rewritten at the next refresh (body differs).
+- **Mikey paladin skips three blessings (0.2.26, Mikey's ask, 2026-11-13):**
+  `ns.Exclude("PALADIN", { Might, Wisdom, Kings, Light }, "Mikey")` in
+  `Collections/Mikey/Paladin.lua`: auto mode makes no macro for them, since
+  mikey-halo's blessing ring and Ring 2 bar macro (mouseover, else friendly
+  target, else you, halo 0.22.0) cast them. An existing BoM macro is left as
+  it is (delete it by hand). Salvation isn't listed: Forever removed it
+  (Mikey). Not yet checked in game.
+- **Helpful spells fall through to you, not the NPC (0.2.25, Mikey, 2026-11-12):**
+  generated helpful macros (buffs, heals) were `/use [@mouseover,help,nodead] []
+  <spell>`. On Forever the bare `[]` took the interact soft target, a friendly
+  NPC in front of you (`SoftTargetInteract` 3, kept for Forever Loot
+  Sparkles), before self-cast; `SoftTargetFriend` was 0 and the buffs went on
+  you with `SoftTargetInteract` 0 (Mikey, in game). Now `[@mouseover,help,nodead]
+  [help,nodead] [@player]`: mouseover, else a friendly target, else you (the
+  Ulako mage's pattern). The Mikey druid's HT and HT2 too, rewritten at the next
+  refresh. Generated macros already made (BoM, Holy Light, Mark of the Wild,
+  Rejuvenation...) are yours and aren't rewritten: `/mma sync -n <name>` each.
+  Not yet checked in game.
+- **Mikey rogue's Backstab fits again (0.2.24, Mikey, 2026-11-11):** learning
+  Ambush didn't update it: with Ambush known the body came to 273 characters,
+  over 255, and `Refresh` skipped over-long macros silently. Now (Mikey's call)
+  Backstab has no Pick Pocket line (SS still has one), so a bare `#showtooltip`
+  shows what it casts: Ambush in stealth with a dagger, Backstab with one,
+  Sinister Strike otherwise; `worn:` (the game's alias for `equipped:`) replaces
+  `equipped:`. 158 characters with Ambush. `Refresh` now says in chat, once a session per macro, when one is too
+  long to update. Rewritten at the next refresh (body differs). Not yet checked
+  in game.
+- **~Ranged: `!` off the single shots again (0.2.23, Mikey, 2026-11-11):** checked in
+  game, `!Shoot Crossbow` and `Shoot Crossbow` behave the same (one shot per press).
+  The body is 0.2.18's again, spaces and all (253 characters). `RANGED_OLD` now holds
+  0.2.17's and 0.2.22's bodies, so a ~Ranged that 0.2.22 rewrote goes back in place
+  at login. Don't add `!` to Throw or the bow, gun and crossbow shots.
+- **~Ranged starts melee too (0.2.18, Mikey's ask, 2026-11-08):** a last line
+  `/startattack [noequipped:Wands]` after the throw or shot (not with a wand, which
+  `/startattack` would swap for melee). To fit the 255-character limit, the two
+  retargeting lines became one, `/targetenemy [noharm][dead]` (253 characters
+  now). An existing ~Ranged whose body is exactly
+  0.2.17's is rewritten in place at login (`EnsureGeneral`, the entry's 4th value:
+  the old body), keeping its bar spots; a hand-edited one is left alone. Not yet
+  checked in game.
+- **Mikey hunter: every sting excluded (0.2.29, Mikey's ask, 2026-11-13):**
+  Serpent, Scorpid and Wyvern Sting join Viper Sting on the Mikey
+  collection's hunter exclude list. mikey-halo 0.23.0's sting ring (hunter
+  Ring 3) casts them. Khnume follows the Mikey collection (saved
+  `collection = "Mikey"`). The existing Serpent and Scorpid macros stay until
+  they're deleted by hand. Not yet checked in game.
 - **Mikey hunter: every aspect excluded (0.2.17, Mikey's ask, 2026-11-08):**
   Hawk and Cheetah joined Monkey, Pack, Wild and Beast on the Mikey collection's
   hunter exclude list, and its "Aspect" macro (a Cheetah/Hawk castsequence) was
@@ -224,6 +323,16 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   their macro there as well.
 - **Limits:** 30 character macro slots on Classic Era now (Mikey's hunter,
   2026-11-03; was 18) and on retail; collections can get close.
+  **0.2.28 (Mikey, 2026-11-13):** a hunter on Forever (Khnume) got "no free
+  character slots" for Multi-Shot with 6 macros and room for more. The limits
+  were read from the old globals `MAX_CHARACTER_MACROS` /
+  `MAX_ACCOUNT_MACROS`. The Retail API keeps them in `Constants.MacroConsts`
+  (Blizzard_MacroUI reads them there, per wow-ui-source), so on Forever the
+  code likely fell back to Classic's 18. `CharacterMax` / `AccountMax` read
+  `Constants.MacroConsts` first now. The "no free character slots" messages
+  also say "(N of M used)". Cause not confirmed: 6 of 18 shouldn't have been
+  full either, so the new message's numbers are the next clue. Not yet
+  checked in game.
 
 ## Collections
 

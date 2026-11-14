@@ -11,10 +11,11 @@ ns.Collection("Default").SHAMAN = {
         #showtooltip
         /use [nomounted] !Ghost Wolf
     ]] },
-    -- Dead friend under the mouse, else your dead target.
+    -- Dead friend under the mouse, else your dead target, else the targeting hand. 0.2.27: @target named, so
+    -- the friendly NPC you face (Forever's soft target) is skipped.
     { name = "Res", spells = { "Ancestral Spirit" }, body = [[
         #showtooltip
-        /use [@mouseover,help,dead] [] Ancestral Spirit
+        /use [@mouseover,help,dead] [@target,help,dead] [] Ancestral Spirit
     ]] },
 }
 

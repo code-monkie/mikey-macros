@@ -38,12 +38,12 @@ ns.Collection("Mikey").SHAMAN = {
     -- Cures: mouseover friend, else you.
     { name = "Cure Poison", spells = { "Cure Poison" }, body = [[
         #showtooltip
-        /use [@mouseover,help,nodead] [@player] Cure Poison
+        /use [@mouseover,help,nodead] [@target,help,nodead] [@player] Cure Poison
     ]] },
 
     { name = "Cure Disease", spells = { "Cure Disease" }, body = [[
         #showtooltip
-        /use [@mouseover,help,nodead] [@player] Cure Disease
+        /use [@mouseover,help,nodead] [@target,help,nodead] [@player] Cure Disease
     ]] },
 }
 

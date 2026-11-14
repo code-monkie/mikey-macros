@@ -24,7 +24,7 @@ ns.Collection("Mikey").HUNTER = {
         /target [noexists] mouseover
         /cleartarget [dead][help]
         /targetenemy [noexists]
-        /cast !Auto Shot
+        /use !Auto Shot
     ]] },
 
     -- Aimed Shot opener: same targeting as Shot, Raptor Strike if in melee,
@@ -34,9 +34,9 @@ ns.Collection("Mikey").HUNTER = {
         #showtooltip Aimed Shot
         /cleartarget [dead][help]
         /targetenemy [noexists]
-        /cast Raptor Strike
-        /cast Aimed Shot
-        /cast !Auto Shot
+        /use Raptor Strike
+        /use Aimed Shot
+        /use !Auto Shot
         /petattack
     ]] },
 
@@ -73,7 +73,12 @@ ns.Collection("Mikey").HUNTER = {
 
 -- Mikey's characters only (on top of Default's list), and final.
 ns.Exclude("HUNTER", {
+    -- Stings: cast from mikey-halo's sting ring (halo 0.23.0, Ring 3). Serpent, Scorpid and Wyvern joined Viper in
+    -- 0.2.29 (Mikey's ask, 2026-11-13).
+    "Serpent Sting",
+    "Scorpid Sting",
     "Viper Sting",
+    "Wyvern Sting",
     -- Traps (spellbook)
     "Freezing Trap",
     "Immolation Trap",

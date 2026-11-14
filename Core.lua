@@ -51,12 +51,21 @@ local function Print(...)
     print("|cff33ff99mikey-macros|r:", ...)
 end
 
+-- 0.2.28 (Mikey, 2026-11-13: "no free character slots" with 12 empty): the Retail API keeps the limits in
+-- Constants.MacroConsts (Blizzard_MacroUI reads them there; wow-ui-source), not the old globals, so on Forever
+-- this fell back to Classic's 18. The constants first now, then the globals, then the old guess.
+local function MacroConst(key)
+    local c = Constants and Constants.MacroConsts
+    return c and c[key]
+end
+
 local function AccountMax()
-    return MAX_ACCOUNT_MACROS or 120
+    return MacroConst("MAX_ACCOUNT_MACROS") or MAX_ACCOUNT_MACROS or 120
 end
 
 local function CharacterMax()
-    return MAX_CHARACTER_MACROS or (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and 30 or 18)
+    return MacroConst("MAX_CHARACTER_MACROS") or MAX_CHARACTER_MACROS
+        or (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and 30 or 18)
 end
 
 -- A spellbook entry's real spell name, from its ID. The spellbook can show
@@ -359,6 +368,7 @@ end
 -- Rewrite existing macros to match the data file and the spells you know
 -- (keeps their action bar spots). Normally only changed bodies are rewritten;
 -- force rewrites every macro.
+local tooLongSaid = {}   -- 0.2.24: names already reported as too long this session
 local function Refresh(force)
     local defs = Definitions()
     if #defs == 0 or InCombatLockdown() then return {} end
@@ -369,7 +379,14 @@ local function Refresh(force)
         local index = have[def.name]
         if index then
             local body = Clean(def, ctx)
-            if #body <= MAX_BODY then
+            if #body > MAX_BODY then
+                -- 0.2.24 (Mikey, 2026-11-11): this used to be skipped silently (Backstab, once Ambush was known)
+                if not tooLongSaid[def.name] then
+                    tooLongSaid[def.name] = true
+                    Print(("|cffff6060%s not updated|r: %d characters with the spells you know now, over 255.")
+                        :format(def.name, #body))
+                end
+            else
                 local _, icon, current = GetMacroInfo(index)
                 -- a macro still on the question mark gets its entry's icon
                 if force or current ~= body or (def.icon and icon == ICON) then
@@ -488,7 +505,12 @@ end
 -- The macro auto mode writes for a newly learned spell:
 --   harmful        -> /startattack first
 --   ranged harmful -> [@mouseover,harm,nodead] [] (mouseover, else target)
---   ranged helpful -> [@mouseover,help,nodead] []
+--   ranged helpful -> [@mouseover,help,nodead] [@target,help,nodead] [@player] (mouseover, else a friendly target,
+--                     else you). 0.2.25: was "[]", which on Forever fell to the interact soft target (a friendly NPC
+--                     in front of you, with SoftTargetInteract 3 for Forever Loot Sparkles) before self-cast (Mikey,
+--                     2026-11-12: buffs went on NPCs; checked with SoftTargetInteract 0). 0.2.27: any clause without
+--                     an @unit counts that NPC as your target, so 0.2.25's "[help,nodead]" didn't help; "@target"
+--                     named skips it (Mikey, in game, 2026-11-13: "naming the target explicitly fixed it").
 --   pet-only       -> no mouseover (the spell picks your pet itself)
 --   toggles        -> ! so a second press doesn't cancel it
 -- Hunters too: on Forever /startattack starts Auto Shot at range, as on Retail (Mikey, in game, 2026-11-05).
@@ -503,7 +525,7 @@ local function AutoBody(spell)
     if ranged and f.harmful then
         target = "[@mouseover,harm,nodead] [] "
     elseif ranged and f.helpful then
-        target = "[@mouseover,help,nodead] [] "
+        target = "[@mouseover,help,nodead] [@target,help,nodead] [@player] "
     end
     return body .. "/use " .. target .. (f.toggle and "!" or "") .. spell
 end
@@ -523,9 +545,26 @@ local ATTACK_BODY = "#showtooltip 16\n/startattack"
 -- Account-wide like Attack, so nothing trims it: a clause for a weapon you
 -- can't use is never reached.
 local RANGED_MACRO = "~Ranged"
-local RANGED_BODY = "#showtooltip 18\n/target [@mouseover,harm,nodead]\n"
-    .. "/cleartarget [dead][help]\n/targetenemy [noexists]\n"
+-- Bodies this addon wrote before, rewritten in place at login (EnsureGeneral): 0.2.17's, then 0.2.22's (never the
+-- current body, or it would be "updated" at every login)
+local RANGED_OLD = {
+    "#showtooltip 18\n/target [@mouseover,harm,nodead]\n"
+        .. "/cleartarget [dead][help]\n/targetenemy [noexists]\n"
+        .. "/use [equipped:Thrown] Throw; [equipped:Bows] Shoot Bow; [equipped:Guns] Shoot Gun; [equipped:Crossbows] Shoot Crossbow; [equipped:Wands] !Shoot",
+    "#showtooltip 18\n/target [@mouseover,harm,nodead]\n/targetenemy [noharm][dead]\n"
+        .. "/use [equipped:Thrown] Throw;[equipped:Bows] !Shoot Bow;[equipped:Guns] !Shoot Gun;[equipped:Crossbows] !Shoot Crossbow;[equipped:Wands] !Shoot"
+        .. "\n/startattack [noequipped:Wands]",
+}
+-- 0.2.18 (Mikey's ask, 2026-11-08): melee starts after the throw or shot, so you're swinging when it closes in.
+-- Not with a wand: /startattack would swap the wand's Shoot for melee. To stay under the 255-character limit
+-- (it came to 275), "/cleartarget [dead][help]" + "/targetenemy [noexists]" became one line,
+-- "/targetenemy [noharm][dead]": no target, a friendly one or a dead one, and the nearest enemy is picked.
+-- 0.2.22 put "!" on Shoot Bow, Gun and Crossbow; 0.2.23 (Mikey, 2026-11-11) took it off again: checked in game,
+-- "!Shoot Crossbow" and "Shoot Crossbow" behave the same (a single shot, nothing to toggle). Only the wand's Shoot
+-- repeats, so only it has "!". This is 0.2.18's body again (253 characters).
+local RANGED_BODY = "#showtooltip 18\n/target [@mouseover,harm,nodead]\n/targetenemy [noharm][dead]\n"
     .. "/use [equipped:Thrown] Throw; [equipped:Bows] Shoot Bow; [equipped:Guns] Shoot Gun; [equipped:Crossbows] Shoot Crossbow; [equipped:Wands] !Shoot"
+    .. "\n/startattack [noequipped:Wands]"
 -- Where a brand-new character's Ranged goes on bar 1: "throw" (warriors and
 -- rogues start with Throw) or a button number (wand users, Mikey 2026-11-02).
 local RANGED_CLASSES = { WARRIOR = "throw", ROGUE = "throw", PRIEST = 2, MAGE = 2, WARLOCK = 2 }
@@ -680,13 +719,66 @@ local function PlaceCancel()
     ClearCursor()
 end
 
+-- Account macros placed by KEY rather than by bar position (0.2.20, Mikey's ask, 2026-11-09: "can you always
+-- place To the Face to the 0 binding"). Each is the account's own general macro, never made here: no macro, nothing
+-- happens. The key is looked up at run time (GetBindingAction), so the macro follows the key if it's ever rebound;
+-- the button's slot comes from the button itself (bar 1 through Bar1Slot, for stance and stealth pages).
+-- A taken button is left alone (said in chat). Out of combat, empty cursor only.
+local KEY_MACROS = {
+    { macro = "To the Face", key = "0" },
+}
+-- binding command prefix -> the button frames' name prefix and the bar's first slot minus 1 (when the frame is gone)
+local BAR_BUTTONS = {
+    MULTIACTIONBAR1BUTTON = { "MultiBarBottomLeftButton", 60 }, MULTIACTIONBAR2BUTTON = { "MultiBarBottomRightButton", 48 },
+    MULTIACTIONBAR3BUTTON = { "MultiBarRightButton", 24 }, MULTIACTIONBAR4BUTTON = { "MultiBarLeftButton", 36 },
+    MULTIACTIONBAR5BUTTON = { "MultiBar5Button", 144 }, MULTIACTIONBAR6BUTTON = { "MultiBar6Button", 156 },
+    MULTIACTIONBAR7BUTTON = { "MultiBar7Button", 168 },
+}
+-- the action slot a key's button shows now, or nil (and why) when the key isn't on an action button
+local function KeySlot(key)
+    local command = GetBindingAction and GetBindingAction(key)
+    if not command or command == "" then return nil, "isn't bound" end
+    local n = tonumber(command:match("^ACTIONBUTTON(%d+)$"))
+    if n then return Bar1Slot(n) end
+    local prefix, num = command:match("^(MULTIACTIONBAR%dBUTTON)(%d+)$")
+    local bar = prefix and BAR_BUTTONS[prefix]
+    if not bar then return nil, "is bound to " .. command .. ", not an action button" end
+    num = tonumber(num)
+    local button = _G[bar[1] .. num]
+    local slot = button and type(button.action) == "number" and button.action or (bar[2] + num)
+    return slot
+end
+local function PlaceKeyMacros()
+    if InCombatLockdown() or GetCursorInfo() then return end
+    for _, e in ipairs(KEY_MACROS) do
+        local index = GeneralMacroIndex(e.macro)
+        if index ~= 0 then
+            local slot, why = KeySlot(e.key)
+            if not slot then
+                Print(("the %s key %s; %s not placed."):format(e.key, why, e.macro))
+            else
+                local kind, id = GetActionInfo(slot)
+                if not (kind == "macro" and id == index) then
+                    if kind then
+                        Print(("the %s key's button is taken; drag the %s macro onto it by hand."):format(e.key, e.macro))
+                    else
+                        PickupMacro(index)
+                        PlaceAction(slot)
+                        ClearCursor()
+                    end
+                end
+            end
+        end
+    end
+end
+
 -- The general (account) macros made at login when missing, whatever the class
 -- (2026-11-02, Mikey's call): ~Attack and ~Ranged, and ~RM (0.2.3). An existing one
 -- is used as it is, whatever its body, so a deleted one comes back on the next login.
 -- An entry's third value is its icon (0.2.3, ~RM's); without one it's the question mark, which #showtooltip
 -- replaces. A macro that has an icon here but still wears the question mark (made before it had one) gets the
 -- icon; its body is left alone.
-local GUARANTEED = { { ATTACK_MACRO, ATTACK_BODY }, { RANGED_MACRO, RANGED_BODY }, { MARK_MACRO, MARK_BODY, MARK_ICON },
+local GUARANTEED = { { ATTACK_MACRO, ATTACK_BODY }, { RANGED_MACRO, RANGED_BODY, nil, RANGED_OLD }, { MARK_MACRO, MARK_BODY, MARK_ICON },
     { FOCUS_MACRO, FOCUS_BODY, FOCUS_ICON } }   -- ~Focus: 0.2.7
 local function EnsureGeneral()
     for _, m in ipairs(GUARANTEED) do
@@ -702,6 +794,19 @@ local function EnsureGeneral()
         elseif icon then
             local _, current, oldBody = GetMacroInfo(index)
             if current == ICON then EditMacro(index, name, icon, oldBody) end
+        elseif m[4] then
+            -- 0.2.18: a body this addon wrote earlier (m[4], not edited by hand) is brought up to date in place, so
+            -- it keeps its bar spots; one edited by hand is left alone
+            local _, current, oldBody = GetMacroInfo(index)
+            local was = oldBody and oldBody:gsub("%s+$", "")
+            local known = false
+            for _, old in ipairs(type(m[4]) == "table" and m[4] or { m[4] }) do   -- 0.2.22: a list of old bodies
+                if was == old then known = true end
+            end
+            if known then
+                EditMacro(index, name, current, body)
+                Print("updated general macro: " .. name)
+            end
         end
     end
 end
@@ -719,8 +824,9 @@ local function PlaceBar()
     PlaceAttack()
     if RANGED_CLASSES[class] then PlaceRanged(RANGED_CLASSES[class]) end
     PlaceCancel()
+    PlaceKeyMacros()                                  -- 0.2.20: To the Face on the 0 key
     Print("bar macros placed: " .. ATTACK_MACRO .. (RANGED_CLASSES[class] and (", " .. RANGED_MACRO) or "")
-        .. ", " .. CANCEL_MACRO .. " (any button that was taken is named above).")
+        .. ", " .. CANCEL_MACRO .. ", To the Face (any button that was taken is named above).")
 end
 
 local function AutoCreate()
@@ -831,16 +937,17 @@ local function AutoCreate()
     -- cleared from bar 1, so ~Attack lives only on button 9 (Mikey's layout,
     -- 2026-10-29). Warriors and rogues also get "~Ranged", in place of Throw;
     -- priests, mages and warlocks get it on button 2 (see RANGED_CLASSES).
-    -- Every class gets "~Cancel" on bar 5 button 4.
+    -- Every class gets "~Cancel" on bar 5 button 4, and "To the Face" on the 0 key's button (0.2.20).
     if brandNew then
         PlaceAttack()
         if RANGED_CLASSES[class] then PlaceRanged(RANGED_CLASSES[class]) end
         PlaceCancel()
+        PlaceKeyMacros()
     end
     if #created > 0 then Print("new spell macro: " .. table.concat(created, ", ")) end
     if #skipped > 0 then Print("no macro (excluded): " .. table.concat(skipped, ", ")) end
     if #full > 0 then
-        Print("|cffff6060no free character slots|r for new spell macros: " .. table.concat(full, ", "))
+        Print("|cffff6060no free character slots|r (" .. count .. " of " .. CharacterMax() .. " used) for new spell macros: " .. table.concat(full, ", "))
     end
 end
 
@@ -893,7 +1000,7 @@ local function Sync(all)
         Print("nothing new to create.")
     end
     if #full > 0 then
-        Print("|cffff6060no free character slots|r for: " .. table.concat(full, ", "))
+        Print("|cffff6060no free character slots|r (" .. count .. " of " .. CharacterMax() .. " used) for: " .. table.concat(full, ", "))
     end
     if #tooLong > 0 then
         Print("|cffff6060over 255 characters, skipped|r: " .. table.concat(tooLong, ", "))
@@ -958,7 +1065,7 @@ local function SyncOne(wanted)
         return
     end
     if count >= CharacterMax() then
-        Print("|cffff6060no free character slots|r for: " .. name)
+        Print("|cffff6060no free character slots|r (" .. count .. " of " .. CharacterMax() .. " used) for: " .. name)
         return
     end
     CreateMacro(name, icon or ICON, body, true)

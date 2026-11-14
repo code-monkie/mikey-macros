@@ -19,14 +19,16 @@ ns.Collection("Default").DRUID = {
         return ([[
         #showtooltip Prowl
         /dismount
-        /cast [noform:%d] Cat Form
-        /cast [form:%d,nostealth,nocombat] Prowl
+        /use [noform:%d] Cat Form
+        /use [form:%d,nostealth,nocombat] Prowl
         ]]):format(cat, cat)
     end },
-    -- Out of combat Revive (where the game has it), in combat Rebirth; mouseover first.
+    -- Out of combat Revive (where the game has it), in combat Rebirth; mouseover first, then your dead target,
+    -- else the targeting hand. 0.2.27: @target named, so the friendly NPC you face (Forever's soft target) is
+    -- skipped.
     { name = "Res", spells = { "Rebirth", "Revive" }, body = [[
         #showtooltip
-        /use [nocombat,@mouseover,help,dead] [nocombat] Revive; [@mouseover,help,dead] [] Rebirth
+        /use [nocombat,@mouseover,help,dead] [nocombat,@target,help,dead] [nocombat] Revive; [@mouseover,help,dead] [@target,help,dead] [] Rebirth
     ]] },
 }
 

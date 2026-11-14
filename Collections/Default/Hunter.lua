@@ -11,8 +11,8 @@ ns.Collection("Default").HUNTER = {
     -- ! so mashing doesn't un-queue Raptor Strike (it waits for the next swing).
     { name = "Raptor Strike", learn = "Raptor Strike", spells = { "Raptor Strike", "Mongoose Bite" }, body = [[
         #showtooltip Raptor Strike
-        /cast Mongoose Bite
-        /cast !Raptor Strike
+        /use Mongoose Bite
+        /use !Raptor Strike
     ]] },
 
     -- The opener (0.2.4, from the Mikey collection, 2026-11-05): an enemy under the mouse becomes your target, then
@@ -21,7 +21,7 @@ ns.Collection("Default").HUNTER = {
     { name = "Hunter's Mark", spells = { "Hunter's Mark" }, body = [[
         #showtooltip
         /target [@mouseover,harm,nodead]
-        /cast Hunter's Mark
+        /use Hunter's Mark
     ]] },
 
     { name = "Scare Beast", spells = { "Scare Beast" }, body = [[
@@ -38,20 +38,20 @@ ns.Collection("Default").HUNTER = {
         /petfollow
         /stopattack
         /stopcasting
-        /cast [combat] Feign Death
+        /use [combat] Feign Death
     ]] },
 
     -- Lands where the mouse points.
     { name = "Flare", spells = { "Flare" }, body = [[
         #showtooltip Flare
-        /cast [@cursor] Flare
+        /use [@cursor] Flare
     ]] },
 
     -- ! so a second press doesn't end the channel and snap the view back to
     -- you: you can recast it to move the eye, like a priest's Mind Vision.
     { name = "Eagle Eye", spells = { "Eagle Eye" }, body = [[
         #showtooltip Eagle Eye
-        /cast !Eagle Eye
+        /use !Eagle Eye
     ]] },
 
     -- All-in-one pet: Revive Pet if it's dead, Call Pet with none out, else
@@ -65,8 +65,8 @@ ns.Collection("Default").HUNTER = {
     -- (Mikey's Shift and Ctrl are bars). Checked in game on Forever (Mikey).
     { name = "Pet", learn = "Call Pet", spells = { "Call Pet", "Revive Pet", "Mend Pet" }, body = [[
         #showtooltip
-        /cast [@pet,dead] Revive Pet; [nopet] Call Pet; Mend Pet
-        /cast [nopet] Revive Pet
+        /use [@pet,dead] Revive Pet; [nopet] Call Pet; Mend Pet
+        /use [nopet] Revive Pet
     ]] },
 
     -- Pet in: Assist stance (Mikey's trial, 2026-11-02), attack the mouseover,
@@ -81,9 +81,9 @@ ns.Collection("Default").HUNTER = {
         /target [noexists] mouseover
         /petassist
         /petattack [@mouseover,harm,nodead] []
-        /cast Dash
-        /cast Dive
-        /cast [@mouseover,harm,nodead] [] Charge
+        /use Dash
+        /use Dive
+        /use [@mouseover,harm,nodead] [] Charge
     ]] },
 }
 

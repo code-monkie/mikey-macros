@@ -12,10 +12,11 @@ ns.Collection("Default").PRIEST = {
         /stopattack
         /use [@mouseover,harm,nodead] [] Shackle Undead
     ]] },
-    -- Dead friend under the mouse, else your dead target.
+    -- Dead friend under the mouse, else your dead target, else the targeting hand. 0.2.27: @target named, so
+    -- the friendly NPC you face (Forever's soft target) is skipped.
     { name = "Res", spells = { "Resurrection" }, body = [[
         #showtooltip
-        /use [@mouseover,help,dead] [] Resurrection
+        /use [@mouseover,help,dead] [@target,help,dead] [] Resurrection
     ]] },
 }
 

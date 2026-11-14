@@ -30,13 +30,13 @@ ns.Collection("Mikey").DRUID = {
 
     { name = "HT", spells = { "Healing Touch" }, body = [[
         #showtooltip
-        /use [@mouseover,help,nodead] [] Healing Touch
+        /use [@mouseover,help,nodead] [@target,help,nodead] [@player] Healing Touch
     ]] },
 
     -- Rank 2: a cheap heal.
     { name = "HT2", spells = { "Healing Touch" }, body = [[
         #showtooltip
-        /use [@mouseover,help,nodead] [] Healing Touch(Rank 2)
+        /use [@mouseover,help,nodead] [@target,help,nodead] [@player] Healing Touch(Rank 2)
     ]] },
 
     -- Hibernate comes from the Default collection (/stopattack, mouseover).

@@ -10,10 +10,19 @@ local _, ns = ...
 
 ns.Collection("Mikey").WARLOCK = {
     -- Damage ----------------------------------------------------------------------
+    -- 0.2.21 (Mikey's ask, 2026-11-10): the hunter Shot's targeting. With no target
+    -- (or a dead or friendly one), the mouseover becomes it, else the nearest enemy;
+    -- then the bolt on the target (a target you have always wins; the mouseover
+    -- only picks one up), /startattack, and the Imp (only) goes in on it too.
     { name = "SB", spells = { "Shadow Bolt" }, body = [[
         #showtooltip
+        /cleartarget [dead][help]
+        /target [noexists] mouseover
+        /cleartarget [dead][help]
+        /targetenemy [noexists]
+        /use Shadow Bolt
         /startattack
-        /use [@mouseover,nodead,harm] [] Shadow Bolt
+        /petattack [pet:Imp]
     ]] },
 
     -- Immolate and Corruption differed from auto mode's macros only by a pet
@@ -59,22 +68,22 @@ ns.Collection("Mikey").WARLOCK = {
     -- Armor -----------------------------------------------------------------------
     { name = "DS", spells = { "Demon Skin", "Demon Armor" }, body = [[
         #showtooltip
-        /cast Demon Armor
-        /cast Demon Skin
+        /use Demon Armor
+        /use Demon Skin
     ]] },
 
     -- Voidwalker ------------------------------------------------------------------
     { name = "CS", spells = { "Summon Voidwalker" }, body = [[
         #showtooltip Consume Shadows
         /petpassive
-        /cast [pet:Voidwalker] Consume Shadows
+        /use [pet:Voidwalker] Consume Shadows
     ]] },
 
     { name = "VW Sac", spells = { "Summon Voidwalker" }, body = [[
         #showtooltip Sacrifice
         /stopcasting
         /petautocastoff Sacrifice
-        /cast [pet:Voidwalker] Sacrifice
+        /use [pet:Voidwalker] Sacrifice
     ]] },
 }
 
