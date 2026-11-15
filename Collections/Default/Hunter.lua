@@ -7,12 +7,13 @@
 local _, ns = ...
 
 ns.Collection("Default").HUNTER = {
-    -- Melee: Mongoose Bite when it's lit (after a dodge), else Raptor Strike.
+    -- Melee: Raptor Strike, then Mongoose Bite when it's lit (after a dodge).
     -- ! so mashing doesn't un-queue Raptor Strike (it waits for the next swing).
+    -- 0.2.30 (Mikey, 2026-11-14: "the order matters ... raptor before mongoose"): Raptor Strike's line first.
     { name = "Raptor Strike", learn = "Raptor Strike", spells = { "Raptor Strike", "Mongoose Bite" }, body = [[
         #showtooltip Raptor Strike
-        /use Mongoose Bite
         /use !Raptor Strike
+        /use Mongoose Bite
     ]] },
 
     -- The opener (0.2.4, from the Mikey collection, 2026-11-05): an enemy under the mouse becomes your target, then

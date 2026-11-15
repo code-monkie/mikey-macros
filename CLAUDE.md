@@ -237,6 +237,36 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   0.2.17's is rewritten in place at login (`EnsureGeneral`, the entry's 4th value:
   the old body), keeping its bar spots; a hand-edited one is left alone. Not yet
   checked in game.
+- **Warlock channels (0.2.32, Mikey's ask, 2026-11-14: "default warlock should
+  get drain life and drain soul with the corresponding nochanneling:Drain X
+  conditions. Same with health funnel"):** Default warlock gets Drain Life
+  (mouseover, else target, `/startattack`), Drain Soul (the same, with
+  `/stopattack` only when it goes on your target) and Health Funnel. Each
+  clause has `[nochanneling:<that spell>]`, so a second press mid-channel does
+  nothing instead of restarting it. The Mikey warlock's Drain drops
+  `/stopcasting` (Mikey: CC macros only) and gets `[nochanneling:Drain Soul]`;
+  it's still on the target only, and it takes Drain Soul, so Default's Drain
+  Soul isn't made for Mikey's characters. Made when the spell is learned;
+  for one already known, `/mma sync -n <name>` (auto mode only makes macros
+  for new spells). Mikey's Drain is rewritten at the next refresh (body
+  differs). Not yet checked in game.
+- **Old generated helpful macros upgrade themselves (0.2.31, Mikey, 2026-11-14:
+  his druids' Mark of the Wild and Thorns had no `@target` clause):** the
+  macros 0.2.25 and 0.2.27 changed were made earlier, and generated macros
+  aren't rewritten, so they kept `[@mouseover,help,nodead] [] <spell>`
+  (Tigrryn, Lyra, Moolah: Mark, Thorns, Healing Touch). `UpgradeGenerated`
+  (run from `Refresh`, at login and every refresh) rewrites a character macro
+  whose body is *exactly* 0.2.24's or 0.2.25's generated helpful body to the
+  current one (`[@mouseover,help,nodead] [@target,help,nodead] [@player]`),
+  keeping its name, icon and bar spots. Hand-edited bodies and the followed
+  collection's or Default's macros (by name) are left alone. Any class, any
+  helpful spell (paladin blessings, Rejuvenation...). No `/mma sync -n`
+  needed. Not yet checked in game.
+- **Raptor Strike before Mongoose Bite (0.2.30, Mikey, 2026-11-14: "the order
+  matters for this macro ... raptor before mongoose"):** the Default
+  hunter's "Raptor Strike" macro now runs `/use !Raptor Strike`, then
+  `/use Mongoose Bite`. Existing macros are rewritten at the next login or
+  `/reload` (the body changed). Not yet checked in game.
 - **Mikey hunter: every sting excluded (0.2.29, Mikey's ask, 2026-11-13):**
   Serpent, Scorpid and Wyvern Sting join Viper Sting on the Mikey
   collection's hunter exclude list. mikey-halo 0.23.0's sting ring (hunter

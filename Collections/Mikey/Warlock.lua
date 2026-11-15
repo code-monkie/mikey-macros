@@ -54,15 +54,16 @@ ns.Collection("Mikey").WARLOCK = {
     ]] },
 
     -- Channels and mana -----------------------------------------------------------
-    -- Life Tap and Health Funnel were dropped 2026-11-03: /stopattack did nothing
-    -- for them, so they're auto mode's macros now.
-    -- Drain: no melee or wand killing blow (that loses the shard); /stopcasting
-    -- cuts a wand or Shadow Bolt off so the drain lands on the kill.
+    -- Life Tap was dropped 2026-11-03 (/stopattack did nothing for it), so it's
+    -- auto mode's macro. Health Funnel and Drain Life come from Default (0.2.32).
+    -- Drain: no melee or wand killing blow (that loses the shard). 0.2.32 (Mikey,
+    -- 2026-11-14): no /stopcasting ("I don't need stop casting for drain soul";
+    -- it's for CC only) and [nochanneling:Drain Soul], so a second press doesn't
+    -- restart the channel. Still on the target only, as before.
     { name = "Drain", spells = { "Drain Soul" }, body = [[
         #showtooltip
         /stopattack
-        /stopcasting
-        /use Drain Soul
+        /use [nochanneling:Drain Soul] Drain Soul
     ]] },
 
     -- Armor -----------------------------------------------------------------------

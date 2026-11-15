@@ -369,12 +369,43 @@ end
 -- (keeps their action bar spots). Normally only changed bodies are rewritten;
 -- force rewrites every macro.
 local tooLongSaid = {}   -- 0.2.24: names already reported as too long this session
+
+-- 0.2.31 (Mikey, 2026-11-14: his druids' Mark of the Wild and Thorns still had "[]"): generated helpful macros
+-- made before 0.2.27 kept their old body, since generated macros are never rewritten. A character macro whose
+-- body is exactly one an older AutoBody wrote (0.2.24's "[]" or 0.2.25's "[help,nodead] [@player]") gets the
+-- current one; anything hand-edited, or a collection's macro (skip), is left alone. Keeps its bar spots.
+local HELP_NOW = "#showtooltip\n/use [@mouseover,help,nodead] [@target,help,nodead] [@player] "
+local HELP_OLD = {
+    "^#showtooltip\n/use %[@mouseover,help,nodead%] %[%] ([^\n]+)$",
+    "^#showtooltip\n/use %[@mouseover,help,nodead%] %[help,nodead%] %[@player%] ([^\n]+)$",
+}
+local function UpgradeGenerated(have, skip, updated)
+    for name, index in pairs(have) do
+        if not skip[name] then
+            local _, icon, body = GetMacroInfo(index)
+            body = body and body:gsub("\r", ""):gsub("%s+$", "")
+            for _, pattern in ipairs(HELP_OLD) do
+                local spell = body and body:match(pattern)
+                if spell then
+                    EditMacro(index, name, icon, HELP_NOW .. spell)
+                    updated[#updated + 1] = name
+                    break
+                end
+            end
+        end
+    end
+end
+
 local function Refresh(force)
+    if InCombatLockdown() then return {} end
     local defs = Definitions()
-    if #defs == 0 or InCombatLockdown() then return {} end
-    local ctx = Context(KnownSpells())
     local have = CharacterMacros()
     local updated = {}
+    local skip = {}
+    for _, def in ipairs(defs) do skip[def.name] = true end
+    UpgradeGenerated(have, skip, updated)
+    if #defs == 0 then return updated end
+    local ctx = Context(KnownSpells())
     for _, def in ipairs(defs) do
         local index = have[def.name]
         if index then
@@ -415,7 +446,8 @@ end
 -- Default collection's, else a generated one (see AutoBody), unless the spell
 -- is excluded. /mma sync does the same for every spell you already know. Spells are matched by name, so
 -- only a new spell (rank 1 or unranked) counts, never a higher rank. These
--- macros are yours: the addon never rewrites or clears them.
+-- macros are yours: the addon never rewrites or clears them (one exception: an untouched old helpful body,
+-- see UpgradeGenerated, 0.2.31).
 
 -- Names (lowercase -> as shown) of the usable spells on the class tabs of the
 -- spellbook: no General tab (Attack, racials, professions, mounts), no

@@ -12,6 +12,27 @@ ns.Collection("Default").WARLOCK = {
         /stopattack
         /use [@mouseover,harm,nodead] [] Fear
     ]] },
+    -- Channels (0.2.32, Mikey's ask, 2026-11-14: "default warlock should get drain life and drain soul with the
+    -- corresponding nochanneling:Drain X conditions. Same with health funnel"): [nochanneling:<spell>] so a second
+    -- press while it's channelling does nothing instead of restarting it (clipping the ticks). Only that spell's
+    -- own channel holds it back, so one drain can still cut another channel short. No /stopcasting (CC only).
+    -- Drain Soul: /stopattack, so a melee swing doesn't take the killing blow (and the shard); only when the drain
+    -- goes on your target, not a mouseover (as Default mage's Polymorph).
+    { name = "Drain Life", spells = { "Drain Life" }, body = [[
+        #showtooltip
+        /startattack
+        /use [nochanneling:Drain Life,@mouseover,harm,nodead] [nochanneling:Drain Life] Drain Life
+    ]] },
+    { name = "Drain Soul", spells = { "Drain Soul" }, body = [[
+        #showtooltip
+        /stopattack [@mouseover,noexists][@mouseover,noharm][@mouseover,dead]
+        /use [nochanneling:Drain Soul,@mouseover,harm,nodead] [nochanneling:Drain Soul] Drain Soul
+    ]] },
+    -- Health Funnel always goes to your demon: no unit needed.
+    { name = "Health Funnel", spells = { "Health Funnel" }, body = [[
+        #showtooltip
+        /use [nochanneling:Health Funnel] Health Funnel
+    ]] },
     -- The best Create Healthstone you know.
     { name = "Healthstone", spells = { "Create Healthstone (Major)", "Create Healthstone (Greater)", "Create Healthstone", "Create Healthstone (Lesser)", "Create Healthstone (Minor)" }, body = [[
         #showtooltip
