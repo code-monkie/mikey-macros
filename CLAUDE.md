@@ -237,6 +237,22 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   0.2.17's is rewritten in place at login (`EnsureGeneral`, the entry's 4th value:
   the old body), keeping its bar spots; a hand-edited one is left alone. Not yet
   checked in game.
+- **Druid "Forms" is now "Travel" (0.2.33, Mikey's ask, 2026-11-17):** same
+  body (Aquatic Form swimming, else Cat Form). A druid that already has
+  "Forms" keeps it until it's deleted by hand; "Travel" is made at the next
+  refresh, or with `/mma sync -n Travel`. Not yet checked in game.
+- **Druid Prowl icon (0.2.33, Mikey's ask, 2026-11-17: "don't add prowl icon
+  to the prowl macro"):** Default's Prowl has a bare `#showtooltip`, so the
+  icon follows the line it would use: Cat Form out of cat, Prowl in it. While
+  stealthed or in combat in cat no line applies, so it shows the macro's own
+  icon. Rewritten at the next refresh. Not yet checked in game.
+- **Bracketed spell names (0.2.33, Mikey, 2026-11-17):** Forever's spellbook
+  calls the cat charge "Feral Charge (Cat)", 18 characters, so auto mode
+  named its macro by initials, "FC(". `AutoName` now drops a bracketed tail
+  first: "Feral Charge". The body still uses the full name, since that's the
+  spellbook's (whether a bare "Feral Charge" resolves on Forever isn't
+  checked). A macro already made keeps its name: delete "FC(" and run
+  `/mma sync -n Feral Charge`. Not yet checked in game.
 - **Warlock channels (0.2.32, Mikey's ask, 2026-11-14: "default warlock should
   get drain life and drain soul with the corresponding nochanneling:Drain X
   conditions. Same with health funnel"):** Default warlock gets Drain Life

@@ -488,7 +488,11 @@ end
 
 -- A macro name for a spell: the name itself, or its initials when it's longer
 -- than 16 characters (Blessing of Might -> BoM).
+-- 0.2.33 (Mikey, 2026-11-17: Forever's "Feral Charge (Cat)" became "FC("): a
+-- bracketed tail is dropped from the name first ("Feral Charge"). The macro
+-- body keeps the spell's full name.
 local function AutoName(spell)
+    spell = spell:gsub("%s*%b()%s*$", "")
     if #spell <= 16 then return spell end
     local initials = ""
     for word in spell:gmatch("[^%s%-]+") do initials = initials .. word:sub(1, 1) end

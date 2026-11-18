@@ -13,11 +13,12 @@ ns.Collection("Default").DRUID = {
         /use [@mouseover,harm,nodead] [] Hibernate
     ]] },
     -- Into Cat Form first, then Prowl (out of combat); more presses don't drop it.
-    -- Cat Form's number depends on which forms you have, so it's filled in.
+    -- Cat Form's number depends on which forms you have, so it's filled in. 0.2.33 (Mikey's ask, 2026-11-17): a bare
+    -- #showtooltip, no Prowl icon named: Cat Form out of it, Prowl in it.
     { name = "Prowl", learn = "Prowl", spells = { "Prowl", "Cat Form" }, body = function(c)
         local cat = c.form("Cat Form") or 3
         return ([[
-        #showtooltip Prowl
+        #showtooltip
         /dismount
         /use [noform:%d] Cat Form
         /use [form:%d,nostealth,nocombat] Prowl

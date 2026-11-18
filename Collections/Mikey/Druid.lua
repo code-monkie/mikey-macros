@@ -82,8 +82,8 @@ ns.Collection("Mikey").DRUID = {
     ]] },
 
     -- Travel -------------------------------------------------------------------
-    -- Aquatic Form in water; Cat Form on land (from 20).
-    { name = "Forms", spells = { "Aquatic Form", "Cat Form" }, body = [[
+    -- Aquatic Form in water; Cat Form on land (from 20). 0.2.33 (Mikey's ask, 2026-11-17): named Travel, was Forms.
+    { name = "Travel", spells = { "Aquatic Form", "Cat Form" }, body = [[
         #showtooltip
         /use [swimming] !Aquatic Form; !Cat Form
     ]] },
