@@ -5,7 +5,7 @@
 -- bars (Shift+1-7, Ctrl+1-7). Traps are dragged from the spellbook and aspects
 -- come from mikey-halo's ring, so auto mode makes no macros for them (exclude list at the bottom).
 -- No pet rider on attacks (2026-11-02, Mikey): Default's Pet Attack sends the
--- pet and the general Pet Stop calls it back. AP's /petattack is the one
+-- pet and ~Cancel's /petfollow calls it back (Pet Stop until 2026-11-18). AP's /petattack is the one
 -- exception. Macros that differed from auto mode's only by the old rider were
 -- dropped (Serpent, Scorpid, Intimidation).
 

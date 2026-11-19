@@ -8,6 +8,26 @@
 
 local _, ns = ...
 
+-- 0.2.35: Create Soulstone ranks, best first: { spell ID, the stone it makes }. 0.2.36 (Mikey, 2026-11-18: the
+-- macro asked for "Soulstone" when Nectavius knew only the first rank): by spell ID, not name. Forever's spellbook
+-- calls rank 1 plain "Create Soulstone", which is the name Classic gives the middle rank, so names can't tell them
+-- apart. IDs are Classic's (693, 20752, 20755, 20756, 20757).
+local SOULSTONES = {
+    { 20757, "Major Soulstone" },
+    { 20756, "Greater Soulstone" },
+    { 20755, "Soulstone" },
+    { 20752, "Lesser Soulstone" },
+    { 693, "Minor Soulstone" },
+}
+-- the names the spellbook may use, for when the macro is made (any one known) and KnownOnly
+local SOULSTONE_SPELLS = { "Create Soulstone (Minor)", "Create Soulstone (Lesser)", "Create Soulstone",
+    "Create Soulstone (Greater)", "Create Soulstone (Major)" }
+local function KnowsID(id)
+    if IsPlayerSpell then local ok, k = pcall(IsPlayerSpell, id); if ok and k then return true end end
+    if IsSpellKnown then local ok, k = pcall(IsSpellKnown, id); if ok and k then return true end end
+    return false
+end
+
 ns.Collection("Mikey").WARLOCK = {
     -- Damage ----------------------------------------------------------------------
     -- 0.2.21 (Mikey's ask, 2026-11-10): the hunter Shot's targeting. With no target
@@ -86,6 +106,30 @@ ns.Collection("Mikey").WARLOCK = {
         /petautocastoff Sacrifice
         /use [pet:Voidwalker] Sacrifice
     ]] },
+
+    -- Soulstone ---------------------------------------------------------------------
+    -- 0.2.35 (Mikey's ask, 2026-11-18: "use the same button to create and then apply a soulstone"): with a stone in
+    -- your bags, the first line uses it on the friendly mouseover, else your friendly target, else you (house rule
+    -- for helpful macros); its global cooldown keeps the second line from running. With none, the first line does
+    -- nothing and the second makes one (a soul shard). Both lines are your highest Create Soulstone and its own
+    -- stone (each rank makes its own), rewritten as you learn a higher one. Was on the exclude list (mikey-ring's
+    -- Utility ring still has the create spells).
+    { name = "Soulstone", spells = SOULSTONE_SPELLS, body = function(c)
+        for _, r in ipairs(SOULSTONES) do
+            if KnowsID(r[1]) then
+                -- the create line by the spellbook's own name for that rank (kept by KnownOnly: a name you know)
+                local name = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(r[1])
+                if type(name) ~= "string" or not c.knows(name) then name = "Create Soulstone" end
+                return ([[
+                #showtooltip %s
+                /use [@mouseover,help,nodead] [@target,help,nodead] [@player] %s
+                /use %s
+                ]]):format(r[2], r[2], name)   -- 0.2.36: the stone's icon on the button (Mikey's ask)
+            end
+        end
+        -- no rank found by ID: the first one, as a new warlock has
+        return "#showtooltip Minor Soulstone\n/use [@mouseover,help,nodead] [@target,help,nodead] [@player] Minor Soulstone\n/use Create Soulstone"
+    end },
 }
 
 -- Mikey's characters only (on top of Default's list), and final: Default's
@@ -99,11 +143,7 @@ ns.Exclude("WARLOCK", {
     "Create Healthstone",
     "Create Healthstone (Greater)",
     "Create Healthstone (Major)",
-    "Create Soulstone (Minor)",
-    "Create Soulstone (Lesser)",
-    "Create Soulstone",
-    "Create Soulstone (Greater)",
-    "Create Soulstone (Major)",
+    -- Create Soulstone: off the list in 0.2.35 (the Soulstone macro above)
     "Create Firestone (Lesser)",
     "Create Firestone",
     "Create Firestone (Greater)",

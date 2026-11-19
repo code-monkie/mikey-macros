@@ -38,14 +38,13 @@ ns.Collection("Default").WARLOCK = {
         #showtooltip
         /use Create Healthstone (Major); Create Healthstone (Greater); Create Healthstone; Create Healthstone (Lesser); Create Healthstone (Minor)
     ]] },
-    -- Demon in: Assist stance (Mikey's trial, 2026-11-02), attack the mouseover,
-    -- else your target. Made with Summon Imp (level 1); the general Pet Stop
-    -- macro puts it back on passive. The pet bar's Attack icon, as it has no
+    -- Demon in: attack the mouseover,
+    -- else your target. Made with Summon Imp (level 1). The pet bar's Attack icon, as it has no
     -- spell of yours to show.
     -- 0.2.10 (Mikey's ask): with no target, the mouseover becomes it, as the hunter's.
+    -- 0.2.34 (Mikey's ask, 2026-11-18): no more /petassist, as the hunter's: the demon stays on Passive.
     { name = "Pet Attack", learn = "Summon Imp", spells = { "Summon Imp" }, icon = "Ability_GhoulFrenzy", body = [[
         /target [noexists] mouseover
-        /petassist
         /petattack [@mouseover,harm,nodead] []
     ]] },
 }

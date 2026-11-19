@@ -70,17 +70,17 @@ ns.Collection("Default").HUNTER = {
         /use [nopet] Revive Pet
     ]] },
 
-    -- Pet in: Assist stance (Mikey's trial, 2026-11-02), attack the mouseover,
+    -- Pet in: attack the mouseover,
     -- else your target, with its gap closer (Dash, Dive or a boar's Charge).
-    -- Pet spells aren't in your spellbook, so they're not listed; the general
-    -- Pet Stop macro puts it back on passive. #showtooltip can't show pet
+    -- Pet spells aren't in your spellbook, so they're not listed. #showtooltip can't show pet
     -- spells, so it has the pet bar's Attack icon.
     -- 0.2.10 (Mikey's ask, 2026-11-06): with no target, the mouseover becomes it, so you and the pet are on the
     -- same mob ([noexists] checks your target; an existing target is kept).
+    -- 0.2.34 (Mikey's ask, 2026-11-18): no more /petassist (from the 2026-11-02 trial). The pet stays on
+    -- Passive and fights only when this sends it; ~Cancel's /petfollow calls it back.
     { name = "Pet Attack", learn = "Call Pet", spells = { "Call Pet" }, icon = "Ability_GhoulFrenzy", body = [[
         #showtooltip
         /target [noexists] mouseover
-        /petassist
         /petattack [@mouseover,harm,nodead] []
         /use Dash
         /use Dive

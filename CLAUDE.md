@@ -94,7 +94,7 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
 - **~ names (2026-11-03, Mikey):** the general macros the addon handles start
   with `~` (`~Attack`, `~Ranged`); the old `Attack` and `Ranged` names aren't
   recognised any more (no migration, Mikey's call). `PlaceCancel` puts the
-  account's own `~Cancel` macro (never made by the addon) on MultiBar5 button 4
+  `~Cancel` macro (made by the addon since 0.2.34) on MultiBar5 button 4
   (`MULTIACTIONBAR5BUTTON4`, slot 148, bound to X) for a brand-new character of
   any class; a taken button is left alone with a chat message.
   **By key (0.2.20, Mikey's ask, 2026-11-09):** `PlaceKeyMacros` puts account
@@ -237,6 +237,60 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   0.2.17's is rewritten in place at login (`EnsureGeneral`, the entry's 4th value:
   the old body), keeping its bar spots; a hand-edited one is left alone. Not yet
   checked in game.
+- **Warlock Soulstone (0.2.35, Mikey's ask, 2026-11-18):** one button that uses
+  your soulstone if you have one (mouseover, target, else you) and makes one
+  if not. In the Mikey collection, body a function: the highest Create
+  Soulstone you know and its own stone (`SOULSTONES`), so it's rewritten as
+  you learn ranks. The Create Soulstone spells came off the Mikey exclude
+  list.
+  0.2.36 (Mikey, 2026-11-18): Nectavius (rank 1 only) got "Soulstone", not
+  "Minor Soulstone": Forever's spellbook calls rank 1 plain "Create
+  Soulstone" (Classic's name for rank 3). The rank is now found by spell ID
+  (`IsPlayerSpell`; 693, 20752, 20755, 20756, 20757), the create line by that
+  rank's own name. `#showtooltip <stone>` so the button wears the stone's
+  icon (Mikey's ask). Not yet checked in game.
+
+- **~Toggle (0.2.37, Mikey's ask, 2026-11-19):** paladin, warrior and shaman
+  only. `Toggle.lua` remembers the last one-hander (main hand), two-hander
+  and shield you wore (`MikeyMacrosCharDB.toggle`, item names from the links),
+  at login and on every main/off-hand change. Once all three are known it
+  makes a **character** macro `~Toggle` and rewrites it when one changes
+  (out of combat; a change in combat waits for it to end). Body: a shield on
+  puts on the two-hander (`/equip [equipped:Shields]`), otherwise
+  `/equipslot 16` the one-hander and `/equipslot 17` the shield;
+  `#showtooltip` shows the item it would switch to. Not placed on a bar.
+  Managed like the general ~ macros: hand edits don't last. `/mma toggle`
+  prints the three and writes it now. It began as "swap on Righteous Fury
+  cast / cancel" (mikey-paladin), dropped because addons can't equip in
+  combat and picking up a mob mid-fight was the point. Not yet checked in
+  game: in particular that the shield check reads the old state on every
+  line of one press (as Classic swap macros rely on), and the in-combat swap.
+
+- **~ macros fully managed (0.2.34, Mikey's ask, 2026-11-18):** `GUARANTEED`
+  (~Attack, ~Ranged, ~Focus, ~Cancel) is the source of truth. Once per login
+  `EnsureGeneral` makes a missing one and rewrites any whose body differs
+  (and its icon, where the entry has one). A hand edit lasts only until the
+  next login; changes go in Core.lua. Mikey's call: no flexibility for now.
+  Until 0.2.34 an existing one was kept unless it had exactly an old body
+  (`RANGED_OLD`, now gone). Generated and collection macros are unchanged.
+- **~Cancel is managed (0.2.34, Mikey's ask, 2026-11-18):** it was the
+  account's own. New body: `/petfollow` added, `/cancelform [nostealth]`
+  before `/cancelaura Prowl` / `Stealth` (a prowling cat stays a cat), the
+  non-command `/cancelattack` dropped. Icon 136047, as the accounts had it.
+  Mikey checked it in game (2026-11-18): first press drops stealth, second the form.
+
+- **No more Assist (0.2.34, Mikey's ask, 2026-11-18):** the hunter and
+  warlock Pet Attack macros (Default) lose `/petassist`; pets stay on
+  Passive and fight only when Pet Attack or a `/petattack` line sends them,
+  and ~Cancel's `/petfollow` calls them back. Collection macros, so existing
+  ones are rewritten by `Refresh`. Pet Stop is the account's own general
+  macro, not the addon's.
+
+- **~RM retired (0.2.34, Mikey's ask, 2026-11-18):** no longer made at
+  login. mikey-follow's leader button marks the group on a right-click with
+  the same `/tm` lines. A `~RM` already saved on an account isn't deleted;
+  remove it in game. The older ~RM notes below are history.
+
 - **Druid "Forms" is now "Travel" (0.2.33, Mikey's ask, 2026-11-17):** same
   body (Aquatic Form swimming, else Cat Form). A druid that already has
   "Forms" keeps it until it's deleted by hand; "Travel" is made at the next

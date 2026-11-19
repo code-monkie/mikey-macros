@@ -263,6 +263,9 @@ local function CharDB()
     return MikeyMacrosCharDB
 end
 
+-- 0.2.37: for Toggle.lua (~Toggle).
+ns.Print, ns.CharDB, ns.CharacterMacros, ns.CharacterMax = Print, CharDB, CharacterMacros, CharacterMax
+
 local Collections -- prints the installed collections; defined further down
 
 -- The collection name matching `name` (any case), or nil.
@@ -581,16 +584,6 @@ local ATTACK_BODY = "#showtooltip 16\n/startattack"
 -- Account-wide like Attack, so nothing trims it: a clause for a weapon you
 -- can't use is never reached.
 local RANGED_MACRO = "~Ranged"
--- Bodies this addon wrote before, rewritten in place at login (EnsureGeneral): 0.2.17's, then 0.2.22's (never the
--- current body, or it would be "updated" at every login)
-local RANGED_OLD = {
-    "#showtooltip 18\n/target [@mouseover,harm,nodead]\n"
-        .. "/cleartarget [dead][help]\n/targetenemy [noexists]\n"
-        .. "/use [equipped:Thrown] Throw; [equipped:Bows] Shoot Bow; [equipped:Guns] Shoot Gun; [equipped:Crossbows] Shoot Crossbow; [equipped:Wands] !Shoot",
-    "#showtooltip 18\n/target [@mouseover,harm,nodead]\n/targetenemy [noharm][dead]\n"
-        .. "/use [equipped:Thrown] Throw;[equipped:Bows] !Shoot Bow;[equipped:Guns] !Shoot Gun;[equipped:Crossbows] !Shoot Crossbow;[equipped:Wands] !Shoot"
-        .. "\n/startattack [noequipped:Wands]",
-}
 -- 0.2.18 (Mikey's ask, 2026-11-08): melee starts after the throw or shot, so you're swinging when it closes in.
 -- Not with a wand: /startattack would swap the wand's Shoot for melee. To stay under the 255-character limit
 -- (it came to 275), "/cleartarget [dead][help]" + "/targetenemy [noexists]" became one line,
@@ -604,20 +597,21 @@ local RANGED_BODY = "#showtooltip 18\n/target [@mouseover,harm,nodead]\n/targete
 -- Where a brand-new character's Ranged goes on bar 1: "throw" (warriors and
 -- rogues start with Throw) or a button number (wand users, Mikey 2026-11-02).
 local RANGED_CLASSES = { WARRIOR = "throw", ROGUE = "throw", PRIEST = 2, MAGE = 2, WARLOCK = 2 }
--- The raid marker macro (0.2.3, Mikey's ask, Forever launch night 2026-11-05): marks a group of three, you with
--- the blue square (6), party1 with the moon (5), party2 with the green triangle (4). /tm is the game's own marker
--- command, so it isn't blocked the way an addon setting markers is. It toggles: pressing it again takes the
--- marks off. Which follower gets which depends on the window's party order. Never placed on a bar.
-local MARK_MACRO = "~RM"
--- 0.2.5: ",exists" on the party lines, so a group of two marks just the two of you
-local MARK_BODY = "/tm [@player] 6\n/tm [@party1,exists] 5\n/tm [@party2,exists] 4"
-local MARK_ICON = 236188   -- ability_hunter_markedfordeath (Wowhead Forever's icon list, 2026-11-05), Mikey's ask
+-- ~RM, the raid marker macro (0.2.3-0.2.33), is gone in 0.2.34 (Mikey's ask, 2026-11-18): mikey-follow's leader
+-- button marks the group on a right-click with the same /tm lines. A ~RM an account still has is left as it is.
 -- The focus macro (0.2.7, Mikey's ask, 2026-11-05): the unit under the mouse becomes your focus, else your target.
 -- For mikey-follow's Partner mode: a heal bot follows, assists and heals its focus. The focus is lost at every
 -- reload and logout, so this is pressed once a session. /focus is the game's own command.
 local FOCUS_MACRO = "~Focus"
 local FOCUS_BODY = "/focus [@mouseover,exists] []"
 local FOCUS_ICON = 132212  -- ability_hunter_snipershot (Wowhead Forever's icon list, 2026-11-05)
+-- The cancel macro (0.2.34, Mikey's ask, 2026-11-18): it was the account's own until now (PlaceCancel only put it
+-- on bar 5). Off the mount, out of melee, the pet called back, then out of stealth, or out of the form when not
+-- stealthed (so a prowling cat stays a cat: [nostealth] is read before the stealth lines take it off). Prowl is the
+-- druid's stealth buff, Stealth the rogue's. The old "/cancelattack" (not a command) is gone.
+local CANCEL_BODY = "/dismount\n/stopattack\n/petfollow\n/cancelform [nostealth]\n/cancelaura Prowl\n/cancelaura Stealth\n"
+    .. "/cancelaura Aspect of the Cheetah\n/cancelaura Aspect of the Pack\n/use !Devotion Aura"
+local CANCEL_ICON = 136047   -- the icon the accounts' ~Cancel already wears
 
 local function SwapIntoBars(made)
     local placed = {}
@@ -735,8 +729,8 @@ local function PlaceAttack()
 end
 
 -- The ~Cancel macro onto MultiBar5's button 4 (MULTIACTIONBAR5BUTTON4, slot 148)
--- for a brand-new character (Mikey, 2026-11-03). It's the account's own macro:
--- never made here, so nothing happens without it. A taken button is left alone
+-- for a brand-new character (Mikey, 2026-11-03). Made at login when missing
+-- since 0.2.34 (EnsureGeneral; the account's own before). A taken button is left alone
 -- (said in chat). Out of combat, empty cursor only.
 local CANCEL_MACRO = "~Cancel"
 local function PlaceCancel()
@@ -808,14 +802,16 @@ local function PlaceKeyMacros()
     end
 end
 
--- The general (account) macros made at login when missing, whatever the class
--- (2026-11-02, Mikey's call): ~Attack and ~Ranged, and ~RM (0.2.3). An existing one
--- is used as it is, whatever its body, so a deleted one comes back on the next login.
--- An entry's third value is its icon (0.2.3, ~RM's); without one it's the question mark, which #showtooltip
--- replaces. A macro that has an icon here but still wears the question mark (made before it had one) gets the
--- icon; its body is left alone.
-local GUARANTEED = { { ATTACK_MACRO, ATTACK_BODY }, { RANGED_MACRO, RANGED_BODY, nil, RANGED_OLD }, { MARK_MACRO, MARK_BODY, MARK_ICON },
-    { FOCUS_MACRO, FOCUS_BODY, FOCUS_ICON } }   -- ~Focus: 0.2.7
+-- The general (account) macros, whatever the class (2026-11-02, Mikey's call): ~Attack, ~Ranged, ~Focus (0.2.7),
+-- ~Cancel (0.2.34); ~RM 0.2.3-0.2.33. Made at login when missing, so a deleted one comes back.
+-- 0.2.34 (Mikey's ask, 2026-11-18): fully managed. Once per login each is rewritten to the body here if it differs,
+-- and to its icon here if it has one; a hand edit doesn't last (change it here instead). Until 0.2.34 an existing
+-- one was left alone unless it had exactly a body this addon wrote before. Rewritten in place, so bar spots stay.
+-- An entry's third value is its icon; without one the macro keeps its own (the question mark when made here, which
+-- #showtooltip replaces).
+local GUARANTEED = { { ATTACK_MACRO, ATTACK_BODY }, { RANGED_MACRO, RANGED_BODY },
+    { FOCUS_MACRO, FOCUS_BODY, FOCUS_ICON },
+    { "~Cancel", CANCEL_BODY, CANCEL_ICON } }
 local function EnsureGeneral()
     for _, m in ipairs(GUARANTEED) do
         local name, body, icon = m[1], m[2], m[3]
@@ -827,20 +823,11 @@ local function EnsureGeneral()
             else
                 Print("|cffff6060no free general slots|r for the " .. name .. " macro")
             end
-        elseif icon then
-            local _, current, oldBody = GetMacroInfo(index)
-            if current == ICON then EditMacro(index, name, icon, oldBody) end
-        elseif m[4] then
-            -- 0.2.18: a body this addon wrote earlier (m[4], not edited by hand) is brought up to date in place, so
-            -- it keeps its bar spots; one edited by hand is left alone
-            local _, current, oldBody = GetMacroInfo(index)
-            local was = oldBody and oldBody:gsub("%s+$", "")
-            local known = false
-            for _, old in ipairs(type(m[4]) == "table" and m[4] or { m[4] }) do   -- 0.2.22: a list of old bodies
-                if was == old then known = true end
-            end
-            if known then
-                EditMacro(index, name, current, body)
+        else
+            local _, current, have = GetMacroInfo(index)
+            have = have and have:gsub("\r", ""):gsub("%s+$", "")
+            if have ~= body or (icon and current ~= icon) then
+                EditMacro(index, name, icon or current, body)
                 Print("updated general macro: " .. name)
             end
         end
@@ -1436,6 +1423,8 @@ SlashCmdList.MIKEYMACROS = function(msg)
         end
     elseif cmd == "bar" then
         PlaceBar()
+    elseif cmd == "toggle" then
+        if ns.ToggleCommand then ns.ToggleCommand() end
     else
         Print("/mma list - your class macros and their state")
         Print("/mma sync - create the macros for the spells you know (normally automatic as you learn them)")
@@ -1446,6 +1435,7 @@ SlashCmdList.MIKEYMACROS = function(msg)
         Print("/mma clear -a - delete all of this character's macros, whatever made them")
         Print("/mma resync - create anything missing and rewrite the rest (macros stay on your bars)")
         Print("/mma bar - put ~Attack, ~Ranged and ~Cancel on your bars, as a new character gets them")
+        Print("/mma toggle - paladin, warrior, shaman: the weapons ~Toggle swaps between, and write it now")
         Print("/mma collections - whose macro sets are installed")
         Print("/mma use <name> - follow someone's collection on this character (/mma use none to stop)")
         Print("/mma auto on or off - make a macro for each new class spell you learn (this character)")
