@@ -249,6 +249,9 @@ more. Part of Mikey's KISS addon set for WoW Forever (live launch 4 Nov 2026).
   (`IsPlayerSpell`; 693, 20752, 20755, 20756, 20757), the create line by that
   rank's own name. `#showtooltip <stone>` so the button wears the stone's
   icon (Mikey's ask). Not yet checked in game.
+  0.2.38 (Mikey's ask, 2026-11-19): `#showtooltip <create spell>` instead,
+  the same rank's Create Soulstone as the last line, so the button shows the
+  create spell's tooltip and icon. Not yet checked in game.
 
 - **~Toggle (0.2.37, Mikey's ask, 2026-11-19):** paladin, warrior and shaman
   only. `Toggle.lua` remembers the last one-hander (main hand), two-hander
@@ -520,3 +523,22 @@ macros on the site, 358 of them non-PvP.
   with other collections, which is expected for ClassicWowForever.
 - **Docs:** public on GitHub Pages (`docs/`, code-monkie.github.io/mikey-macros);
   the repo itself is private.
+
+- **Automatic runs skip when nothing changed (0.2.39, Mikey's ask,
+  2026-11-20, from the performance review):** `Schedule` takes a fingerprint
+  first (spell IDs as a count and two sums, the shapeshift forms' spell IDs,
+  the main-hand item ID, the followed collection and auto mode) and does
+  nothing when it matches the last run's. Full runs whatever the fingerprint:
+  the first run of each login or `/reload` that finds a spellbook (an empty
+  book keeps them full), after `PLAYER_LEVEL_UP` and `LEARNED_SPELL_IN_TAB`,
+  and `/mma update`, `sync` and `resync` as before (they don't go through
+  `Schedule`). A form event whose forms didn't change (stealth or a form going
+  on or off) isn't scheduled at all. During a run each spellbook read
+  (`KnownSpells`, `ClassSpells`) is made once and shared (`runCache`).
+  Mikey's rule: a change the fingerprint misses lasts until the next reload,
+  login, level-up, new spell or `/mma update` at most. The trade-off he
+  accepted: a hand edit to a managed macro lasts until the next full run
+  instead of seconds. `/mma check` prints the last run, whether the next
+  would run, and the fingerprint. If a macro ever needs something new (a
+  talent, another equipment slot), add it to `Fingerprint`. Not yet checked
+  in game.

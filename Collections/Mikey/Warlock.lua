@@ -124,11 +124,12 @@ ns.Collection("Mikey").WARLOCK = {
                 #showtooltip %s
                 /use [@mouseover,help,nodead] [@target,help,nodead] [@player] %s
                 /use %s
-                ]]):format(r[2], r[2], name)   -- 0.2.36: the stone's icon on the button (Mikey's ask)
+                ]]):format(name, r[2], name)   -- 0.2.38 (Mikey's ask, 2026-11-19): the create spell's tooltip
+                                               -- and icon on the button (0.2.36 showed the stone's)
             end
         end
         -- no rank found by ID: the first one, as a new warlock has
-        return "#showtooltip Minor Soulstone\n/use [@mouseover,help,nodead] [@target,help,nodead] [@player] Minor Soulstone\n/use Create Soulstone"
+        return "#showtooltip Create Soulstone\n/use [@mouseover,help,nodead] [@target,help,nodead] [@player] Minor Soulstone\n/use Create Soulstone"
     end },
 }
 

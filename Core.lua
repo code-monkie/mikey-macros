@@ -81,8 +81,13 @@ end
 -- Names (lowercased) of every spell in the player's spellbook that is actually
 -- learned: no future spells, no off-spec spells. Both the name shown and the
 -- real one count.
+-- 0.2.39 (performance, Mikey's ask, 2026-11-20): during one automatic run (Schedule) each spellbook read is made
+-- once and shared (Refresh and AutoCreate both asked for it). Outside a run every call reads afresh.
+local runCache                                      -- a table while a run is going, else nil
 local function KnownSpells()
+    if runCache and runCache.known then return runCache.known end
     local known = {}
+    if runCache then runCache.known = known end
     if C_SpellBook and C_SpellBook.GetNumSpellBookSkillLines then -- retail
         local bank = Enum.SpellBookSpellBank.Player
         for line = 1, C_SpellBook.GetNumSpellBookSkillLines() do
@@ -457,7 +462,9 @@ end
 -- passives, no off-spec or future spells. Real names (RealName), so Call Pet
 -- gets the Pet macros, not a "Call <pet>" macro.
 local function ClassSpells()
+    if runCache and runCache.class then return runCache.class end
     local spells = {}
+    if runCache then runCache.class = spells end
     if C_SpellBook and C_SpellBook.GetNumSpellBookSkillLines then -- retail
         local bank = Enum.SpellBookSpellBank.Player
         for line = 2, C_SpellBook.GetNumSpellBookSkillLines() do -- line 1 is General
@@ -1178,23 +1185,104 @@ end
 
 -- Keep macros current as spells, forms (form numbers) and the main-hand weapon change.
 -- Changes wait until combat ends.
+-- 0.2.39 (performance, Mikey's ask, 2026-11-20): a run first takes a fingerprint of what the macros depend on (your
+-- spell IDs, your shapeshift forms, the main-hand item, the collection you follow and auto mode) and does nothing
+-- when it matches the last run's. SPELLS_CHANGED comes often on the Retail API, and form and stealth shifts used
+-- to redo the whole rebuild each time. Full runs, whatever the fingerprint:
+--   * the first run of each login or /reload that finds your spellbook (an empty one at login keeps them full);
+--   * after a level-up or a spell learned (PLAYER_LEVEL_UP, LEARNED_SPELL_IN_TAB);
+--   * /mma update, sync and resync, which don't go through here.
+-- So a change the fingerprint misses lasts until the next of those at most. A form event whose forms didn't change
+-- (going into or out of stealth or a form) isn't even scheduled. /mma check shows the fingerprint and the last run.
 local pending = false
 local ensured = false -- EnsureGeneral runs once per login
+local forceFull = true                               -- until a run has found your spellbook this session
+local lastPrint, lastForms, lastRun = nil, nil, "none yet"
 local events = CreateFrame("Frame")
+
+local function FormPrint()
+    local parts = {}
+    for i = 1, (GetNumShapeshiftForms and GetNumShapeshiftForms() or 0) do
+        local _, _, _, spellID = GetShapeshiftFormInfo(i)
+        parts[#parts + 1] = tostring(spellID)
+    end
+    return table.concat(parts, ",")
+end
+
+-- spell IDs as a count and two sums (a new rank changes its ID, so the sums), or 0 when the book isn't loaded
+local function SpellPrint()
+    local count, sum, weighted = 0, 0, 0
+    local function add(id)
+        if type(id) ~= "number" then return end
+        count = count + 1
+        sum = sum + id
+        weighted = (weighted + id * count) % 2147483647
+    end
+    if C_SpellBook and C_SpellBook.GetNumSpellBookSkillLines then -- retail
+        local bank = Enum.SpellBookSpellBank.Player
+        for line = 1, C_SpellBook.GetNumSpellBookSkillLines() do
+            local info = C_SpellBook.GetSpellBookSkillLineInfo(line)
+            if info then
+                for i = info.itemIndexOffset + 1, info.itemIndexOffset + info.numSpellBookItems do
+                    if C_SpellBook.GetSpellBookItemType then
+                        local _, id = C_SpellBook.GetSpellBookItemType(i, bank)
+                        add(id)
+                    else
+                        local item = C_SpellBook.GetSpellBookItemInfo(i, bank)
+                        add(item and item.spellID)
+                    end
+                end
+            end
+        end
+    elseif GetNumSpellTabs then -- classic-based clients
+        for tab = 1, GetNumSpellTabs() do
+            local _, _, offset, n = GetSpellTabInfo(tab)
+            for i = offset + 1, offset + n do
+                local _, id = GetSpellBookItemInfo(i, BOOKTYPE_SPELL)
+                add(id)
+            end
+        end
+    end
+    return count, ("%d:%d:%d"):format(count, sum, weighted)
+end
+
+local function Fingerprint()
+    local count, spells = SpellPrint()
+    local db = CharDB()
+    local mainHand = GetInventoryItemID("player", INVSLOT_MAINHAND or 16) or 0
+    return count, table.concat({ spells, FormPrint(), tostring(mainHand), tostring(db.collection),
+        tostring(db.auto ~= false) }, "|")
+end
+
 local function Schedule()
     if pending then return end
     pending = true
     C_Timer.After(0.5, function()
         if InCombatLockdown() then return end -- PLAYER_REGEN_ENABLED retries
         pending = false
-        if not ensured then
-            ensured = true
-            EnsureGeneral()
+        local count, fp = Fingerprint()
+        lastForms = FormPrint()
+        if not forceFull and fp == lastPrint then
+            lastRun = ("skipped at %.0f (nothing changed)"):format(GetTime())
+            return
         end
-        Adopt()
-        CheckConflicts()
-        Refresh()
-        AutoCreate()
+        lastRun = ("%s at %.0f"):format(forceFull and "full run" or "run (fingerprint changed)", GetTime())
+        lastPrint = fp
+        if count > 0 then forceFull = false end      -- an empty book at login: the next run is full too
+        runCache = {}
+        -- the shared reads end with the run, even if a step errors (then the error is reported as usual)
+        local ok, err = pcall(function()
+            if not ensured then
+                ensured = true
+                EnsureGeneral()
+            end
+            Adopt()
+            CheckConflicts()
+            Refresh()
+            AutoCreate()
+        end)
+        runCache = nil
+        if not ok then lastPrint = nil; geterrorhandler()(err) end   -- a failed run: the next one runs again
     end)
 end
 events:RegisterEvent("PLAYER_LOGIN")
@@ -1202,14 +1290,32 @@ events:RegisterEvent("SPELLS_CHANGED")
 events:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 events:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
 events:RegisterEvent("PLAYER_REGEN_ENABLED")
+pcall(events.RegisterEvent, events, "PLAYER_LEVEL_UP")        -- 0.2.39: full runs
+pcall(events.RegisterEvent, events, "LEARNED_SPELL_IN_TAB")
 events:SetScript("OnEvent", function(_, event, slot)
     if event == "PLAYER_EQUIPMENT_CHANGED" and slot ~= (INVSLOT_MAINHAND or 16) then return end
     if event == "PLAYER_REGEN_ENABLED" then
         if not pending then return end
         pending = false
     end
+    if event == "PLAYER_LOGIN" or event == "PLAYER_LEVEL_UP" or event == "LEARNED_SPELL_IN_TAB" then
+        forceFull = true
+    end
+    -- 0.2.39: stealth or a form going on or off fires this too; only a change in which forms you have matters
+    if event == "UPDATE_SHAPESHIFT_FORMS" and not pending and not forceFull and lastForms ~= nil
+        and FormPrint() == lastForms then
+        return
+    end
     Schedule()
 end)
+
+-- /mma check (0.2.39): the fingerprint and what the last automatic run did
+local function Check()
+    local count, fp = Fingerprint()
+    Print(("last run: %s. Next run: %s."):format(lastRun, forceFull and "full"
+        or (fp == lastPrint and "would skip (nothing changed)" or "would run (fingerprint changed)")))
+    Print(("fingerprint: %d spells | %s"):format(count, fp))
+end
 
 -- Delete this character's macros whose names appear in any collection's list
 -- for its class (Mikey's, Ulako's, ...). Anything else (e.g. a macro called
@@ -1425,12 +1531,15 @@ SlashCmdList.MIKEYMACROS = function(msg)
         PlaceBar()
     elseif cmd == "toggle" then
         if ns.ToggleCommand then ns.ToggleCommand() end
+    elseif cmd == "check" then
+        Check()   -- 0.2.39
     else
         Print("/mma list - your class macros and their state")
         Print("/mma sync - create the macros for the spells you know (normally automatic as you learn them)")
         Print("/mma sync all - also create collection macros for spells you haven't learned yet")
         Print("/mma sync -n <name> - just that macro: create it, or rewrite it if you have it")
         Print("/mma update - force a refresh now (normally automatic)")
+        Print("/mma check - what the last automatic update did, and whether the next would run")
         Print("/mma clear - delete this character's macros that come from any collection (others are kept)")
         Print("/mma clear -a - delete all of this character's macros, whatever made them")
         Print("/mma resync - create anything missing and rewrite the rest (macros stay on your bars)")
