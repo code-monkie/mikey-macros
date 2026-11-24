@@ -23,6 +23,13 @@ ns.Collection("Mikey").SHAMAN = {
         /use [@mouseover,harm,nodead] [] Earth Shock
     ]] },
 
+    -- Rank 1 (0.2.40, Mikey's ask, 2026-11-22).
+    { name = "ES-R1", spells = { "Earth Shock" }, body = [[
+        #showtooltip
+        /startattack
+        /use [@mouseover,harm,nodead] [] Earth Shock(Rank 1)
+    ]] },
+
     { name = "Flame Shock", spells = { "Flame Shock" }, body = [[
         #showtooltip
         /startattack

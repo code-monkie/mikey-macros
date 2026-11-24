@@ -542,3 +542,8 @@ macros on the site, 358 of them non-PvP.
   would run, and the fingerprint. If a macro ever needs something new (a
   talent, another equipment slot), add it to `Fingerprint`. Not yet checked
   in game.
+
+- **ES-R1 (0.2.40, Mikey's ask, 2026-11-22):** the Mikey shaman collection
+  has `ES-R1`, rank 1 Earth Shock on the mouseover, else the target, as the
+  druid's `MF1` does Moonfire. It comes once you know Earth Shock. Not yet
+  checked in game.
