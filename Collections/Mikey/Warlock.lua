@@ -45,6 +45,15 @@ ns.Collection("Mikey").WARLOCK = {
         /petattack [pet:Imp]
     ]] },
 
+    -- 0.2.41 (Mikey's ask, 2026-11-23): auto mode's Searing Pain plus Pet Attack, so any demon goes in on the
+    -- same mob (the mouseover, else your target).
+    { name = "Searing Pain", spells = { "Searing Pain" }, body = [[
+        #showtooltip
+        /startattack
+        /use [@mouseover,harm,nodead] [] Searing Pain
+        /petattack [@mouseover,harm,nodead] []
+    ]] },
+
     -- Immolate and Corruption differed from auto mode's macros only by a pet
     -- rider; dropped 2026-11-02 (Default's Pet Attack sends the demon).
 

@@ -547,3 +547,11 @@ macros on the site, 358 of them non-PvP.
   has `ES-R1`, rank 1 Earth Shock on the mouseover, else the target, as the
   druid's `MF1` does Moonfire. It comes once you know Earth Shock. Not yet
   checked in game.
+
+- **Searing Pain sends the pet (0.2.41, Mikey's ask, 2026-11-23: "should pet
+  attack with any pet"):** the Mikey warlock collection has its own
+  `Searing Pain`: auto mode's body (`/startattack`, the spell on the
+  mouseover, else the target) plus `/petattack [@mouseover,harm,nodead] []`,
+  so any demon goes in on the same mob (SB still sends only the Imp). Same
+  name as the generated macro, so it's rewritten at the next refresh and
+  keeps its bar spots. Not yet checked in game.
