@@ -574,3 +574,15 @@ macros on the site, 358 of them non-PvP.
   different levels would rewrite a spilled collection macro back and forth (the
   last refresh wins). Existing character macros don't move. `~Toggle`
   (Toggle.lua) still needs a character slot. Not yet checked in game.
+
+- **Ghost Wolf without `!` (0.2.43, Mikey, 2026-11-25):** with 2/2 Improved
+  Ghost Wolf the macro stopped working until Mikey took the `!` off. In game,
+  `C_Spell.GetOverrideSpell(2645)` gave 1238640: Forever swaps a talented spell
+  for another, plain `/use Ghost Wolf` follows the swap, and `/use !Ghost Wolf`
+  stays on the old spell and does nothing. Default shaman's Ghost Wolf is now
+  `/use [nomounted,noform] Ghost Wolf` (a shaman's only form, so a second press
+  still doesn't turn you back). Rewritten at the next refresh (body differs),
+  over Mikey's hand edit. Any other `!` macro (auto mode puts it on forms,
+  stances, stealth, aspects) can break the same way once a talent swaps its
+  spell; check with `GetOverrideSpell`. Ulako's `U_Wolf` left as it is. Not
+  yet checked in game.

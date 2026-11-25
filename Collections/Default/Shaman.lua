@@ -6,10 +6,13 @@
 local _, ns = ...
 
 ns.Collection("Default").SHAMAN = {
-    -- Not while mounted.
+    -- Not while mounted. 0.2.43 (Mikey, 2026-11-25): [noform] instead of "!": with 2/2 Improved Ghost Wolf,
+    -- Forever swaps Ghost Wolf (2645) for another spell (C_Spell.GetOverrideSpell(2645) = 1238640, in game), and
+    -- "/use !Ghost Wolf" stays on the old one and does nothing; plain "/use Ghost Wolf" follows the swap. Ghost Wolf
+    -- is a shaman's only form, so [noform] does what "!" did: a second press doesn't turn you back.
     { name = "Ghost Wolf", spells = { "Ghost Wolf" }, body = [[
         #showtooltip
-        /use [nomounted] !Ghost Wolf
+        /use [nomounted,noform] Ghost Wolf
     ]] },
     -- Dead friend under the mouse, else your dead target, else the targeting hand. 0.2.27: @target named, so
     -- the friendly NPC you face (Forever's soft target) is skipped.
