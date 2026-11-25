@@ -119,16 +119,71 @@ local function KnownSpells()
     return known
 end
 
--- name -> index of this character's macros, plus how many there are.
+-- 0.2.42 (Mikey's ask, 2026-11-24: his druid hit the character macro cap, "Instead of failing, I'd like future
+-- macros to be generated into the General Tab with the Class prefix and then a shortened name"): once the
+-- character tab is full, a new macro goes on the General (account) tab as "<class tag> <short name>", 16 characters
+-- at most: "DR Rejuvenation", "DR MotW" (Mark of the Wild: too long, so its initials, as AutoName does). The addon
+-- keeps it as its own: Refresh trims it to the spells you know, /mma sync and sync -n find it, /mma clear deletes
+-- it. General macros are the account's, so every character of that class on the account sees (and keeps
+-- rewriting) the same one; with two at different levels, the last refresh wins.
+local CLASS_TAG = { DRUID = "DR", HUNTER = "HU", MAGE = "MA", PALADIN = "PA", PRIEST = "PR", ROGUE = "RO",
+    SHAMAN = "SH", WARLOCK = "WL", WARRIOR = "WR", DEATHKNIGHT = "DK", MONK = "MO", DEMONHUNTER = "DH",
+    EVOKER = "EV" }
+local function GeneralTag()
+    local _, class = UnitClass("player")
+    return (CLASS_TAG[class] or (class or "??"):sub(1, 2)) .. " "
+end
+local function GeneralName(name)
+    local tag = GeneralTag()
+    local room = 16 - #tag
+    if #name > room then
+        local initials = ""
+        for word in name:gsub("%s*%b()%s*$", ""):gmatch("[^%s%-]+") do initials = initials .. word:sub(1, 1) end
+        name = #initials >= 2 and initials or name
+    end
+    return tag .. name:sub(1, room)
+end
+
+-- name -> index of this character's macros, plus how many there are (the character tab only). Since 0.2.42 the
+-- table also holds this class's General-tab macros ("DR ..."), by their own names; look a macro up with Lookup.
 local function CharacterMacros()
     local byName = {}
-    local _, numChar = GetNumMacros()
+    local numAccount, numChar = GetNumMacros()
     local first = AccountMax() + 1
     for index = first, first + numChar - 1 do
         local name = GetMacroInfo(index)
         if name then byName[name] = index end
     end
+    local tag = GeneralTag()
+    for index = 1, numAccount or 0 do
+        local name = GetMacroInfo(index)
+        if name and name:sub(1, #tag) == tag and not byName[name] then byName[name] = index end
+    end
     return byName, numChar
+end
+
+-- 0.2.42: the index of the macro the addon keeps under `name`: the character macro, else its General-tab one
+local function Lookup(have, name) return have[name] or have[GeneralName(name)] end
+
+-- 0.2.42: make a macro: on the character tab while it has room (count: how many it holds), else on the General
+-- tab as GeneralName(name). Returns the name it was made under and whether it's a character macro; nil if both
+-- tabs are full.
+local function Make(name, icon, body, count)
+    if count < CharacterMax() then
+        CreateMacro(name, icon, body, true)
+        return name, true
+    end
+    if (GetNumMacros()) < AccountMax() then
+        local general = GeneralName(name)
+        CreateMacro(general, icon, body, false)
+        return general, false
+    end
+end
+
+-- 0.2.42: "character 30 of 30, general 120 of 120", for the messages when both tabs are full
+local function SlotsUsed()
+    local numAccount, numChar = GetNumMacros()
+    return ("character %d of %d, general %d of %d"):format(numChar or 0, CharacterMax(), numAccount or 0, AccountMax())
 end
 
 -- The spells that create a macro when learned: def.learn (one name or a list)
@@ -370,7 +425,7 @@ end
 -- was blocked and blamed on mikey-macros (ADDON_ACTION_BLOCKED, BugSack on wow1, 2026-11-05). Now it only says
 -- so in chat (Mikey's call); a window you open yourself is untouched. Don't open Blizzard's windows from here.
 local function ShowCharacterMacros()
-    Print("open /macro, Character tab, to put the new macros on your bars.")
+    Print("open /macro, Character tab (General for the " .. GeneralTag() .. "ones), to put the new macros on your bars.")
 end
 
 -- Rewrite existing macros to match the data file and the spells you know
@@ -410,12 +465,12 @@ local function Refresh(force)
     local have = CharacterMacros()
     local updated = {}
     local skip = {}
-    for _, def in ipairs(defs) do skip[def.name] = true end
+    for _, def in ipairs(defs) do skip[def.name], skip[GeneralName(def.name)] = true, true end
     UpgradeGenerated(have, skip, updated)
     if #defs == 0 then return updated end
     local ctx = Context(KnownSpells())
     for _, def in ipairs(defs) do
-        local index = have[def.name]
+        local index = Lookup(have, def.name)         -- 0.2.42: or its General-tab copy
         if index then
             local body = Clean(def, ctx)
             if #body > MAX_BODY then
@@ -426,11 +481,11 @@ local function Refresh(force)
                         :format(def.name, #body))
                 end
             else
-                local _, icon, current = GetMacroInfo(index)
+                local name, icon, current = GetMacroInfo(index)
                 -- a macro still on the question mark gets its entry's icon
                 if force or current ~= body or (def.icon and icon == ICON) then
-                    EditMacro(index, def.name, IconFor(def), body)
-                    updated[#updated + 1] = def.name
+                    EditMacro(index, name, IconFor(def), body)   -- 0.2.42: its own name (a General one keeps its tag)
+                    updated[#updated + 1] = name
                 end
             end
         end
@@ -917,40 +972,42 @@ local function AutoCreate()
         local list = defs[spell:lower()]
         if list then
             for _, def in ipairs(list) do
-                if have[def.name] then
+                if Lookup(have, def.name) then
                     -- already made (for another of its spells); Refresh keeps it current
-                elseif count >= CharacterMax() then
-                    full[#full + 1] = spell
                 else
                     ctx = ctx or Context(KnownSpells())
                     local body = Clean(def, ctx)
-                    CreateMacro(def.name, IconFor(def), body, true)
-                    have[def.name] = true
-                    count = count + 1
-                    created[#created + 1] = def.name
-                    -- swap onto the spell's buttons only if the macro casts it
-                    -- (not a pet-spell macro gated on Summon Voidwalker)
-                    local swap = body:lower():find(spell:lower(), 1, true) ~= nil
-                    made[#made + 1] = { name = def.name, spell = spell, swap = swap }
+                    local as, inChar = Make(def.name, IconFor(def), body, count)   -- 0.2.42: General when full
+                    if not as then
+                        full[#full + 1] = spell
+                    else
+                        have[as] = true
+                        if inChar then count = count + 1 end
+                        created[#created + 1] = as
+                        -- swap onto the spell's buttons only if the macro casts it
+                        -- (not a pet-spell macro gated on Summon Voidwalker)
+                        local swap = body:lower():find(spell:lower(), 1, true) ~= nil
+                        made[#made + 1] = { name = as, spell = spell, swap = swap }
+                    end
                 end
             end
         elseif covered[spell:lower()] then
             -- on another collection macro (a modifier or sequence step): no macro of its own
         else
             local name = AutoName(spell)
-            if have[name] then
+            if Lookup(have, name) then
                 local n = 2 -- name taken (e.g. two spells with the same initials)
-                while have[name:sub(1, 15) .. n] do n = n + 1 end
+                while Lookup(have, name:sub(1, 15) .. n) do n = n + 1 end
                 name = name:sub(1, 15) .. n
             end
-            if count >= CharacterMax() then
+            local as, inChar = Make(name, ICON, AutoBody(spell), count)   -- 0.2.42: General when full
+            if not as then
                 full[#full + 1] = spell
             else
-                CreateMacro(name, ICON, AutoBody(spell), true)
-                have[name] = true
-                count = count + 1
-                made[#made + 1] = { name = name, spell = spell }
-                created[#created + 1] = (name == spell) and spell or (name .. " (" .. spell .. ")")
+                have[as] = true
+                if inChar then count = count + 1 end
+                made[#made + 1] = { name = as, spell = spell }
+                created[#created + 1] = (as == spell) and spell or (as .. " (" .. spell .. ")")
             end
         end
     end
@@ -977,7 +1034,7 @@ local function AutoCreate()
     if #created > 0 then Print("new spell macro: " .. table.concat(created, ", ")) end
     if #skipped > 0 then Print("no macro (excluded): " .. table.concat(skipped, ", ")) end
     if #full > 0 then
-        Print("|cffff6060no free character slots|r (" .. count .. " of " .. CharacterMax() .. " used) for new spell macros: " .. table.concat(full, ", "))
+        Print("|cffff6060no free macro slots|r (" .. SlotsUsed() .. ") for new spell macros: " .. table.concat(full, ", "))
     end
 end
 
@@ -994,19 +1051,21 @@ local function Sync(all)
     local function add(name, body, label, icon)
         if #body > MAX_BODY then
             tooLong[#tooLong + 1] = name
-        elseif count >= CharacterMax() then
+            return
+        end
+        local as, inChar = Make(name, icon or ICON, body, count)   -- 0.2.42: General when full
+        if not as then
             full[#full + 1] = name
         else
-            CreateMacro(name, icon or ICON, body, true)
-            have[name] = true
-            count = count + 1
-            created[#created + 1] = label or name
+            have[as] = true
+            if inChar then count = count + 1 end
+            created[#created + 1] = (as == name) and (label or name) or (as .. " (" .. (label or name) .. ")")
         end
     end
     for _, def in ipairs(Definitions()) do
         if all or IsLearned(def, known) then
             for _, spell in ipairs(def.spells) do covered[spell:lower()] = true end
-            if not have[def.name] then add(def.name, Clean(def, ctx), nil, def.icon) end
+            if not Lookup(have, def.name) then add(def.name, Clean(def, ctx), nil, def.icon) end
         end
     end
     if CharDB().auto ~= false then
@@ -1019,7 +1078,7 @@ local function Sync(all)
         table.sort(spells)
         for _, spell in ipairs(spells) do
             local name = AutoName(spell)
-            if not have[name] then
+            if not Lookup(have, name) then
                 add(name, AutoBody(spell), (name == spell) and spell or (name .. " (" .. spell .. ")"))
             end
         end
@@ -1030,7 +1089,7 @@ local function Sync(all)
         Print("nothing new to create.")
     end
     if #full > 0 then
-        Print("|cffff6060no free character slots|r (" .. count .. " of " .. CharacterMax() .. " used) for: " .. table.concat(full, ", "))
+        Print("|cffff6060no free macro slots|r (" .. SlotsUsed() .. ") for: " .. table.concat(full, ", "))
     end
     if #tooLong > 0 then
         Print("|cffff6060over 255 characters, skipped|r: " .. table.concat(tooLong, ", "))
@@ -1087,19 +1146,19 @@ local function SyncOne(wanted)
         Print("|cffff6060over 255 characters, skipped|r: " .. name)
         return
     end
-    local index = have[name]
+    local index = Lookup(have, name)                 -- 0.2.42: or its General-tab copy
     if index then
-        local _, current = GetMacroInfo(index)
-        EditMacro(index, name, icon or current, body)
-        Print("rewrote " .. name .. ".")
+        local own, current = GetMacroInfo(index)
+        EditMacro(index, own, icon or current, body)
+        Print("rewrote " .. own .. ".")
         return
     end
-    if count >= CharacterMax() then
-        Print("|cffff6060no free character slots|r (" .. count .. " of " .. CharacterMax() .. " used) for: " .. name)
+    local as = Make(name, icon or ICON, body, count) -- 0.2.42: General when full
+    if not as then
+        Print("|cffff6060no free macro slots|r (" .. SlotsUsed() .. ") for: " .. name)
         return
     end
-    CreateMacro(name, icon or ICON, body, true)
-    Print("created " .. name .. ".")
+    Print("created " .. as .. ".")
     return true
 end
 
@@ -1350,7 +1409,9 @@ local function Clear(all)
     local _, class = UnitClass("player")
     local names = {}
     for _, c in pairs(ns.collections) do
-        for _, def in ipairs(c[class] or {}) do names[def.name] = true end
+        for _, def in ipairs(c[class] or {}) do
+            names[def.name], names[GeneralName(def.name)] = true, true   -- 0.2.42: its General-tab copy too
+        end
     end
     local have = CharacterMacros()
     local indexes = {}
@@ -1359,7 +1420,7 @@ local function Clear(all)
     end
     table.sort(indexes, function(x, y) return x > y end) -- highest first, so indexes stay valid
     for _, index in ipairs(indexes) do DeleteMacro(index) end
-    Print("deleted " .. #indexes .. " collection macros; other character macros were kept.")
+    Print("deleted " .. #indexes .. " collection macros (General-tab " .. GeneralTag() .. "ones too); other macros were kept.")
 end
 
 -- Show every macro for this class and its state.
@@ -1371,7 +1432,7 @@ local function List()
     local have, count = CharacterMacros()
     for _, def in ipairs(list) do
         local state
-        if have[def.name] then
+        if Lookup(have, def.name) then
             state = "|cff60ff60have|r"
         elseif IsLearned(def, known) then
             state = "|cffffd040ready|r"
@@ -1380,7 +1441,7 @@ local function List()
         end
         Print(state, def.name, "(" .. table.concat(def.spells, ", ") .. ")")
     end
-    Print(count .. " of " .. CharacterMax() .. " character slots used.")
+    Print(SlotsUsed() .. " slots used.")                -- 0.2.42: the General tab too
 end
 
 -- Every installed collection and the classes it covers.

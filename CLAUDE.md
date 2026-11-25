@@ -555,3 +555,22 @@ macros on the site, 358 of them non-PvP.
   so any demon goes in on the same mob (SB still sends only the Imp). Same
   name as the generated macro, so it's rewritten at the next refresh and
   keeps its bar spots. Not yet checked in game.
+
+- **Full character tab spills to General (0.2.42, Mikey's ask, 2026-11-24: his
+  druid hit the cap; "Instead of failing, I'd like future macros to be generated
+  into the General Tab with the Class prefix and then a shortened name"):** when
+  the character tab is full, `Make` puts a new macro (auto mode, `/mma sync`,
+  `sync -n`) on the General tab as `GeneralName(name)`: a two-letter class tag
+  and a space (`CLASS_TAG`: DR, HU, MA, PA, PR, RO, SH, WL, WR...), then the
+  name, or its initials when it won't fit in the 13 left ("DR Rejuvenation",
+  "DR MotW"). `CharacterMacros` now also returns the class's General-tab macros
+  (names starting with the tag), and `Lookup(have, name)` finds a macro under
+  either name, so Refresh keeps a spilled collection macro trimmed (`EditMacro`
+  keeps the macro's own name), sync doesn't make it twice, `/mma list` says
+  have, and `/mma clear` deletes it. Bar swapping works by name, so a spilled
+  macro replaces its spell on the bars too. The "full" messages are now "no
+  free macro slots (character N of M, general N of M)". General macros belong
+  to the account, so every character of that class on it shares them; two of
+  different levels would rewrite a spilled collection macro back and forth (the
+  last refresh wins). Existing character macros don't move. `~Toggle`
+  (Toggle.lua) still needs a character slot. Not yet checked in game.
