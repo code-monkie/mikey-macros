@@ -584,5 +584,7 @@ macros on the site, 358 of them non-PvP.
   still doesn't turn you back). Rewritten at the next refresh (body differs),
   over Mikey's hand edit. Any other `!` macro (auto mode puts it on forms,
   stances, stealth, aspects) can break the same way once a talent swaps its
-  spell; check with `GetOverrideSpell`. Ulako's `U_Wolf` left as it is. Not
-  yet checked in game.
+  spell; check with `GetOverrideSpell`. Ulako's `U_Wolf` left as it is.
+  Mikey's call (same day): keep both `nomounted` and `noform`. **Checked in game
+  (Mikey, 2026-11-25):** works, and a second press keeps you a wolf. `nomounted`
+  waits for a shaman with a mount (level 40).
