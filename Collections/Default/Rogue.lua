@@ -50,15 +50,13 @@ ns.Collection("Default").ROGUE = {
         /stopattack
         /use [nostealth,combat] Vanish; [nostealth,nocombat] Stealth
     ]] },
-    -- Lands where the mouse points.
-    { name = "Distract", spells = { "Distract" }, body = [[
-        #showtooltip
-        /use [@cursor] Distract
-    ]] },
+    -- (Distract, "/use [@cursor] Distract", was here until 0.2.47: see the exclude list below)
 }
 
 ns.Exclude("ROGUE", {
     "Pick Lock",
     "Disarm Trap",
     "Evasion",       -- 0.2.13 (Mikey's ask, 2026-11-07); the ClassicWowForever collection's own Evasion macro still wins
+    "Distract",      -- 0.2.47 (Mikey, 2026-11-27: "I don't like the @cursor for it", "exclude it at the default
+                     -- level"): no Distract macro for any rogue; drop the spell on a bar for the targeting circle
 })

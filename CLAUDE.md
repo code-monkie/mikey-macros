@@ -588,3 +588,28 @@ macros on the site, 358 of them non-PvP.
   Mikey's call (same day): keep both `nomounted` and `noform`. **Checked in game
   (Mikey, 2026-11-25):** works, and a second press keeps you a wolf. `nomounted`
   waits for a shaman with a mount (level 40).
+
+- **~Cancel drops Divine Shield and Divine Protection (0.2.44, Mikey's ask,
+  2026-11-26):** `/cancelaura Divine Shield` and `/cancelaura Divine
+  Protection` were added after the aspect lines, before `/use !Devotion Aura`.
+  The body is 235 of 255 characters (179 before). It's managed, so every
+  account's ~Cancel is rewritten at the next login. Whether `/cancelaura`
+  drops Forever's Divine Shield in combat isn't checked (Retail made some
+  buffs uncancellable by macro). Not yet checked in game.
+- **~Cancel no longer casts Devotion Aura (0.2.45, Mikey's ask, 2026-11-27:
+  "remove dev aura from the cancel macro"):** the last line, `/use !Devotion
+  Aura`, is gone; the body is 215 of 255 characters. Rewritten on every
+  account at the next login. Not yet checked in game.
+- **Stun without Pick Pocket (0.2.46, Mikey's ask, 2026-11-27: "please
+  remove pickpocket from the stun macro"):** the Mikey rogue's Stun is now
+  `/use [stealth] Cheap Shot; Kidney Shot` alone; its `/use [stealth] Pick
+  Pocket` line and Pick Pocket in its `spells` are gone. Rewritten at the
+  next refresh (body differs). The Default collection's Cheap Shot opener
+  still has its Pick Pocket. Not yet checked in game.
+- **No Distract macro (0.2.47, Mikey, 2026-11-27: "I find I don't like the
+  @cursor for it", then "exclude it at the default level"):** the Default
+  rogue's `/use [@cursor] Distract` macro is gone and Distract is on the
+  Default exclude list, so no collection or auto mode makes one for any
+  rogue (a followed collection's own Distract macro would still win; none
+  has one). A Distract macro already made isn't deleted: delete it by hand
+  (Mikey is). Use the spell itself on a bar. Not yet checked in game.

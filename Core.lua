@@ -671,8 +671,12 @@ local FOCUS_ICON = 132212  -- ability_hunter_snipershot (Wowhead Forever's icon 
 -- on bar 5). Off the mount, out of melee, the pet called back, then out of stealth, or out of the form when not
 -- stealthed (so a prowling cat stays a cat: [nostealth] is read before the stealth lines take it off). Prowl is the
 -- druid's stealth buff, Stealth the rogue's. The old "/cancelattack" (not a command) is gone.
+-- 0.2.44 (Mikey's ask, 2026-11-26): Divine Shield and Divine Protection off too, before the aura line. 235 of the
+-- 255 characters (179 before).
+-- 0.2.45 (Mikey's ask, 2026-11-27): the "/use !Devotion Aura" line is gone. 215 characters.
 local CANCEL_BODY = "/dismount\n/stopattack\n/petfollow\n/cancelform [nostealth]\n/cancelaura Prowl\n/cancelaura Stealth\n"
-    .. "/cancelaura Aspect of the Cheetah\n/cancelaura Aspect of the Pack\n/use !Devotion Aura"
+    .. "/cancelaura Aspect of the Cheetah\n/cancelaura Aspect of the Pack\n/cancelaura Divine Shield\n"
+    .. "/cancelaura Divine Protection"
 local CANCEL_ICON = 136047   -- the icon the accounts' ~Cancel already wears
 
 local function SwapIntoBars(made)

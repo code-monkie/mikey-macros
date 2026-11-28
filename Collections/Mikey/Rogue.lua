@@ -1,7 +1,7 @@
 -- Rogue macros. Write each body in full; spells listed in `spells` are left
 -- out of the live macro until you know them. Names must be unique and at most
 -- 16 characters; bodies at most 255.
--- Stealth, Vanish, Blind and Distract come from the Default collection.
+-- Stealth, Vanish and Blind come from the Default collection (Distract: no macro since 0.2.47).
 
 local _, ns = ...
 
@@ -52,11 +52,11 @@ ns.Collection("Mikey").ROGUE = {
         /use [@mouseover,harm,nodead,nostealth] [nostealth] Kick
     ]] },
 
-    -- Later levels. From stealth: Pick Pocket, then Cheap Shot, in one press (2026-11-02); out of it, Kidney Shot.
-    -- Made at Cheap Shot, not at Pick Pocket (level 4), which would have made it early as a lone Pick Pocket.
-    { name = "Stun", learn = "Cheap Shot", spells = { "Pick Pocket", "Cheap Shot", "Kidney Shot" }, body = [[
+    -- Later levels. From stealth: Cheap Shot; out of it, Kidney Shot. Made at Cheap Shot.
+    -- 0.2.46 (Mikey, 2026-11-27: "please remove pickpocket from the stun macro"): it opened with Pick Pocket from
+    -- stealth (2026-11-02); gone, so it's just the two stuns.
+    { name = "Stun", learn = "Cheap Shot", spells = { "Cheap Shot", "Kidney Shot" }, body = [[
         #showtooltip
-        /use [stealth] Pick Pocket
         /use [stealth] Cheap Shot; Kidney Shot
     ]] },
 }
